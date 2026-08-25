@@ -5,7 +5,7 @@ import { useTheme } from "@mui/material/styles";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
-const PREFERENCES_STORAGE_KEY = "starter-tenplate:preferences";
+const PREFERENCES_STORAGE_KEY = "starter-template:preferences";
 
 function ThemeProbe() {
   const theme = useTheme();

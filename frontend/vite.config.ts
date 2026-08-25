@@ -15,7 +15,7 @@ const IS_STORYBOOK = process.env.STORYBOOK === "true";
  *
  * vireocode/
  * ├── starter/
- * └── starter-tenplate/
+ * └── starter-template/
  *     └── frontend/
  *
  * Source mode is the normal local-development path: Vite consumes Starter's

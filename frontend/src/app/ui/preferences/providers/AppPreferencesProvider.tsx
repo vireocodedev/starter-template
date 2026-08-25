@@ -6,7 +6,7 @@ import {
 } from "@/app/ui/preferences/models/AppPreferences";
 import { AppPreferencesContext } from "@/app/ui/preferences/contexts/AppPreferencesContext";
 
-const STORAGE_KEY = "starter-tenplate:preferences";
+const STORAGE_KEY = "starter-template:preferences";
 
 function readPreferences(): AppPreferences {
   try {

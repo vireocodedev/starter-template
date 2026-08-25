@@ -7,7 +7,7 @@ The expected workspace layout is:
 ```text
 vireocode/
 ├── starter/
-└── starter-tenplate/
+└── starter-template/
     └── frontend/
 ```
 
@@ -17,14 +17,14 @@ Published frontend packages come from GitHub Packages. Export a token with `read
 
 ```bash
 export NODE_AUTH_TOKEN=<github-token>
-cd starter-tenplate/frontend
+cd starter-template/frontend
 npm ci
 ```
 
 Start the frontend with:
 
 ```bash
-cd starter-tenplate/frontend
+cd starter-template/frontend
 npm run dev
 ```
 
@@ -49,7 +49,7 @@ npm run starter:mode:published
 When changing Starter and testing those changes in the template, run only:
 
 ```bash
-cd starter-tenplate/frontend
+cd starter-template/frontend
 npm run dev:local-starter
 ```
 
@@ -69,7 +69,7 @@ For the JVM libraries, first publish the Starter artifacts to Maven Local and th
 cd starter/jvm
 ./gradlew publishToMavenLocal
 
-cd ../../starter-tenplate
+cd ../../starter-template
 ./gradlew bootRun -PuseLocalStarter=true
 ```
 
@@ -120,7 +120,7 @@ Use dist mode when validating the actual JavaScript and declarations emitted by 
 cd starter
 npm run build
 
-cd ../starter-tenplate/frontend
+cd ../starter-template/frontend
 npm run dev:local-starter:dist
 ```
 
@@ -131,7 +131,7 @@ This is an integration check, not the normal local development loop.
 Validate the template against local Starter declarations and emitted output with:
 
 ```bash
-cd starter-tenplate/frontend
+cd starter-template/frontend
 npm run typecheck:local-starter
 npm run build:local-starter
 npm run verify:local-starter
