@@ -2,6 +2,14 @@ import { HistoryQueryKeys } from "@/features/history/api/history.query";
 import { itemApi } from "@/features/item/api/item.api.online";
 import { ItemMutationKeys, ItemQuery, ItemQueryKeys } from "@/features/item/api/item.query";
 import { mergeItemSearchPages } from "@/features/item/hooks/useItemSearchQuery";
+import {
+  insertItemIntoUnfilteredSearchQueries,
+  removeItemFromSearchQueries,
+  replaceItemInSearchQueries,
+  restoreItemSearchQueries,
+  snapshotItemSearchQueries,
+} from "@/features/item/services/itemQueryCache";
+import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
 
 const pagination = {
@@ -61,5 +69,56 @@ describe("item query contracts", () => {
 
     expect(merged).toMatchObject({ number: 1, size: 2, totalElements: 2, totalPages: 2 });
     expect(merged?.content.map(row => row.name)).toEqual(["First", "Second"]);
+  });
+
+  it("updates and rolls back cached item searches without clearing usable rows", async () => {
+    const queryClient = new QueryClient();
+    const key = ItemQuery.search({ ...pagination, page: 0 }, { searchText: "", queryFilters: null }).queryKey;
+    const first = { id: 1, name: "First", description: "", quantity: 1, status: "DRAFT" as const };
+    const second = { ...first, id: 2, name: "Second" };
+    queryClient.setQueryData(key, {
+      content: [first, second],
+      number: 0,
+      size: 10,
+      totalElements: 2,
+      totalPages: 1,
+    });
+
+    const snapshot = await snapshotItemSearchQueries(queryClient);
+    replaceItemInSearchQueries(queryClient, { ...first, name: "Updated" });
+    expect(queryClient.getQueryData<{ content: (typeof first)[] }>(key)?.content[0].name).toBe("Updated");
+
+    removeItemFromSearchQueries(queryClient, second.id);
+    expect(queryClient.getQueryData<{ content: (typeof first)[]; totalElements: number }>(key)).toMatchObject({
+      content: [{ ...first, name: "Updated" }],
+      totalElements: 1,
+    });
+
+    restoreItemSearchQueries(queryClient, snapshot);
+    expect(queryClient.getQueryData<{ content: (typeof first)[]; totalElements: number }>(key)).toMatchObject({
+      content: [first, second],
+      totalElements: 2,
+    });
+  });
+
+  it("inserts created items only into unfiltered first-page caches in the active sort order", () => {
+    const queryClient = new QueryClient();
+    const unfilteredKey = ItemQuery.search(pagination, { searchText: "", queryFilters: null }).queryKey;
+    const filteredKey = ItemQuery.search(pagination, filters).queryKey;
+    const second = { id: 2, name: "Second", description: "", quantity: 1, status: "DRAFT" as const };
+    const page = { content: [second], number: 0, size: 10, totalElements: 1, totalPages: 1 };
+    queryClient.setQueryData(unfilteredKey, page);
+    queryClient.setQueryData(filteredKey, page);
+
+    const first = { ...second, id: 1, name: "First" };
+    insertItemIntoUnfilteredSearchQueries(queryClient, first);
+
+    expect(queryClient.getQueryData<{ content: (typeof first)[]; totalElements: number }>(unfilteredKey)).toMatchObject(
+      {
+        content: [first, second],
+        totalElements: 2,
+      },
+    );
+    expect(queryClient.getQueryData(filteredKey)).toEqual(page);
   });
 });

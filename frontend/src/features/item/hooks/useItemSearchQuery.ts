@@ -25,6 +25,7 @@ export function useItemSearchQuery(pagination: PageableParams, filters: ItemFilt
     hasNextPage: isCompact ? infinite.hasNextPage : undefined,
     isError: active.isError,
     isFetchingNextPage: isCompact ? infinite.isFetchingNextPage : undefined,
+    isRefreshing: active.isFetching && !active.isLoading && !(isCompact && infinite.isFetchingNextPage),
     isLoading: active.isLoading,
     layout: isCompact ? ("mobile" as const) : ("desktop" as const),
     onLoadNextPage: isCompact ? infinite.fetchNextPage : undefined,

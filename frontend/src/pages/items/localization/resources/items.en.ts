@@ -13,6 +13,13 @@ const en = {
     edit: "Edit",
     clear: "Clear",
   },
+  empty: {
+    filtered: "No items match the current search and filters.",
+    first: "This workspace has no items yet.",
+    none: "There are no items to show yet.",
+    clear: "Clear search and filters",
+    create: "Create the first item",
+  },
   delete: {
     title: "Delete item?",
     message: "This permanently removes {{name}} from the active workspace.",
@@ -21,6 +28,7 @@ const en = {
   table: {
     table: "Items",
     loadingTable: "Loading items",
+    refreshing: "Refreshing items",
     noData: "No items match this search.",
     showMore: "Show more",
     showLess: "Show less",

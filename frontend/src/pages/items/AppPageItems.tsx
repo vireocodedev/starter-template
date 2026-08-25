@@ -17,6 +17,7 @@ import {
   ItemFormOverlay,
   ItemHistoryOverlay,
   useItemDeleteMutation,
+  usePendingItemUpdateId,
   useItemSearchQuery,
   useItemTableColumns,
   type Item,
@@ -27,12 +28,15 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Collapse,
   IconButton,
   InputAdornment,
+  LinearProgress,
   Stack,
   TextField,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import {
   PageOverlay,
@@ -47,6 +51,7 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { ITEMS_TRANSLATION_NAMESPACE } from "@/app/app.localization";
+import { APP_THEME_TOKENS } from "@/app/ui/theme/config/theme.tokens";
 
 type ItemOverlayModes = {
   form: { item?: Item };
@@ -77,8 +82,10 @@ type ItemListContentProps = {
   tableSize: "small" | "medium";
   presentation: EntityQueryFilterPresentation;
   onClearQueryFilters: () => void;
+  onClearAllFilters: () => void;
   onRemoveQueryFilter: (index: number) => void;
   onOpenEdit: (item: Item) => void;
+  onOpenCreate: () => void;
   onOpenFilters: () => void;
   onOpenHistory: (item: Item) => void;
   onRequestDelete: (item: Item) => Promise<void>;
@@ -94,8 +101,10 @@ const ItemListContent = React.memo(function ItemListContent({
   tableSize,
   presentation,
   onClearQueryFilters,
+  onClearAllFilters,
   onRemoveQueryFilter,
   onOpenEdit,
+  onOpenCreate,
   onOpenFilters,
   onOpenHistory,
   onRequestDelete,
@@ -125,12 +134,33 @@ const ItemListContent = React.memo(function ItemListContent({
     [t],
   );
   const result = useItemSearchQuery(filters, { searchText: search.committed, queryFilters });
+  const pendingUpdateId = usePendingItemUpdateId();
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const totalResults = result.data?.totalElements;
+  const hasActiveConstraints = search.committed.length > 0 || queryFilters !== null;
   const columns = useItemTableColumns({
     onHistory: onOpenHistory,
     onEdit: canManage ? onOpenEdit : undefined,
     onDelete: canManage ? onRequestDelete : undefined,
   });
+  const getRowSx = React.useCallback(
+    (
+      item: Item,
+      _rowIndex: number,
+      layout: "mobile" | "desktop",
+    ): Record<
+      string,
+      { backgroundColor: string; transition: string; "@media (prefers-reduced-motion: reduce)": { transition: string } }
+    > => {
+      const feedback = {
+        backgroundColor: item.id === pendingUpdateId ? "action.selected" : "surface.raised",
+        transition: `background-color ${APP_THEME_TOKENS.motion.duration.emphasized}ms ${APP_THEME_TOKENS.motion.easing.standard}`,
+        "@media (prefers-reduced-motion: reduce)": { transition: "none" },
+      };
+      return layout === "desktop" ? { "& > td": feedback } : { "& .MuiAccordionSummary-root": feedback };
+    },
+    [pendingUpdateId],
+  );
 
   return (
     <Stack spacing={2} sx={{ flex: 1, height: "100%", minHeight: 0, overflow: "hidden" }}>
@@ -257,7 +287,15 @@ const ItemListContent = React.memo(function ItemListContent({
           )}
         </Stack>
       </Box>
-      {result.isError && (
+      <Collapse
+        in={result.isError}
+        timeout={
+          reducedMotion
+            ? 0
+            : { enter: APP_THEME_TOKENS.motion.duration.enter, exit: APP_THEME_TOKENS.motion.duration.exit }
+        }
+        unmountOnExit
+      >
         <Alert
           severity="error"
           action={
@@ -275,8 +313,22 @@ const ItemListContent = React.memo(function ItemListContent({
         >
           {t("error.message")}
         </Alert>
-      )}
-      <Box sx={{ display: "flex", flex: 1, minHeight: 0 }}>
+      </Collapse>
+      <Box sx={{ display: "flex", flex: 1, minHeight: 0, position: "relative" }}>
+        {result.isRefreshing && (
+          <LinearProgress
+            aria-label={t("table.refreshing")}
+            variant={reducedMotion ? "determinate" : "indeterminate"}
+            value={reducedMotion ? 100 : undefined}
+            sx={{
+              position: "absolute",
+              top: result.layout === "desktop" ? 24 : 0,
+              insetInline: 0,
+              height: 2,
+              zIndex: 5,
+            }}
+          />
+        )}
         <VireoResponsiveTable
           layout={result.layout}
           columns={columns}
@@ -286,6 +338,7 @@ const ItemListContent = React.memo(function ItemListContent({
           labels={labels}
           layers={ITEM_TABLE_LAYERS}
           getRowKey={getItemRowKey}
+          getRowSx={getRowSx}
           totalCount={result.data?.totalElements ?? 0}
           skeleton={result.isLoading}
           titleColumn="name"
@@ -296,6 +349,22 @@ const ItemListContent = React.memo(function ItemListContent({
           onLoadNextPage={result.onLoadNextPage}
           size={tableSize}
           sx={ITEM_TABLE_SX}
+          renderEmptyState={() => (
+            <Stack spacing={1} sx={{ alignItems: "center", py: 1 }}>
+              <Typography color="text.secondary">
+                {hasActiveConstraints ? t("empty.filtered") : t(canManage ? "empty.first" : "empty.none")}
+              </Typography>
+              {hasActiveConstraints ? (
+                <Button size="small" onClick={onClearAllFilters}>
+                  {t("empty.clear")}
+                </Button>
+              ) : canManage ? (
+                <Button size="small" variant="contained" onClick={onOpenCreate}>
+                  {t("empty.create")}
+                </Button>
+              ) : null}
+            </Stack>
+          )}
         />
       </Box>
     </Stack>
@@ -380,6 +449,12 @@ export function AppPageItems() {
     setFilters(current => ({ ...current, page: 0 }));
   }, []);
 
+  const clearAllFilters = React.useCallback(() => {
+    search.clear();
+    setQueryFilters(null);
+    setFilters(current => ({ ...current, page: 0 }));
+  }, [search]);
+
   const removeQueryFilter = React.useCallback((index: number) => {
     setQueryFilters(current => {
       if (!current) return null;
@@ -409,7 +484,7 @@ export function AppPageItems() {
         confirmColor: "error",
       });
       if (!accepted) return;
-      await deleteItem(item.id);
+      await deleteItem(item);
     },
     [confirm, deleteItem, t],
   );
@@ -438,8 +513,10 @@ export function AppPageItems() {
         tableSize={preferences.tableSize}
         presentation={presentation}
         onClearQueryFilters={clearQueryFilters}
+        onClearAllFilters={clearAllFilters}
         onRemoveQueryFilter={removeQueryFilter}
         onOpenEdit={openEdit}
+        onOpenCreate={openCreate}
         onOpenFilters={openFilters}
         onOpenHistory={openHistory}
         onRequestDelete={requestDelete}

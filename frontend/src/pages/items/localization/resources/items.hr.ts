@@ -15,6 +15,13 @@ const hr = {
     edit: "Uredi",
     clear: "Očisti",
   },
+  empty: {
+    filtered: "Nijedna stavka ne odgovara trenutačnoj pretrazi i filtrima.",
+    first: "Ovaj radni prostor još nema stavki.",
+    none: "Još nema stavki za prikaz.",
+    clear: "Očisti pretragu i filtre",
+    create: "Kreiraj prvu stavku",
+  },
   delete: {
     title: "Izbrisati stavku?",
     message: "Time se stavka {{name}} trajno uklanja iz aktivnog radnog prostora.",
@@ -23,6 +30,7 @@ const hr = {
   table: {
     table: "Stavke",
     loadingTable: "Učitavanje stavki",
+    refreshing: "Osvježavanje stavki",
     noData: "Nijedna stavka ne odgovara pretraživanju.",
     showMore: "Prikaži više",
     showLess: "Prikaži manje",
