@@ -44,6 +44,7 @@ Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md
 
 - [Getting started and configuration](docs/getting-started.md)
 - [Customizing the template](docs/customizing-the-template.md)
+- [Deployment](docs/deployment.md)
 - [Developing against local Starter libraries](docs/local-starter-development.md)
 - [Entity query-filter standard](docs/entity-query-filters.md)
 - [Frontend architecture contract](frontend/docs/architecture/README.md)

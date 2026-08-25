@@ -32,6 +32,14 @@ class MainApplicationTest {
     }
 
     @Test
+    @DisplayName("Actuator readiness is available without an authenticated session")
+    void readinessIsPublic() throws Exception {
+        mockMvc.perform(get("/actuator/health/readiness"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"));
+    }
+
+    @Test
     @WithMockUser(roles = "USER")
     @DisplayName("POST /api/items/search binds its public query parameters")
     void searchItems_BindsExplicitRequestParameterNames() throws Exception {

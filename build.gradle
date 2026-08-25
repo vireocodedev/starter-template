@@ -51,6 +51,7 @@ dependencies {
     implementation 'com.vireocode:vireo-starter-queryengine'
     implementation 'com.vireocode:vireo-starter-history'
 
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-flyway'
     implementation 'org.springframework.session:spring-session-jdbc'
     implementation 'org.mapstruct:mapstruct:1.6.0'
@@ -101,4 +102,8 @@ tasks.named('processResources') {
 
 tasks.named('bootRun') {
     systemProperty 'spring.profiles.active', System.getProperty('spring.profiles.active', 'dev')
+}
+
+tasks.named('bootJar') {
+    archiveFileName = 'app.jar'
 }
