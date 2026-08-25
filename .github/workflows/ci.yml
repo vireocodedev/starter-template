@@ -19,8 +19,8 @@ jobs:
     timeout-minutes: 30
     env:
       GITHUB_ACTOR: ${{ github.actor }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.VIREO_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+      NODE_AUTH_TOKEN: ${{ secrets.VIREO_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -36,7 +36,6 @@ jobs:
           node-version: "24.15.0"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-          registry-url: https://npm.pkg.github.com
 
       - name: Install frontend dependencies
         working-directory: frontend
