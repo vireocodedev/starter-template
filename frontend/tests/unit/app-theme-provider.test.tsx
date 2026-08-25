@@ -38,5 +38,6 @@ describe("AppThemeProvider", () => {
 
     expect(screen.getByTestId("theme")).toHaveAttribute("data-mode", "dark");
     expect(screen.getByTestId("theme")).toHaveAttribute("data-background", "#0c111d");
+    expect(document.head.querySelector('meta[name="theme-color"]')).toHaveAttribute("content", "#1d2939");
   });
 });

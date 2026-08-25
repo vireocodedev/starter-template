@@ -12,8 +12,10 @@ import {
 } from "@mui/icons-material";
 import {
   Avatar,
+  Alert,
   Box,
   Button,
+  Collapse,
   Divider,
   IconButton,
   List,
@@ -27,10 +29,11 @@ import {
   VireoApplicationNavigation,
   VireoApplicationNavigationItem,
   VireoMobileBottomNavigation,
+  useVireoOnlineStatus,
   type VireoApplicationNavigationMode,
 } from "@vireocodedev/starter-ui";
 import { Outlet, useLocation, useNavigate } from "react-router";
-import { APP_NAVIGATION_PAGES, APP_PAGES, type AppNavigationIcon } from "@/app/app.pages";
+import { APP_NAVIGATION_PAGES, APP_PAGES, preloadAppPage, type AppNavigationIcon } from "@/app/app.pages";
 import { AppShellNavigationContext } from "@/app/shell/contexts/AppShellNavigationContext";
 import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences";
 import { useAppAuth } from "@/app/shell/hooks/useAppAuth";
@@ -52,6 +55,7 @@ export function AppShellLayout() {
   const { preferences, updatePreference } = useAppPreferences();
   const location = useLocation();
   const navigate = useNavigate();
+  const online = useVireoOnlineStatus();
   const navigation = React.useMemo(
     () =>
       APP_NAVIGATION_PAGES.map(item => ({
@@ -81,6 +85,7 @@ export function AppShellLayout() {
 
   const navigateTo = React.useCallback(
     (path: string) => {
+      preloadAppPage(path);
       void navigate(path);
       setMobileOpen(false);
       setAccountAnchor(null);
@@ -189,6 +194,8 @@ export function AppShellLayout() {
                         : location.pathname.startsWith(item.path)
                     }
                     onClick={() => navigateTo(item.path)}
+                    onFocus={() => preloadAppPage(item.path)}
+                    onPointerEnter={() => preloadAppPage(item.path)}
                     sx={{
                       mb: 0.5,
                       "&.Mui-selected": { bgcolor: "primary.main", color: "primary.contrastText" },
@@ -277,6 +284,11 @@ export function AppShellLayout() {
             overflow: "hidden",
           }}
         >
+          <Collapse in={!online}>
+            <Alert role="status" severity="warning" square sx={{ borderRadius: 0, py: 0.25 }}>
+              {t("pwa.offline")}
+            </Alert>
+          </Collapse>
           <Box
             component="main"
             sx={{ display: "flex", flex: 1, maxWidth: "100%", minHeight: 0, minWidth: 0, overflow: "hidden" }}

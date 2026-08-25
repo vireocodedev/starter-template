@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { APP_NAVIGATION_PAGES, APP_PAGE_REGISTRY, APP_PAGES } from "@/app/app.pages";
+import { describe, expect, it, vi } from "vitest";
+import { APP_NAVIGATION_PAGES, APP_PAGE_REGISTRY, APP_PAGES, loadAppPage, preloadAppPage } from "@/app/app.pages";
 
 describe("application page registry", () => {
   it("owns every route path and path builder in one registry", () => {
@@ -16,5 +16,14 @@ describe("application page registry", () => {
 
     expect(new Set(paths).size).toBe(paths.length);
     expect(orders).toEqual([...orders].sort((left, right) => left - right));
+  });
+
+  it("shares one route-module promise between intent prefetch and rendering", async () => {
+    const load = vi.spyOn(APP_PAGE_REGISTRY.home, "load");
+
+    preloadAppPage(APP_PAGES.home);
+    await loadAppPage("home");
+
+    expect(load).toHaveBeenCalledOnce();
   });
 });

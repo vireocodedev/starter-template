@@ -200,6 +200,25 @@ export const APP_PAGE_REGISTRY = {
 
 export type AppPageId = keyof typeof APP_PAGE_REGISTRY;
 
+const pageModuleCache = new Map<AppPageId, Promise<AppPageModule>>();
+
+/** Loads each route module once and reuses the promise for intent prefetch and React.lazy. */
+export function loadAppPage(id: AppPageId): Promise<AppPageModule> {
+  const cached = pageModuleCache.get(id);
+  if (cached) return cached;
+
+  const pending = APP_PAGE_REGISTRY[id].load();
+  pageModuleCache.set(id, pending);
+  void pending.catch(() => pageModuleCache.delete(id));
+  return pending;
+}
+
+/** Warms a route chunk from navigation intent without delaying navigation. */
+export function preloadAppPage(path: string): void {
+  const match = Object.entries(APP_PAGE_REGISTRY).find(([, definition]) => definition.path === path);
+  if (match) void loadAppPage(match[0] as AppPageId);
+}
+
 export const APP_PAGES = Object.fromEntries(
   Object.entries(APP_PAGE_REGISTRY).map(([id, definition]) => [id, definition.path]),
 ) as { [K in AppPageId]: (typeof APP_PAGE_REGISTRY)[K]["path"] };

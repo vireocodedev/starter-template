@@ -17,6 +17,7 @@ import {
   shouldRetryQueryFailure,
 } from "@/app/data/network/services/appQueryErrorReporting";
 import { AppAuthProvider } from "@/app/shell/providers/AppAuthProvider";
+import { AppPwaProvider } from "@/app/shell/providers/AppPwaProvider";
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({ onError: reportQueryError }),
@@ -35,6 +36,7 @@ const providers = [
   child => <PageOverlayControllerProvider>{child}</PageOverlayControllerProvider>,
   child => <VireoConfirmationProvider>{child}</VireoConfirmationProvider>,
   child => <AppUnsavedChangesProvider>{child}</AppUnsavedChangesProvider>,
+  child => <AppPwaProvider>{child}</AppPwaProvider>,
 ] satisfies readonly VireoProviderWrapper[];
 
 export function AppProviders({ children }: React.PropsWithChildren) {

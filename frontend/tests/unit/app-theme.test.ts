@@ -50,4 +50,10 @@ describe("application themes", () => {
       variant: "outlined",
     });
   });
+
+  it("uses the system reduced-motion preference and semantic application timing", () => {
+    expect(APP_THEME.motion.reducedMotion).toBe("system");
+    expect(APP_THEME.transitions.duration.standard).toBe(APP_THEME.appMotion.duration.standard);
+    expect(APP_THEME.transitions.duration.enteringScreen).toBe(APP_THEME.appMotion.duration.enter);
+  });
 });

@@ -3,6 +3,7 @@ import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences"
 import { APP_THEME } from "@/app/ui/theme/config/theme";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider, useColorScheme } from "@mui/material/styles";
+import { VireoThemeColorMeta } from "@vireocodedev/starter-ui";
 
 type AppThemeMode = "light" | "dark";
 
@@ -31,6 +32,7 @@ export function AppThemeProvider({ children }: React.PropsWithChildren) {
     >
       <AppThemeModeSynchronizer mode={mode}>
         <CssBaseline />
+        <VireoThemeColorMeta />
         {children}
       </AppThemeModeSynchronizer>
     </ThemeProvider>

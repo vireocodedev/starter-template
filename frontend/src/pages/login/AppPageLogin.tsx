@@ -44,7 +44,7 @@ export function AppPageLogin() {
   if (user) return <Navigate replace to={APP_PAGES.home} />;
 
   return (
-    <Box sx={{ alignItems: "center", display: "flex", justifyContent: "center", minHeight: "100vh", p: 2.5 }}>
+    <Box sx={{ alignItems: "center", display: "flex", justifyContent: "center", minHeight: "100dvh", p: 2.5 }}>
       <Card sx={{ maxWidth: 420, width: "100%", borderColor: "divider" }}>
         <CardContent sx={{ p: { xs: 3, sm: 4 }, "&:last-child": { pb: { xs: 3, sm: 4 } } }}>
           <Box sx={{ mb: 3, textAlign: "center" }}>
