@@ -5,6 +5,10 @@ build/
 bin/
 out/
 .data/
+.env
+.env.*
+!.env.example
+!frontend/.env.example
 frontend/dist/
 frontend/node_modules/
 frontend/playwright-report/
