@@ -1,18 +1,21 @@
 # Deployment
 
-The template produces one Spring Boot artifact containing the compiled PWA. Production runs therefore deploy one JVM process and one PostgreSQL database.
+The backend and frontend are independent build and deployment units. Gradle builds only the Spring Boot API; npm builds only the React PWA. The backend never invokes npm or embeds `frontend/dist` in its JAR.
 
-## Build the artifact
+## Build the artifacts
 
 The build needs read access to the Vireo GitHub Packages registries. Configure the credentials described in [Getting started](./getting-started.md), then run:
 
 ```bash
 ./gradlew clean bootJar
+cd frontend
+npm ci
+npm run build
 ```
 
-The deployable artifact is `build/libs/app.jar`. The deterministic name is intentional: the checked-in Dockerfile never guesses between a Spring Boot archive and a plain Java archive.
+The backend artifact is `build/libs/app.jar`, and the frontend artifact is `frontend/dist`. The deterministic JAR name is intentional: the checked-in backend Dockerfile never guesses between a Spring Boot archive and a plain Java archive.
 
-## Build and run the container
+## Build and run the backend container
 
 ```bash
 docker build -t starter-template:local .
@@ -21,7 +24,7 @@ POSTGRES_PASSWORD=change-me SESSION_COOKIE_SECURE=false docker compose up
 
 `SESSION_COOKIE_SECURE=false` is only for an HTTP-only local container check. Keep the production default (`true`) behind HTTPS.
 
-The image runs as an unprivileged user. Compose waits for PostgreSQL and probes `/actuator/health/readiness`; only Actuator health is publicly reachable. Do not expose the database port or the Actuator endpoint beyond the network boundaries that need them.
+The image runs as an unprivileged user. Compose waits for PostgreSQL and probes `/actuator/health/readiness`; only Actuator health is publicly reachable. Deploy `frontend/dist` through the application's static host or edge platform and route `/api` to the backend origin. Do not expose the database port or the Actuator endpoint beyond the network boundaries that need them.
 
 ## Required production configuration
 
