@@ -28,6 +28,8 @@ npm run dev
 
 Open <http://localhost:3000>. API documentation is available at <http://localhost:8080/swagger-ui.html> only in the `dev` profile.
 
+VS Code users can instead open the repository and launch **Full stack (published Starter)** from Run and Debug after installing dependencies. The committed launch configuration uses the same H2 development database and starts both application processes.
+
 ## Verify a change
 
 ```bash

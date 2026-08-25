@@ -1,0 +1,12 @@
+{
+  "editor.formatOnSave": true,
+  "eslint.workingDirectories": [
+    { "directory": "frontend", "changeProcessCWD": true }
+  ],
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.import.gradle.annotationProcessing.enabled": true,
+  "java.import.gradle.enabled": true,
+  "java.import.gradle.wrapper.enabled": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.tsdk": "frontend/node_modules/typescript/lib"
+}

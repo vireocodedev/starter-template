@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Backend (dev)",
+      "request": "launch",
+      "mainClass": "com.vireocode.startertemplate.MainApplication",
+      "projectName": "starter-template",
+      "cwd": "${workspaceFolder}",
+      "vmArgs": "-Dspring.profiles.active=dev",
+      "preLaunchTask": "backend: classes",
+      "env": {
+        "SPRING_DATASOURCE_URL": "jdbc:h2:file:./.data/starter-template;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;AUTO_SERVER=TRUE",
+        "SPRING_DATASOURCE_USERNAME": "sa",
+        "SPRING_DATASOURCE_PASSWORD": ""
+      }
+    },
+    {
+      "type": "node-terminal",
+      "name": "Frontend (published Starter)",
+      "request": "launch",
+      "command": "npm run dev",
+      "cwd": "${workspaceFolder}/frontend"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full stack (published Starter)",
+      "configurations": ["Backend (dev)", "Frontend (published Starter)"],
+      "stopAll": true
+    }
+  ]
+}

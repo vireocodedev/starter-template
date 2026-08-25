@@ -10,6 +10,8 @@ Normal development consumes released `@vireocodedev/starter-*` packages and the 
 4. Run `npm ci` in `frontend`.
 5. Start `./gradlew bootRun` and `npm run dev` in separate terminals.
 
+The repository also commits a VS Code **Full stack (published Starter)** launch compound. It compiles JVM classes through Gradle so generated MapStruct implementations are present, launches Spring Boot with the `dev` profile and H2 configuration, and starts the published-package frontend. Run `npm ci` in `frontend` before using it.
+
 The `dev` Spring profile is the only profile that seeds the documented demo accounts. Never activate it in a public deployment.
 
 ## Configuration ownership

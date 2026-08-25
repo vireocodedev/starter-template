@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "redhat.java",
+    "vscjava.vscode-gradle",
+    "vscjava.vscode-java-debug"
+  ]
+}

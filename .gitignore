@@ -1,6 +1,10 @@
 .gradle/
 .idea/
-.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
 build/
 bin/
 out/
