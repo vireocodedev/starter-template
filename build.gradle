@@ -19,7 +19,14 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 repositories {
-    mavenLocal()
+    def useLocalStarter = providers.gradleProperty('useLocalStarter')
+        .map { it.toBoolean() }
+        .orElse(false)
+        .get()
+
+    if (useLocalStarter) {
+        mavenLocal()
+    }
 
     def gprUser = System.getenv('GITHUB_ACTOR') ?: findProperty('gpr.user')
     def gprKey = System.getenv('GITHUB_TOKEN') ?: findProperty('gpr.key')

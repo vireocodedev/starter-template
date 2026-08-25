@@ -12,4 +12,6 @@ Frontend confidence has three pillars:
 
 `npm run test:storybook` transforms every story into a browser test through Storybook's Vitest addon. Every story is smoke-rendered, every `play` function is executed, and project-level accessibility violations fail through `@storybook/addon-a11y`.
 
-`npm run verify` runs architecture checks, formatting, lint, unit/integration tests, browser-based Storybook tests, the production application build, and the production Storybook build with ordered steps and timings. E2E remains a separate command. Both published-Starter and local-Starter modes must pass.
+`npm run verify` runs architecture checks, formatting, lint, unit/integration tests, browser-based Storybook tests, the production application build, and the production Storybook build with ordered steps and timings. It always exercises published Starter packages and is the release-facing default. E2E remains a separate command.
+
+Local Starter integration is always explicit: use `npm run verify:local-starter` for the equivalent suite against emitted packages from the adjacent Starter checkout, or the other `*:local-starter` commands for focused local work. Both published and local modes must pass before coordinated Starter/template releases, but filesystem layout never changes what a default command resolves.

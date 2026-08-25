@@ -3,31 +3,40 @@
 set -u
 
 silent=false
+starter_mode="published"
 for argument in "$@"; do
   if [[ "$argument" == "silent" || "$argument" == "--silent" ]]; then
     silent=true
+  elif [[ "$argument" == "local-starter" || "$argument" == "--local-starter" ]]; then
+    starter_mode="local-starter"
   fi
 done
 
 frontend_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$frontend_root"
 
-if [[ -f "../../starter/packages/ui/dist/index.d.ts" ]]; then
-  starter_mode="local-starter"
+if [[ "$starter_mode" == "local-starter" ]]; then
+  npm run starter:mode:local >/dev/null
+  test_command="npm run test:local-starter"
+  storybook_test_command="npm run test:storybook:local-starter"
   application_build_command="npm run build:local-starter"
+  storybook_build_command="npm run build-storybook:local-starter"
 else
-  starter_mode="published"
+  npm run starter:mode:published >/dev/null
+  test_command="npm run test"
+  storybook_test_command="npm run test:storybook"
   application_build_command="npm run build"
+  storybook_build_command="npm run build-storybook"
 fi
 
 steps=(
   "Architecture|npm run architecture:check"
   "Formatting|npm run format:check"
   "Lint|npm run lint"
-  "Unit and integration tests|npm run test"
-  "Storybook tests|npm run test:storybook"
+  "Unit and integration tests|${test_command}"
+  "Storybook tests|${storybook_test_command}"
   "Application build|${application_build_command}"
-  "Storybook build|npm run build-storybook"
+  "Storybook build|${storybook_build_command}"
 )
 
 total=${#steps[@]}
