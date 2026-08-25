@@ -1,0 +1,65 @@
+import { HistoryQueryKeys } from "@/features/history/api/history.query";
+import { itemApi } from "@/features/item/api/item.api.online";
+import { ItemMutationKeys, ItemQuery, ItemQueryKeys } from "@/features/item/api/item.query";
+import { mergeItemSearchPages } from "@/features/item/hooks/useItemSearchQuery";
+import { describe, expect, it, vi } from "vitest";
+
+const pagination = {
+  page: 0,
+  rowsPerPage: 10,
+  sortBy: "name",
+  sortDirection: "asc" as const,
+};
+
+const filters = { searchText: "audit", queryFilters: null };
+
+describe("item query contracts", () => {
+  it("builds stable feature-owned paged and infinite search keys", () => {
+    expect(ItemQuery.search(pagination, filters).queryKey).toEqual(["items", pagination, filters]);
+    expect(ItemQuery.searchInfinite(pagination, filters).queryKey).toEqual(["items", "infinite", pagination, filters]);
+  });
+
+  it("keeps mutation keys under the Item cache root", () => {
+    expect(ItemQueryKeys.all).toEqual(["items"]);
+    expect(ItemMutationKeys.create).toEqual(["items", "create"]);
+    expect(ItemMutationKeys.update).toEqual(["items", "update"]);
+    expect(ItemMutationKeys.delete).toEqual(["items", "delete"]);
+  });
+
+  it("forwards TanStack cancellation to the Item API", async () => {
+    const search = vi.spyOn(itemApi, "search").mockResolvedValue({
+      content: [],
+      number: 0,
+      size: 10,
+      totalElements: 0,
+      totalPages: 0,
+    });
+    const signal = new AbortController().signal;
+    const options = ItemQuery.search(pagination, filters);
+
+    await options.queryFn?.({ signal } as never);
+
+    expect(search).toHaveBeenCalledWith(pagination, filters, { signal });
+  });
+
+  it("normalizes entity identifiers in history keys", () => {
+    expect(HistoryQueryKeys.entity("ITEM", 42)).toEqual(["history", "ITEM", "42"]);
+  });
+
+  it("merges infinite Item pages without losing the server total", () => {
+    const item = {
+      id: 1,
+      name: "First",
+      description: "",
+      quantity: 1,
+      status: "DRAFT" as const,
+    };
+    const merged = mergeItemSearchPages([
+      { content: [item], number: 0, size: 1, totalElements: 2, totalPages: 2 },
+      { content: [{ ...item, id: 2, name: "Second" }], number: 1, size: 1, totalElements: 2, totalPages: 2 },
+    ]);
+
+    expect(merged).toMatchObject({ number: 1, size: 2, totalElements: 2, totalPages: 2 });
+    expect(merged?.content.map(row => row.name)).toEqual(["First", "Second"]);
+  });
+});

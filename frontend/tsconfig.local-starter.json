@@ -1,0 +1,37 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "incremental": false,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@vireocodedev/starter-history": ["../../starter/packages/history/dist/index.d.ts"],
+      "@vireocodedev/starter-infrastructure": ["../../starter/packages/infrastructure/dist/index.d.ts"],
+      "@vireocodedev/starter-infrastructure/network-status": [
+        "../../starter/packages/infrastructure/dist/network/appNetworkStatus.d.ts"
+      ],
+      "@vireocodedev/starter-infrastructure/pagination": [
+        "../../starter/packages/infrastructure/dist/http/pagination.d.ts"
+      ],
+      "@vireocodedev/starter-localization": ["../../starter/packages/localization/dist/index.d.ts"],
+      "@vireocodedev/starter-queryengine": ["../../starter/packages/queryengine/dist/index.d.ts"],
+      "@vireocodedev/starter-shell": ["../../starter/packages/shell/dist/index.d.ts"],
+      "@vireocodedev/starter-sqlite": ["../../starter/packages/sqlite/dist/index.d.ts"],
+      "@vireocodedev/starter-sqlite/offline": ["../../starter/packages/sqlite/dist/offline/index.d.ts"],
+      "@vireocodedev/starter-ui": ["../../starter/packages/ui/dist/index.d.ts"],
+      "@vireocodedev/starter-ui/country": ["../../starter/packages/ui/dist/capabilities/country/public.d.ts"],
+      "@vireocodedev/starter-ui/event-source": ["../../starter/packages/ui/dist/integrations/event-source/public.d.ts"],
+      "@vireocodedev/starter-ui/forms": ["../../starter/packages/ui/dist/capabilities/forms/public.d.ts"],
+      "@vireocodedev/starter-ui/hello-pangea-dnd": [
+        "../../starter/packages/ui/dist/integrations/hello-pangea-dnd/public.d.ts"
+      ],
+      "@vireocodedev/starter-ui/localization": ["../../starter/packages/ui/dist/integrations/localization/public.d.ts"],
+      "@vireocodedev/starter-ui/react-i18next": [
+        "../../starter/packages/ui/dist/integrations/react-i18next/public.d.ts"
+      ],
+      "@vireocodedev/starter-ui/sonner": ["../../starter/packages/ui/dist/integrations/sonner/public.d.ts"],
+      "@vireocodedev/starter-ui/tanstack-query": [
+        "../../starter/packages/ui/dist/integrations/tanstack-query/public.d.ts"
+      ]
+    }
+  }
+}

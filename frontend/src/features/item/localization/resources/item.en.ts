@@ -1,0 +1,64 @@
+const itemEn = {
+  title: "Item",
+  fields: {
+    name: "Name",
+    description: "Description",
+    quantity: "Quantity",
+    status: "Status",
+  },
+  status: {
+    DRAFT: "Draft",
+    ACTIVE: "Active",
+    ARCHIVED: "Archived",
+  },
+  validation: {
+    name: { min: "Enter at least two characters." },
+    description: { max: "Use at most 2,000 characters." },
+    quantity: {
+      integer: "Use a whole number.",
+      nonnegative: "Quantity cannot be negative.",
+    },
+  },
+  form: {
+    section: "Item details",
+    description: "The fields below are persisted by the Spring Boot API.",
+    create: "Create item",
+    update: "Save changes",
+    createTitle: "Create item",
+    updateTitle: "Edit item",
+    close: "Close item form",
+    namePlaceholder: "Design system audit",
+    descriptionPlaceholder: "What needs to be done?",
+  },
+  table: {
+    item: "Item",
+    noDescription: "No description",
+    actions: "Actions",
+    history: "Item history",
+    historyAria: "History",
+    edit: "Edit item",
+    editAria: "Edit",
+    delete: "Delete item",
+    deleteAria: "Delete",
+  },
+  history: {
+    title: "History · {{name}}",
+    close: "Close item history",
+    loading: "Loading item history",
+    loadError: "Item history could not be loaded.",
+    empty: "No history has been recorded for this item.",
+    description: "Recorded changes are shown in chronological order.",
+    entryAria: "History entry for {{name}}",
+    systemActor: "System",
+  },
+  messages: {
+    created: "Item created",
+    createFailed: "Item could not be created.",
+    updated: "Item updated",
+    updateFailed: "Item could not be updated.",
+    deleted: "Item deleted",
+    deleteFailed: "Item could not be deleted.",
+  },
+} as const;
+
+export default itemEn;

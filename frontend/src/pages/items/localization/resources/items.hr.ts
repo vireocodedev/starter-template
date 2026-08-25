@@ -1,0 +1,51 @@
+import type { WidenLeaves } from "@vireocodedev/starter-localization";
+import type en from "./items.en";
+const hr = {
+  header: {
+    title: "Stavke",
+    description: "Cjelovit responzivni CRUD tijek rada podržan jednim Starter entitetom.",
+    create: "Stvori stavku",
+  },
+  search: { placeholder: "Pretraži po nazivu, opisu ili statusu", clear: "Očisti pretraživanje" },
+  results_one: "{{formattedCount}} rezultat",
+  results_other: "{{formattedCount}} rezultata",
+  filters: { open: "Filtri", clearAll: "Očisti sve", clearAllLabel: "Očisti sve filtre", title: "Filtriraj stavke" },
+  error: {
+    message: "Stavke nije moguće učitati. Provjerite API vezu, sesiju ili aktivne filtre.",
+    edit: "Uredi",
+    clear: "Očisti",
+  },
+  delete: {
+    title: "Izbrisati stavku?",
+    message: "Time se stavka {{name}} trajno uklanja iz aktivnog radnog prostora.",
+    confirm: "Izbriši",
+  },
+  table: {
+    table: "Stavke",
+    loadingTable: "Učitavanje stavki",
+    noData: "Nijedna stavka ne odgovara pretraživanju.",
+    showMore: "Prikaži više",
+    showLess: "Prikaži manje",
+    rowsPerPage: "Redaka po stranici",
+    paginationMoreThan: "{{from}}–{{to}} od više od {{to}}",
+    paginationRange: "{{from}}–{{to}} od {{count}}",
+    paginationItem: "Idi na {{type}} stranicu",
+    filters: "Filtri",
+    clearFilters: "Očisti",
+    filtersDone: "Gotovo",
+    sortBy: "Sortiraj po",
+    sortDirection: "Smjer sortiranja",
+    ascending: "Uzlazno",
+    descending: "Silazno",
+    ascendingSortDirection: "Sortiraj uzlazno",
+    descendingSortDirection: "Sortiraj silazno",
+  },
+  filterFields: {
+    name: "Naziv",
+    description: "Opis",
+    quantity: "Količina",
+    status: "Status",
+    statusValues: { DRAFT: "Skica", ACTIVE: "Aktivno", ARCHIVED: "Arhivirano" },
+  },
+} satisfies WidenLeaves<typeof en>;
+export default hr;

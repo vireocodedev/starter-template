@@ -1,0 +1,13 @@
+.gradle/
+.idea/
+.vscode/
+build/
+out/
+.data/
+frontend/dist/
+frontend/node_modules/
+frontend/playwright-report/
+frontend/storybook-static/
+frontend/test-results/
+*.iml
+.DS_Store

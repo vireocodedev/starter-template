@@ -1,0 +1,15 @@
+# Storybook and testing
+
+The application has its own Storybook; it is not merged into the Starter library Storybook. Stories use deterministic data, application providers, and mocked feature APIs—never a real backend.
+
+Navigation groups are `DOCUMENTATION`, `APPLICATION`, `FEATURES`, and `PAGES`. Reusable and state-rich components receive colocated stories. Route components, providers, API clients, and tiny private fragments do not receive stories automatically.
+
+Frontend confidence has three pillars:
+
+1. Vitest unit and integration tests for models, services, hooks, and composition.
+2. Storybook interaction, accessibility, and visual-state coverage for UI contracts. Every story is smoke-rendered and accessibility violations fail.
+3. Playwright E2E tests for boot, authentication/session recovery, shell navigation, Item CRUD, and 403/404 behavior.
+
+`npm run test:storybook` transforms every story into a browser test through Storybook's Vitest addon. Every story is smoke-rendered, every `play` function is executed, and project-level accessibility violations fail through `@storybook/addon-a11y`.
+
+`npm run verify` runs architecture checks, formatting, lint, unit/integration tests, browser-based Storybook tests, the production application build, and the production Storybook build with ordered steps and timings. E2E remains a separate command. Both published-Starter and local-Starter modes must pass.
