@@ -58,4 +58,27 @@ describe("application themes", () => {
     expect(APP_THEME.transitions.duration.standard).toBe(APP_THEME.appMotion.duration.standard);
     expect(APP_THEME.transitions.duration.enteringScreen).toBe(APP_THEME.appMotion.duration.enter);
   });
+
+  it("removes tactile transforms and transition time for reduced-motion users", () => {
+    const buttonRoot = APP_THEME_COMPONENTS?.MuiButton?.styleOverrides?.root;
+    const iconButtonRoot = APP_THEME_COMPONENTS?.MuiIconButton?.styleOverrides?.root;
+    expect(typeof buttonRoot).toBe("function");
+    expect(typeof iconButtonRoot).toBe("function");
+
+    const buttonStyles = typeof buttonRoot === "function" ? buttonRoot({ theme: APP_THEME } as never) : buttonRoot;
+    const iconButtonStyles =
+      typeof iconButtonRoot === "function" ? iconButtonRoot({ theme: APP_THEME } as never) : iconButtonRoot;
+    expect(buttonStyles).toMatchObject({
+      "@media (prefers-reduced-motion: reduce)": {
+        transitionDuration: "0ms",
+        "&:active:not(.Mui-disabled)": { transform: "none" },
+      },
+    });
+    expect(iconButtonStyles).toMatchObject({
+      "@media (prefers-reduced-motion: reduce)": {
+        transitionDuration: "0ms",
+        "&:active:not(.Mui-disabled)": { transform: "none" },
+      },
+    });
+  });
 });
