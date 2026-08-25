@@ -21,10 +21,14 @@ The `dev` Spring profile is the only profile that seeds the documented demo acco
 | `SPRING_DATASOURCE_*`           | JVM runtime                  | Required                               |
 | `GITHUB_ACTOR` / `GITHUB_TOKEN` | Gradle dependency resolution | Required when artifacts are not cached |
 | `NODE_AUTH_TOKEN`               | npm dependency resolution    | Required when packages are not cached  |
+| `VITE_API_BASE_URL`             | Browser build                | `/api`                                 |
+| `VITE_APP_NAME`                 | Browser build                | `Vireo Starter`                        |
+
+Vite values are public build-time configuration. Do not put secrets in variables prefixed with `VITE_`.
 
 ## GitHub Actions package access
 
-The verification and CodeQL workflows prefer the built-in `GITHUB_TOKEN`. Because the Vireo packages are private and are published by the separate `starter` repository, grant `vireocodedev/starter-template` **Read** access under each package's **Manage Actions access** setting. This preserves least privilege and avoids a long-lived personal token.
+The npm registry supports granular package access. Grant `vireocodedev/starter-template` **Read** access under each npm package's **Manage Actions access** setting so ordinary workflow runs can install frontend dependencies with the built-in `GITHUB_TOKEN`:
 
 Grant access to the npm packages consumed by the frontend:
 
@@ -35,7 +39,16 @@ Grant access to the npm packages consumed by the frontend:
 - `starter-shell`
 - `starter-ui`
 
-Grant the same repository access to the JVM packages consumed through Gradle:
+GitHub's Maven/Gradle registry is different: its packages are repository-scoped and do not expose the same cross-repository Actions-access grant. The template therefore needs a classic personal access token whose owner can read `vireocodedev/starter` and whose token has `read:packages` access.
+
+Store that token under the same name in both places:
+
+1. **Settings → Secrets and variables → Actions → New repository secret**: `VIREO_PACKAGES_TOKEN`.
+2. **Settings → Secrets and variables → Dependabot → New repository secret**: `VIREO_PACKAGES_TOKEN`.
+
+The second copy is required because workflows triggered by Dependabot cannot read ordinary Actions secrets. Never commit the token or expose it through a `VITE_*` variable.
+
+The token resolves these JVM packages through Gradle:
 
 - `com.vireocode.vireo-starter-auth`
 - `com.vireocode.vireo-starter-bom`
@@ -43,11 +56,7 @@ Grant the same repository access to the JVM packages consumed through Gradle:
 - `com.vireocode.vireo-starter-history`
 - `com.vireocode.vireo-starter-queryengine`
 
-If organization package settings cannot grant repository access, add a repository Actions secret named `VIREO_PACKAGES_TOKEN` containing a token with `read:packages` access. Both workflows use that secret when present and otherwise fall back to `GITHUB_TOKEN`.
-| `VITE_API_BASE_URL`             | Browser build                | `/api`                                 |
-| `VITE_APP_NAME`                 | Browser build                | `Vireo Starter`                        |
-
-Vite values are public build-time configuration. Do not put secrets in variables prefixed with `VITE_`.
+The verification and CodeQL workflows fail fast with a targeted configuration error when this token is missing, instead of reporting the private JVM artifacts as nonexistent.
 
 ## Local Starter development
 

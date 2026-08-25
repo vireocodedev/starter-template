@@ -11,7 +11,7 @@ A production-shaped React PWA and Spring Boot application for starting a Vireo p
 
 Copy [`.env.example`](.env.example) to `.env` and export the values before running Gradle. Copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env.local` when the frontend defaults are not suitable.
 
-GitHub Packages requires a token with `read:packages` in `GITHUB_TOKEN` (JVM) and `NODE_AUTH_TOKEN` (npm). The token is only consumed by the package clients and must never be committed. GitHub Actions uses its built-in token when the `starter-template` repository has been granted Actions access to the private Vireo packages. As an explicit fallback, configure a repository secret named `VIREO_PACKAGES_TOKEN` containing a token with `read:packages` access.
+GitHub Packages requires a token with `read:packages` in `GITHUB_TOKEN` (JVM) and `NODE_AUTH_TOKEN` (npm). The token is only consumed by the package clients and must never be committed. For CI, configure a classic personal access token as `VIREO_PACKAGES_TOKEN` in both the repository's Actions secrets and Dependabot secrets. The separate token is required because GitHub's Maven/Gradle registry is repository-scoped, so this repository's built-in `GITHUB_TOKEN` cannot download the private JVM artifacts published by `vireocodedev/starter`.
 
 ## Run the application
 

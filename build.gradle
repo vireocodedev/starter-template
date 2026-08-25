@@ -29,7 +29,9 @@ repositories {
     }
 
     def gprUser = System.getenv('GITHUB_ACTOR') ?: findProperty('gpr.user')
-    def gprKey = System.getenv('GITHUB_TOKEN') ?: findProperty('gpr.key')
+    def gprKey = System.getenv('VIREO_PACKAGES_TOKEN') ?:
+        System.getenv('GITHUB_TOKEN') ?:
+        findProperty('gpr.key')
     if (gprUser && gprKey) {
         maven {
             name = 'GitHubPackages'

@@ -36,7 +36,7 @@ This mode:
 
 Normal tests, Storybook, E2E, builds, and `npm run verify` follow the same published-package rule. The presence of an adjacent `starter` checkout never changes a default command implicitly.
 
-The JVM build follows the same rule. Published Vireo artifacts are resolved from GitHub Packages, so configure credentials with `GITHUB_ACTOR` and `GITHUB_TOKEN`, or with `gpr.user` and `gpr.key` in your Gradle user properties. A plain Gradle command never reads artifacts from Maven Local.
+The JVM build follows the same rule. Published Vireo artifacts are resolved from GitHub Packages, so configure credentials with `GITHUB_ACTOR` and either `VIREO_PACKAGES_TOKEN` or `GITHUB_TOKEN`, or with `gpr.user` and `gpr.key` in your Gradle user properties. `VIREO_PACKAGES_TOKEN` takes precedence when present. A plain Gradle command never reads artifacts from Maven Local.
 
 You can select the published TypeScript mode without starting Vite:
 
