@@ -1,11 +1,50 @@
 # Vireo Starter Template
 
-This template is a production-oriented starting point for Vireo applications.
+A production-shaped React PWA and Spring Boot application for starting a Vireo product. It demonstrates an authenticated, localized, responsive CRUD workflow while keeping reusable contracts in [Vireo Starter](https://github.com/vireocodedev/starter) and product behavior in this repository.
 
-It demonstrates one complete React and Spring Boot entity workflow while keeping application-specific code separate from reusable Starter libraries.
+## Prerequisites
+
+- Java 21
+- Node.js 24.15 or newer and npm 12
+- PostgreSQL 16 or newer for a production-like local environment (H2 is also supported for quick development)
+- GitHub Packages read access for the published Vireo Starter artifacts
+
+Copy [`.env.example`](.env.example) to `.env` and export the values before running Gradle. Copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env.local` when the frontend defaults are not suitable.
+
+GitHub Packages requires a token with `read:packages` in `GITHUB_TOKEN` (JVM) and `NODE_AUTH_TOKEN` (npm). The token is only consumed by the package clients and must never be committed.
+
+## Run the application
+
+```bash
+# Terminal 1: Spring Boot API (dev profile seeds demo/demo123 and admin/admin123)
+set -a && source .env && set +a
+./gradlew bootRun
+
+# Terminal 2: React PWA
+cd frontend
+npm ci
+npm run dev
+```
+
+Open <http://localhost:3000>. API documentation is available at <http://localhost:8080/swagger-ui.html> only in the `dev` profile.
+
+## Verify a change
+
+```bash
+./scripts/verify.sh
+```
+
+The authoritative local gate validates architecture, formatting, lint, TypeScript, unit/integration tests, Storybook, the production frontend bundle, browser smoke tests, and the JVM build. Individual frontend commands remain available from `frontend/package.json`.
+
+## Customize the template
+
+Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md). Rename the product, replace the sample Item capability, remove Dev tools before production, configure real authentication/bootstrap behavior, and provide deployment secrets through the environment.
 
 ## Developer documentation
 
+- [Getting started and configuration](docs/getting-started.md)
+- [Customizing the template](docs/customizing-the-template.md)
 - [Developing against local Starter libraries](docs/local-starter-development.md)
 - [Entity query-filter standard](docs/entity-query-filters.md)
 - [Frontend architecture contract](frontend/docs/architecture/README.md)
+- [Vireo Starter documentation](https://vireocodedev.github.io/starter/?path=/docs/documentation-overview--docs)
