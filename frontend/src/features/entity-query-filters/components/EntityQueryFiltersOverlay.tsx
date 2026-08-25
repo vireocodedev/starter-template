@@ -97,6 +97,8 @@ export function EntityQueryFiltersOverlay({
       desktopNavWidth={preferences.navigationMode === "compact" ? 80 : preferences.navigationWidth}
       desktopSidePanelWidth={680}
       maxWidth="md"
+      mobileMaxHeight="92dvh"
+      mobileSurface="bottomDrawer"
     >
       <VireoOverlayHeader title={title} closeLabel={t("overlay.close")} onClose={requestClose} />
       <Box sx={{ bgcolor: "surface.sunken", flex: 1, minHeight: 0, overflowY: "auto", p: 2 }}>

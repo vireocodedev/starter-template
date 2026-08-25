@@ -86,7 +86,7 @@ export function AppShellLayout() {
   const navigateTo = React.useCallback(
     (path: string) => {
       preloadAppPage(path);
-      void navigate(path);
+      void navigate(path, { viewTransition: true });
       setMobileOpen(false);
       setAccountAnchor(null);
     },
@@ -198,8 +198,8 @@ export function AppShellLayout() {
                     onPointerEnter={() => preloadAppPage(item.path)}
                     sx={{
                       mb: 0.5,
-                      "&.Mui-selected": { bgcolor: "primary.main", color: "primary.contrastText" },
-                      "&.Mui-selected:hover": { bgcolor: "primary.dark" },
+                      "&.Mui-selected": { bgcolor: "action.selected", color: "primary.main" },
+                      "&.Mui-selected:hover": { bgcolor: "action.hover" },
                     }}
                   />
                 ))}
@@ -291,7 +291,15 @@ export function AppShellLayout() {
           </Collapse>
           <Box
             component="main"
-            sx={{ display: "flex", flex: 1, maxWidth: "100%", minHeight: 0, minWidth: 0, overflow: "hidden" }}
+            sx={{
+              display: "flex",
+              flex: 1,
+              maxWidth: "100%",
+              minHeight: 0,
+              minWidth: 0,
+              overflow: "hidden",
+              viewTransitionName: "app-page",
+            }}
           >
             <Outlet />
           </Box>

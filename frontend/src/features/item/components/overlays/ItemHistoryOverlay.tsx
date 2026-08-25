@@ -47,6 +47,7 @@ export function ItemHistoryOverlay({ item, open, onClose, onExited }: ItemHistor
       desktopSidePanelWidth={720}
       maxWidth="lg"
       mobileHeight="92dvh"
+      mobileSurface="bottomDrawer"
     >
       <VireoOverlayHeader
         title={t("history.title", { name: item.name })}

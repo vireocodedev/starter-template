@@ -44,6 +44,8 @@ describe("application themes", () => {
     expect(APP_THEME_COMPONENTS?.MuiButton?.defaultProps).toMatchObject({
       disableElevation: true,
     });
+    expect(APP_THEME_COMPONENTS?.MuiButton?.styleOverrides?.root).toBeDefined();
+    expect(APP_THEME_COMPONENTS?.MuiIconButton?.styleOverrides?.root).toBeDefined();
     expect(APP_THEME_COMPONENTS?.MuiTableBody?.styleOverrides?.root).toBeDefined();
     expect(APP_THEME.components?.MuiCard?.defaultProps).toMatchObject({
       elevation: 0,
