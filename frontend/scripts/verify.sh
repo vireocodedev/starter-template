@@ -30,6 +30,7 @@ else
 fi
 
 steps=(
+  "Published Starter boundary|npm run starter:boundary:check"
   "Architecture|npm run architecture:check"
   "Formatting|npm run format:check"
   "Lint|npm run lint"
