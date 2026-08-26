@@ -15,6 +15,11 @@ corepack npm run build
 
 The backend artifact is `build/libs/app.jar`, and the frontend artifact is `frontend/dist`. The deterministic JAR name is intentional: the checked-in backend Dockerfile never guesses between a Spring Boot archive and a plain Java archive.
 
+The Docker context is an enforced allowlist containing only `.dockerignore`, the
+Dockerfile, and that application JAR. The authoritative verification fails if the
+context exceeds 75 MiB, preventing source trees, caches, reports, or frontend
+dependencies from being sent to the Docker daemon.
+
 ## Build and run the backend container
 
 ```bash

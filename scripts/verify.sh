@@ -19,6 +19,7 @@ steps=(
   "Frontend contract|${frontend_verify_command}"
   "Browser smoke tests|cd frontend && corepack npm run test:e2e"
   "JVM build|./gradlew build"
+  "Container context contract|node scripts/container-context-policy.mjs"
 )
 
 total=${#steps[@]}

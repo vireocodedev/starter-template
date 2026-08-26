@@ -1,0 +1,4 @@
+{
+  "maximumBytes": 78643200,
+  "includedFiles": [".dockerignore", "Dockerfile", "build/libs/app.jar"]
+}
