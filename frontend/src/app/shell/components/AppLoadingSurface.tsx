@@ -74,7 +74,13 @@ function GenericRouteBodyFallback() {
 export function AppRouteFallback({ variant = "page" }: AppRouteFallbackProps) {
   const { t } = useAppTranslation();
 
-  if (variant === "overview") return <AppPageHomeView loading />;
+  if (variant === "overview") {
+    return (
+      <VireoDelayedRender delay={150}>
+        <AppPageHomeView loading />
+      </VireoDelayedRender>
+    );
+  }
 
   return (
     <AppPageLayout header={<AppRouteHeaderFallback />}>

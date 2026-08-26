@@ -30,9 +30,9 @@ describe("AppRouteFallback", () => {
       </ThemeProvider>,
     );
 
+    expect(await screen.findByRole("status", { name: "Loading page" })).toBeVisible();
     expect(view.container.querySelector("header")).not.toBeNull();
     expect(view.container.querySelector(".MuiContainer-maxWidthMd")).not.toBeNull();
-    expect(await screen.findByRole("status", { name: "Loading page" })).toBeVisible();
     await waitFor(() =>
       expect(view.container.querySelector('[data-app-route-fallback-variant="overview"]')).not.toBeNull(),
     );
