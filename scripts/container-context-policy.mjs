@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -9,39 +9,77 @@ const policy = JSON.parse(
     "utf8",
   ),
 );
-const expectedIgnore = `*
-!Dockerfile
-!build/
-build/*
-!build/libs/
-build/libs/*
-!build/libs/app.jar
-`;
-const actualIgnore = readFileSync(
-  join(repositoryRoot, ".dockerignore"),
-  "utf8",
-);
 const problems = [];
+const results = [];
 
-if (actualIgnore !== expectedIgnore) {
-  problems.push(
-    ".dockerignore must retain the reviewed allowlist for Dockerfile and build/libs/app.jar",
-  );
+function filesUnder(root) {
+  const files = [];
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    const path = join(root, entry.name);
+    if (entry.isDirectory()) files.push(...filesUnder(path));
+    else if (entry.isFile()) files.push(path);
+  }
+  return files;
 }
 
-let totalBytes = 0;
-for (const relativePath of policy.includedFiles) {
-  const path = join(repositoryRoot, relativePath);
-  if (!existsSync(path))
+for (const [name, context] of Object.entries(policy.contexts)) {
+  const contextRoot = join(repositoryRoot, context.root);
+  const expectedIgnore = `${context.dockerignore.join("\n")}\n`;
+  const ignorePath = join(contextRoot, ".dockerignore");
+  if (
+    !existsSync(ignorePath) ||
+    readFileSync(ignorePath, "utf8") !== expectedIgnore
+  ) {
     problems.push(
-      `required container-context file is missing: ${relativePath}`,
+      `${name} .dockerignore must retain its reviewed build-context allowlist`,
     );
-  else totalBytes += statSync(path).size;
-}
-if (totalBytes > policy.maximumBytes) {
-  problems.push(
-    `container context is ${totalBytes} bytes; budget is ${policy.maximumBytes} bytes`,
+  }
+
+  const dockerfilePath = join(contextRoot, "Dockerfile");
+  if (
+    !existsSync(dockerfilePath) ||
+    !readFileSync(dockerfilePath, "utf8").startsWith(
+      `FROM ${context.baseImage}\n`,
+    )
+  ) {
+    problems.push(`${name} Dockerfile must pin ${context.baseImage}`);
+  }
+
+  const includedPaths = [];
+  for (const relativePath of context.requiredFiles) {
+    const path = join(contextRoot, relativePath);
+    if (!existsSync(path))
+      problems.push(
+        `${name} required context file is missing: ${relativePath}`,
+      );
+    else includedPaths.push(path);
+  }
+  for (const tree of context.requiredTrees) {
+    const treePath = join(contextRoot, tree);
+    if (!existsSync(treePath))
+      problems.push(`${name} required context tree is missing: ${tree}`);
+    else includedPaths.push(...filesUnder(treePath));
+  }
+
+  const totalBytes = includedPaths.reduce(
+    (total, path) => total + statSync(path).size,
+    0,
   );
+  if (totalBytes > context.maximumBytes) {
+    problems.push(
+      `${name} context is ${totalBytes} bytes; budget is ${context.maximumBytes} bytes`,
+    );
+  }
+  results.push(
+    `${name} ${(totalBytes / 1024 / 1024).toFixed(1)} MiB/${(context.maximumBytes / 1024 / 1024).toFixed(0)} MiB`,
+  );
+}
+
+const compose = readFileSync(join(repositoryRoot, "compose.yaml"), "utf8");
+for (const [service, image] of Object.entries(policy.composeImages)) {
+  if (!compose.includes(`  ${service}:\n    image: ${image}\n`)) {
+    problems.push(`Compose service ${service} must pin ${image}`);
+  }
 }
 
 if (problems.length > 0) {
@@ -50,6 +88,4 @@ if (problems.length > 0) {
   process.exit(1);
 }
 
-console.log(
-  `Container context policy passed: ${policy.includedFiles.length} files, ${(totalBytes / 1024 / 1024).toFixed(1)} MiB of ${(policy.maximumBytes / 1024 / 1024).toFixed(0)} MiB.`,
-);
+console.log(`Container context policy passed: ${results.join(", ")}.`);

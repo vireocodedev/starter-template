@@ -38,6 +38,10 @@ VS Code users can instead open the repository and launch **Full stack (published
 
 The authoritative local gate validates architecture, formatting, lint, TypeScript, unit/integration tests, Storybook, the production frontend bundle, browser smoke tests, and the JVM build. Individual frontend commands remain available from `frontend/package.json`.
 
+Run `./scripts/verify-deployment.sh` for the disposable production-like Compose
+check. It builds the independent frontend/backend images, starts PostgreSQL, and
+verifies the PWA shell, API proxy, and backend readiness through the deployed network.
+
 ## Customize the template
 
 Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md). Rename the product, replace the sample Item capability, remove Dev tools before production, configure real authentication/bootstrap behavior, and provide deployment secrets through the environment.
