@@ -18,7 +18,10 @@ export default mergeConfig(
               enabled: true,
               headless: true,
               provider: playwright({}),
-              instances: [{ browser: "chromium" }],
+              instances: [
+                { browser: "chromium", name: "desktop", viewport: { height: 900, width: 1440 } },
+                { browser: "chromium", name: "mobile", viewport: { height: 844, width: 390 } },
+              ],
             },
           },
         },
