@@ -13,6 +13,8 @@ const hr = {
   filters: { open: "Filtri", clearAll: "Očisti sve", clearAllLabel: "Očisti sve filtre", title: "Filtriraj stavke" },
   error: {
     message: "Stavke nije moguće učitati. Provjerite API vezu, sesiju ili aktivne filtre.",
+    refreshMessage: "Stavke nije moguće osvježiti. Posljednji dostupni rezultati i dalje su prikazani.",
+    retry: "Pokušaj ponovno",
     edit: "Uredi",
     clear: "Očisti",
   },

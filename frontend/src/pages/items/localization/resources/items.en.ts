@@ -11,6 +11,8 @@ const en = {
   filters: { open: "Filters", clearAll: "Clear all", clearAllLabel: "Clear all filters", title: "Filter items" },
   error: {
     message: "Items could not be loaded. Check the API connection, session, or active filters.",
+    refreshMessage: "Items could not be refreshed. The last available results are still shown.",
+    retry: "Retry",
     edit: "Edit",
     clear: "Clear",
   },

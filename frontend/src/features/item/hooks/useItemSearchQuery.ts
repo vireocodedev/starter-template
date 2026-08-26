@@ -29,6 +29,7 @@ export function useItemSearchQuery(pagination: PageableParams, filters: ItemFilt
     isLoading: active.isLoading,
     layout: isCompact ? ("mobile" as const) : ("desktop" as const),
     onLoadNextPage: isCompact ? infinite.fetchNextPage : undefined,
+    onRetry: () => void active.refetch(),
   };
 }
 
