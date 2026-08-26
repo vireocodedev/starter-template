@@ -60,7 +60,13 @@ function itemListState(overrides: Partial<AppPageItemsListState> = {}): AppPageI
   };
 }
 
-function ItemsFixture({ result }: { result: AppPageItemsListState }) {
+function ItemsFixture({
+  result,
+  tableSize = "medium",
+}: {
+  result: AppPageItemsListState;
+  tableSize?: "small" | "medium";
+}) {
   const search = useDebouncedSearchText("", 0);
   const [filters, setFilters] = React.useState<VireoResponsiveTableFilters>({
     page: 0,
@@ -79,7 +85,7 @@ function ItemsFixture({ result }: { result: AppPageItemsListState }) {
           queryFilters={null}
           search={search}
           structuredFilterCount={0}
-          tableSize="medium"
+          tableSize={tableSize}
           presentation={presentation}
           onClearQueryFilters={vi.fn()}
           onClearAllFilters={vi.fn()}
@@ -96,10 +102,10 @@ function ItemsFixture({ result }: { result: AppPageItemsListState }) {
   );
 }
 
-function renderItems(result: AppPageItemsListState) {
+function renderItems(result: AppPageItemsListState, tableSize?: "small" | "medium") {
   return render(
     <AppStorybookProvider>
-      <ItemsFixture result={result} />
+      <ItemsFixture result={result} tableSize={tableSize} />
     </AppStorybookProvider>,
   );
 }
@@ -160,5 +166,14 @@ describe("Items loading-state contract", () => {
     expect(view.container.querySelector("[data-items-empty-state]")).not.toBeNull();
     expect(view.container.querySelector("[data-items-initial-error]")).toBeNull();
     expect(view.container.querySelector("[data-items-refresh-error]")).toBeNull();
+  });
+
+  it("keeps the same contract in the compact mobile list at small density", async () => {
+    const view = renderItems(itemListState({ data: undefined, isLoading: true, layout: "mobile" }), "small");
+
+    expect(view.container.querySelector('[data-items-table][data-container-layout="mobile"]')).not.toBeNull();
+    expect(view.container.querySelector("[data-items-toolbar]")).not.toBeNull();
+    expect(view.container.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
+    expect(await screen.findByRole("status")).toHaveTextContent("Loading items");
   });
 });
