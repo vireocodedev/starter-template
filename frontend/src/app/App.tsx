@@ -40,7 +40,7 @@ function AppRoutes() {
                   index={id === "home"}
                   path={id === "home" ? undefined : definition.path}
                   element={
-                    <React.Suspense fallback={<AppRouteFallback />}>
+                    <React.Suspense fallback={<AppRouteFallback variant={id === "home" ? "overview" : "page"} />}>
                       <Page />
                     </React.Suspense>
                   }
