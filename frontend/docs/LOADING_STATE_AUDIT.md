@@ -1,8 +1,8 @@
 # Loading-State and Skeleton Audit
 
-**Phase:** 4 — template page conventions
+**Phase:** 5 — Items data-workflow pilot
 
-**Status:** Route and page-loading conventions remediated
+**Status:** Items loading-state vertical slice remediated
 
 **Audited against:** [Vireo Loading-State and Skeleton Standard](LOADING_STATES.md)
 
@@ -33,13 +33,13 @@ This phase does not decide whether a route should remain lazy or become eager. I
 
 The template already distinguishes initial item loading, retained refresh, incremental pagination, empty results, query errors, and busy mutations in several important paths. Overview also demonstrates the correct structural technique: loaded and loading modes share one page composition and replace only leaves.
 
-The Phase 4 baseline is:
+The Phase 5 baseline is:
 
 1. Every lazy route now declares its loading presentation policy in the route registry.
 2. Unknown route structures use progress-only Level C treatment instead of an invented detailed skeleton.
 3. Route, bootstrap, and Overview loading surfaces consume the shared Starter loading boundary and skeleton leaves.
-4. Items, overlays, and widgets retain loading-ownership and recovery gaps for later vertical-slice phases.
-5. Only Overview and the shared responsive table have alignment contracts; template workflow coverage remains narrower than the standard requires.
+4. Items now applies the shared table and loading-region contracts across initial loading, refresh, empty, initial error, and retained refresh-error states.
+5. Overview, Items, and the shared responsive table have alignment contracts; overlay, mutation, and broader visual-matrix coverage remain for later phases.
 
 ## Route-code loading inventory
 
@@ -61,26 +61,26 @@ The later eager-versus-lazy review may remove waits from static routes, but it i
 
 ## Application surface inventory
 
-| Surface                          | Wait type and category                     | Current treatment                                                                                                             | Geometry target    | Rating                                      | Priority | Owner                      |
-| -------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------- | -------- | -------------------------- |
-| `AppBootstrapFallback`           | Auth/bootstrap; `boundary`                 | Branded full-screen progress through one shared delayed loading boundary.                                                     | C                  | Aligned                                     | —        | App shell                  |
-| `AppRouteFallback` — Overview    | Route code; `boundary`, `skeleton-capable` | Reuses `AppPageHomeView`; skeletonizes leaves in the real page composition through the shared boundary.                       | A                  | Partial                                     | P1       | App shell + Overview       |
-| `AppRouteFallback` — progress    | Route code; `boundary`                     | Reuses the page frame, width preference, localized static header, and bounded progress region without invented content.       | C                  | Aligned                                     | —        | App shell + route registry |
-| `AppPageHomeView loading`        | Route code; `skeleton-capable`             | Reuses real header, width preference, frame, card grid, typography, and localized text geometry with shared skeleton leaves.  | A                  | Partial                                     | P1       | Overview page              |
-| Items initial query              | Initial data; `skeleton-capable`           | Keeps search/filter controls and table frame; delegates unknown rows to the remediated shared `VireoResponsiveTable`.         | B; A outer anchors | Partial; template pilot remains             | P0       | Items feature + Starter UI |
-| Items background refresh         | Refresh; `content-preserving`              | Keeps usable rows and controls; adds a two-pixel top progress line with reduced-motion handling.                              | A                  | Partial                                     | P1       | Items feature              |
-| Items incremental mobile page    | Pagination; `content-preserving`           | Keeps loaded rows and adds local progress below them.                                                                         | B                  | Aligned                                     | P2       | Items feature + Starter UI |
-| Items empty result               | Empty                                      | Keeps table region and renders filtered/first-item/no-data copy with contextual actions.                                      | B                  | Aligned                                     | P2       | Items feature              |
-| Items query error                | Error/recovery                             | Shows an alert above the table; a no-data error also allows the table empty state to render.                                  | B                  | Partial                                     | P1       | Items feature              |
-| Item form create/update          | Mutation; `busy-action`                    | Keeps the form and overlay, disables closing, and delegates submit feedback to `VireoFormSubmitButton`.                       | A                  | Partial, inherits Starter action contract   | P1       | Item feature + Starter UI  |
-| Item delete confirmation         | Mutation; `busy-action`                    | Keeps target context and delegates pending behavior to `VireoConfirmationDialog`.                                             | A                  | Partial, inherits Starter action contract   | P1       | Item feature + Starter UI  |
-| Item history overlay             | Initial data; `skeleton-capable`           | Keeps overlay/header but draws an independent generic skeleton stack for history content. Retains records on refresh failure. | B                  | Non-compliant                               | P1       | Item feature               |
-| Entity-filter definition overlay | Initial data; `boundary`                   | Keeps overlay/header/footer and uses centered progress in a reserved content region.                                          | C                  | Partial                                     | P1       | Query-filter feature       |
-| Relation value editor            | Widget query; `content-preserving`         | Keeps the autocomplete control/value and uses MUI local loading behavior.                                                     | A control frame    | Partial                                     | P2       | Query-filter feature       |
-| Login submission                 | Mutation; `busy-action`                    | Keeps the login form and delegates pending behavior to `VireoFormSubmitButton`; error remains local.                          | A                  | Partial, inherits Starter action contract   | P1       | Login page + Starter UI    |
-| Async data-state example         | Initial data/error; `boundary`             | Demonstrates Suspense success, empty, and error through `VireoQueryBoundary`.                                                 | C by default       | Partial, inherits Starter boundary contract | P2       | Dev tools + Starter UI     |
-| Initialization-readiness example | Initialization; `boundary`                 | Keeps the page and card, replaces the card body with step progress, and delegates lifecycle to `VireoInitializationBoundary`. | B                  | Partial                                     | P2       | Dev tools + Starter UI     |
-| Remaining page content           | `static`                                   | No independent data-loading surface was found; only route-code loading applies.                                               | Not applicable     | Not applicable                              | —        | Owning route               |
+| Surface                          | Wait type and category                     | Current treatment                                                                                                                  | Geometry target    | Rating                                      | Priority | Owner                      |
+| -------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------- | -------- | -------------------------- |
+| `AppBootstrapFallback`           | Auth/bootstrap; `boundary`                 | Branded full-screen progress through one shared delayed loading boundary.                                                          | C                  | Aligned                                     | —        | App shell                  |
+| `AppRouteFallback` — Overview    | Route code; `boundary`, `skeleton-capable` | Reuses `AppPageHomeView`; skeletonizes leaves in the real page composition through the shared boundary.                            | A                  | Partial                                     | P1       | App shell + Overview       |
+| `AppRouteFallback` — progress    | Route code; `boundary`                     | Reuses the page frame, width preference, localized static header, and bounded progress region without invented content.            | C                  | Aligned                                     | —        | App shell + route registry |
+| `AppPageHomeView loading`        | Route code; `skeleton-capable`             | Reuses real header, width preference, frame, card grid, typography, and localized text geometry with shared skeleton leaves.       | A                  | Partial                                     | P1       | Overview page              |
+| Items initial query              | Initial data; `skeleton-capable`           | Keeps toolbar, reserved result-count slot, table/list frame, headings, and pagination; delegates unknown rows to the shared table. | B; A outer anchors | Aligned                                     | —        | Items feature + Starter UI |
+| Items background refresh         | Refresh; `content-preserving`              | Keeps usable rows and controls; one shared delayed boundary owns busy/status semantics and a decorative two-pixel progress line.   | A                  | Aligned                                     | —        | Items feature              |
+| Items incremental mobile page    | Pagination; `content-preserving`           | Keeps loaded rows and adds local progress below them.                                                                              | B                  | Aligned                                     | P2       | Items feature + Starter UI |
+| Items empty result               | Empty                                      | Keeps table region and renders filtered/first-item/no-data copy with contextual actions.                                           | B                  | Aligned                                     | P2       | Items feature              |
+| Items query error                | Error/recovery                             | Renders first-load failure exclusively inside table content; refresh failure retains rows with an overlaid warning and retry.      | B                  | Aligned                                     | —        | Items feature              |
+| Item form create/update          | Mutation; `busy-action`                    | Keeps the form and overlay, disables closing, and delegates submit feedback to `VireoFormSubmitButton`.                            | A                  | Partial, inherits Starter action contract   | P1       | Item feature + Starter UI  |
+| Item delete confirmation         | Mutation; `busy-action`                    | Keeps target context and delegates pending behavior to `VireoConfirmationDialog`.                                                  | A                  | Partial, inherits Starter action contract   | P1       | Item feature + Starter UI  |
+| Item history overlay             | Initial data; `skeleton-capable`           | Keeps overlay/header but draws an independent generic skeleton stack for history content. Retains records on refresh failure.      | B                  | Non-compliant                               | P1       | Item feature               |
+| Entity-filter definition overlay | Initial data; `boundary`                   | Keeps overlay/header/footer and uses centered progress in a reserved content region.                                               | C                  | Partial                                     | P1       | Query-filter feature       |
+| Relation value editor            | Widget query; `content-preserving`         | Keeps the autocomplete control/value and uses MUI local loading behavior.                                                          | A control frame    | Partial                                     | P2       | Query-filter feature       |
+| Login submission                 | Mutation; `busy-action`                    | Keeps the login form and delegates pending behavior to `VireoFormSubmitButton`; error remains local.                               | A                  | Partial, inherits Starter action contract   | P1       | Login page + Starter UI    |
+| Async data-state example         | Initial data/error; `boundary`             | Demonstrates Suspense success, empty, and error through `VireoQueryBoundary`.                                                      | C by default       | Partial, inherits Starter boundary contract | P2       | Dev tools + Starter UI     |
+| Initialization-readiness example | Initialization; `boundary`                 | Keeps the page and card, replaces the card body with step progress, and delegates lifecycle to `VireoInitializationBoundary`.      | B                  | Partial                                     | P2       | Dev tools + Starter UI     |
+| Remaining page content           | `static`                                   | No independent data-loading surface was found; only route-code loading applies.                                                    | Not applicable     | Not applicable                              | —        | Owning route               |
 
 ## Detailed findings
 
@@ -124,25 +124,25 @@ Overview shares one real page structure across loading and loaded modes. `AppSke
 
 **Remaining remediation:** Expand the existing Level A contract across supported widths, localization, responsive modes, and themes without creating a second skeleton tree.
 
-### T-05 — Items initial loading is ready for the template pilot
+### T-05 — Items initial loading preserves the workflow frame
 
-**Rating:** Partial
+**Rating:** Aligned
 
-**Priority:** P0 pilot
+**Priority:** Remediated in Phase 5
 
-Search, filters, page frame, table frame, headings, and pagination remain in place. Initial row placeholders are correctly selected only when there is no usable data. The shared table now owns one delayed loading boundary and derives desktop and mobile placeholders from real row/cell structures. The template still needs to reserve or intentionally bound result-count geometry and prove the complete Items state matrix.
+Search, filters, page frame, table/list frame, headings, and pagination remain in place. Initial row placeholders are selected only when there is no usable data. The result-count chip remains mounted in a bounded reserved slot, and the shared table owns delayed skeleton timing while deriving desktop and mobile placeholders from real row/cell structures.
 
-**Remaining remediation:** In Phase 5, integrate the shared table contract with result-count geometry, exclusive error/empty behavior, refresh ownership, and desktop/mobile density-aware alignment coverage.
+**Remediation record:** Focused integration tests cover initial/loading/empty/error/refresh states plus compact mobile loading at small density. Storybook exposes the canonical state matrix and a browser geometry contract for the page, toolbar, data region, table, and desktop count slot.
 
-### T-06 — Items refresh and error ownership needs tightening
+### T-06 — Items refresh and error ownership are explicit
 
-**Rating:** Partial
+**Rating:** Aligned
 
-**Priority:** P1
+**Priority:** Remediated in Phase 5
 
-`useItemSearchQuery` distinguishes `isLoading`, `isRefreshing`, and `isFetchingNextPage` and retains previous data, which is the desired state model. The refresh progress indicator does not establish a single busy region. When the first request errors with no records, the error alert and the table's ordinary empty state can appear together, communicating two incompatible outcomes.
+`useItemSearchQuery` distinguishes `isLoading`, `isRefreshing`, and `isFetchingNextPage`, retains previous data, and exposes local retry. Initial loading is owned by the shared table; retained refresh is owned by one enclosing `VireoLoadingRegion`; incremental mobile fetching remains table-local. First-load errors replace the table's ordinary empty state, while refresh errors retain rows and provide a warning with retry.
 
-**Required remediation:** Give the Items data region one busy/announcement owner for refresh. Render an exclusive no-data error state inside the table/list content region, while preserving stale rows and a warning on refresh failure.
+**Remediation record:** Initial loading, retained refresh, incremental pagination, empty, initial error, and retained refresh-error now have mutually coherent ownership and recovery behavior.
 
 ### T-07 — Item history duplicates layout in a separate skeleton tree
 
@@ -181,32 +181,33 @@ Authentication bootstrap and login route-code loading now provide separate label
 
 **Remediation record:** Bootstrap and login route loading retain separate labels while sharing the same application-progress presentation primitive and boundary semantics.
 
-### T-11 — verification is concentrated on Overview
+### T-11 — verification now includes the Items reference workflow
 
-**Rating:** Non-compliant  
-**Priority:** P0
+**Rating:** Partial
 
-Overview has a Storybook alignment contract and an integration assertion for the `md` page-width preference. Route-policy exhaustiveness, localized header keys, delayed visibility, and single-boundary ownership now have focused coverage. No equivalent contract yet covers Items initial/refresh/error states, overlays, reduced motion, longest localization, all supported page widths, or the broader announcement matrix.
+**Priority:** P1
+
+Overview and Items have Storybook alignment contracts. Items additionally exercises loaded, initial loading, refreshing, empty, initial error, retained refresh-error, compact mobile loading, small density, retry, delayed visibility, and announcement uniqueness. Route-policy exhaustiveness and localized header keys also have focused coverage. Overlays, mutations, longest localization, all supported page widths, explicit reduced-motion assertions, mobile pixel geometry, and the broader announcement matrix remain open.
 
 **Required remediation:** Add tests alongside each remediation. Route-policy exhaustiveness, Level A/B anchors, state transitions, accessibility ownership, responsive modes, table density, themes, localization, reduced motion, and CLS thresholds must all become executable contracts.
 
 ## State-transition coverage baseline
 
-| Transition                                    | Best current reference                | Gap                                                              |
-| --------------------------------------------- | ------------------------------------- | ---------------------------------------------------------------- |
-| Initial loading → content                     | Overview and Items                    | Overview coverage is narrow; Items template integration remains. |
-| Initial loading → empty                       | Items and async-state example         | Items transition has no alignment contract.                      |
-| Initial loading → error                       | Query/filter/history surfaces         | No-data error ownership is inconsistent.                         |
-| Content → refresh → updated                   | Items                                 | Busy semantics and automated coverage are missing.               |
-| Content → refresh error with retained content | Item history                          | Not generalized; filter definition may replace stale content.    |
-| Content → mutation → success/error            | Item form, delete confirmation, login | Shared busy-action semantics remain incomplete.                  |
-| Route code → destination                      | Overview and page progress            | Overview is exact; other routes preserve known anchors only.     |
+| Transition                                    | Best current reference                | Gap                                                               |
+| --------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------- |
+| Initial loading → content                     | Overview and Items                    | Both have alignment contracts; the broader visual matrix remains. |
+| Initial loading → empty                       | Items and async-state example         | Items is covered; other query boundaries remain inconsistent.     |
+| Initial loading → error                       | Items                                 | Items is exclusive and recoverable; overlays remain inconsistent. |
+| Content → refresh → updated                   | Items                                 | Retention, ownership, and state coverage are aligned.             |
+| Content → refresh error with retained content | Items and item history                | Items is aligned; the pattern is not yet generalized to overlays. |
+| Content → mutation → success/error            | Item form, delete confirmation, login | Shared busy-action semantics remain incomplete.                   |
+| Route code → destination                      | Overview and page progress            | Overview is exact; other routes preserve known anchors only.      |
 
 ## Remediation order
 
 1. **Route contract (complete):** typed per-route policies replace the invented generic fallback with a compliant Level C treatment.
 2. **Starter foundation adoption (complete for Phase 4 surfaces):** route, bootstrap, and Overview loading use shared boundaries, tokens, and skeleton leaves.
-3. **Items pilot:** complete responsive-table integration, result-count geometry, exclusive error/empty behavior, and refresh ownership.
+3. **Items pilot (complete):** responsive-table integration, result-count geometry, exclusive error/empty behavior, refresh ownership, recovery, and canonical stories.
 4. **Overlay migration:** remediate item history, filter definition, and relation-option states.
 5. **Busy-action integration:** adopt the finalized Starter form and confirmation contracts in item and login flows.
 6. **Verification sweep:** add the full route, state, geometry, accessibility, motion, localization, theme, and responsive matrix.
@@ -222,4 +223,5 @@ Overview has a Storybook alignment contract and an integration assertion for the
 - [x] Remediation priorities and repository owners assigned.
 - [x] Eager-versus-lazy decisions explicitly deferred.
 - [x] Phase 4 route-policy and page-loading convention findings remediated.
-- [ ] Remaining Items, overlay, widget, busy-action, and verification findings remediated in later phases.
+- [x] Phase 5 Items data-workflow pilot remediated and verified.
+- [ ] Remaining overlay, widget, busy-action, and broader verification findings remediated in later phases.

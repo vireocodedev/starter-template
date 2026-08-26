@@ -6,6 +6,8 @@ Navigation groups are `DOCUMENTATION`, `APPLICATION`, `FEATURES`, and `PAGES`. R
 
 Async-capable page stories use the applicable canonical names: `Loaded`, `Loading`, `Refreshing`, `Empty`, `Error`, and `AlignmentContract`. Omitted states must be intentional and explained in the page documentation. `Default` may remain as the introductory story but does not replace the canonical state story.
 
+Items is the reference data-workflow matrix. In addition to the canonical states, it exposes `RefreshError` to prove that stale rows remain usable when a background request fails. Its alignment contract compares the real loaded and initial-loading page frame, toolbar, table region, and reserved result-count geometry.
+
 Frontend confidence has three pillars:
 
 1. Vitest unit and integration tests for models, services, hooks, and composition.
