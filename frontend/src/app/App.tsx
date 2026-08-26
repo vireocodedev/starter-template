@@ -23,7 +23,7 @@ function AppRoutes() {
       <Route
         path={APP_PAGES.login}
         element={
-          <React.Suspense fallback={<AppBootstrapFallback />}>
+          <React.Suspense fallback={<AppRouteFallback loading={APP_PAGE_REGISTRY.login.loading} />}>
             <LoginPage />
           </React.Suspense>
         }
@@ -40,7 +40,7 @@ function AppRoutes() {
                   index={id === "home"}
                   path={id === "home" ? undefined : definition.path}
                   element={
-                    <React.Suspense fallback={<AppRouteFallback variant={id === "home" ? "overview" : "page"} />}>
+                    <React.Suspense fallback={<AppRouteFallback loading={definition.loading} />}>
                       <Page />
                     </React.Suspense>
                   }
@@ -50,7 +50,7 @@ function AppRoutes() {
           <Route
             path="*"
             element={
-              <React.Suspense fallback={<AppRouteFallback />}>
+              <React.Suspense fallback={<AppRouteFallback loading={APP_PAGE_REGISTRY.notFound.loading} />}>
                 <NotFoundPage />
               </React.Suspense>
             }

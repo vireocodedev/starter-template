@@ -1,17 +1,20 @@
-import { Avatar, Box, CircularProgress, Skeleton, Stack, Typography } from "@mui/material";
-import { VireoDelayedRender } from "@vireocodedev/starter-ui";
+import type { AppRouteLoadingHeader, AppRouteLoadingPolicy } from "@/app/app.pages";
 import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
 import { AppPageLayout } from "@/app/shell/layout/AppPageLayout";
 import { useAppTranslation } from "@/app/ui/localization/use-app-translation";
 import { AppPageHomeView } from "@/pages/home/AppPageHomeView";
+import { Avatar, Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { VireoLoadingRegion } from "@vireocodedev/starter-ui";
+import { useTranslation } from "react-i18next";
 
-export function AppBootstrapFallback() {
+function AppApplicationProgressFallback({ label }: { label: string }) {
   const { t } = useAppTranslation();
 
   return (
-    <Box
-      aria-label={t("loading.application")}
-      role="status"
+    <VireoLoadingRegion
+      loading
+      loadingLabel={label}
+      data-app-route-fallback-policy="progress"
       sx={{
         alignItems: "center",
         bgcolor: "surface.sunken",
@@ -23,74 +26,94 @@ export function AppBootstrapFallback() {
         p: 3,
       }}
     >
-      <Avatar
-        variant="rounded"
-        sx={{ bgcolor: "primary.main", color: "primary.contrastText", fontSize: 24, fontWeight: 800 }}
-      >
-        V
-      </Avatar>
-      <Typography sx={{ fontWeight: 800 }}>{t("brand.name")}</Typography>
-      <VireoDelayedRender delay={150}>
-        <CircularProgress aria-hidden size={28} />
-      </VireoDelayedRender>
-    </Box>
+      {({ loadingVisible }) => (
+        <>
+          <Avatar
+            variant="rounded"
+            sx={{ bgcolor: "primary.main", color: "primary.contrastText", fontSize: 24, fontWeight: 800 }}
+          >
+            V
+          </Avatar>
+          <Typography sx={{ fontWeight: 800 }}>{t("brand.name")}</Typography>
+          <Box sx={{ alignItems: "center", display: "flex", height: 28, justifyContent: "center" }}>
+            {loadingVisible ? <CircularProgress aria-hidden size={28} /> : null}
+          </Box>
+        </>
+      )}
+    </VireoLoadingRegion>
   );
 }
 
-type AppRouteFallbackProps = {
-  variant?: "overview" | "page";
-};
+export function AppBootstrapFallback() {
+  const { t } = useAppTranslation();
+  return <AppApplicationProgressFallback label={t("loading.application")} />;
+}
 
-function AppRouteHeaderFallback() {
+function AppRouteHeaderFallback({ header }: { header: AppRouteLoadingHeader }) {
+  const { i18n } = useTranslation();
+  const translate = i18n.getFixedT(i18n.resolvedLanguage ?? i18n.language, header.namespace as never) as unknown as (
+    key: string,
+  ) => string;
+
   return (
     <AppPageHeader
-      description={
-        <Skeleton
-          aria-hidden
-          sx={{ display: "block", fontSize: "inherit", maxWidth: "min(28rem, 55vw)", width: "28rem" }}
-          variant="text"
-        />
-      }
-      title={
-        <Skeleton
-          aria-hidden
-          sx={{ display: "block", fontSize: "inherit", maxWidth: "min(12rem, 40vw)", width: "12rem" }}
-          variant="text"
-        />
-      }
+      backLabel={header.backLabelKey ? translate(header.backLabelKey) : undefined}
+      backTo={header.backTo}
+      description={translate(header.descriptionKey)}
+      title={translate(header.titleKey)}
     />
   );
 }
 
-function GenericRouteBodyFallback() {
+function AppPageProgressFallback({ header }: { header?: AppRouteLoadingHeader }) {
+  const { t } = useAppTranslation();
+
   return (
-    <Stack data-app-route-fallback-variant="page" spacing={2}>
-      <Skeleton height={48} variant="rounded" width="min(34rem, 100%)" />
-      <Skeleton height={180} variant="rounded" />
-    </Stack>
+    <AppPageLayout header={header ? <AppRouteHeaderFallback header={header} /> : undefined}>
+      <VireoLoadingRegion
+        loading
+        loadingLabel={t("loading.page")}
+        data-app-route-fallback-policy="progress"
+        sx={{ minWidth: 0 }}
+      >
+        {({ loadingVisible }) => (
+          <Stack
+            data-app-route-fallback-variant="progress"
+            sx={{ alignItems: "center", justifyContent: "center", minHeight: 180 }}
+          >
+            {loadingVisible ? <CircularProgress aria-hidden size={28} /> : null}
+          </Stack>
+        )}
+      </VireoLoadingRegion>
+    </AppPageLayout>
   );
 }
 
-export function AppRouteFallback({ variant = "page" }: AppRouteFallbackProps) {
+function assertNever(value: never): never {
+  throw new Error(`Unhandled route loading policy: ${JSON.stringify(value)}`);
+}
+
+export function AppRouteFallback({ loading }: { loading: AppRouteLoadingPolicy }) {
   const { t } = useAppTranslation();
 
-  if (variant === "overview") {
-    return (
-      <VireoDelayedRender delay={150}>
-        <AppPageHomeView loading />
-      </VireoDelayedRender>
-    );
+  switch (loading.policy) {
+    case "none":
+    case "retain":
+      return null;
+    case "progress":
+      return loading.frame === "application" ? (
+        <AppApplicationProgressFallback label={t("loading.page")} />
+      ) : (
+        <AppPageProgressFallback header={loading.header} />
+      );
+    case "skeleton":
+      switch (loading.composition) {
+        case "overview":
+          return <AppPageHomeView loading />;
+        default:
+          return assertNever(loading.composition);
+      }
+    default:
+      return assertNever(loading);
   }
-
-  return (
-    <AppPageLayout header={<AppRouteHeaderFallback />}>
-      <Box aria-label={t("loading.page")} role="status" sx={{ minWidth: 0 }}>
-        <VireoDelayedRender delay={150} sx={{ minWidth: 0 }}>
-          <Box aria-hidden>
-            <GenericRouteBodyFallback />
-          </Box>
-        </VireoDelayedRender>
-      </Box>
-    </AppPageLayout>
-  );
 }

@@ -1,15 +1,17 @@
 import type React from "react";
-import { Box, Skeleton } from "@mui/material";
+import { Box } from "@mui/material";
+import { VireoSkeleton } from "@vireocodedev/starter-ui";
 
 export type AppSkeletonTextProps = {
   children: React.ReactNode;
+  visible?: boolean;
 };
 
 /**
  * Preserves the wrapped content's real typography and wrapping geometry while
  * presenting it as a loading placeholder.
  */
-export function AppSkeletonText({ children }: AppSkeletonTextProps) {
+export function AppSkeletonText({ children, visible = true }: AppSkeletonTextProps) {
   return (
     <>
       <Box
@@ -28,14 +30,13 @@ export function AppSkeletonText({ children }: AppSkeletonTextProps) {
       >
         {children}
       </Box>
-      <Skeleton
-        aria-hidden
-        component="span"
+      <VireoSkeleton
         variant="rounded"
         sx={{
           display: "block",
           maxWidth: "100%",
           transform: "none",
+          visibility: visible ? "visible" : "hidden",
           width: "fit-content",
           "& > *": { visibility: "hidden" },
         }}
@@ -43,7 +44,7 @@ export function AppSkeletonText({ children }: AppSkeletonTextProps) {
         <Box component="span" sx={{ display: "block" }}>
           {children}
         </Box>
-      </Skeleton>
+      </VireoSkeleton>
     </>
   );
 }
