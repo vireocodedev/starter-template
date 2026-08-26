@@ -53,6 +53,11 @@ const entityQueryFiltersEn = {
     no: "No",
     chooseValue: "Choose a value",
     searchOptions: "Search options",
+    loadingOptions: "Loading options",
+    noOptions: "No matching options",
+    optionsLoadError: "Options could not be loaded.",
+    optionsRefreshError: "Options could not be refreshed. Showing the most recent saved results.",
+    retryOptions: "Retry",
   },
   validation: {
     unavailableField: "This filter field is no longer available.",

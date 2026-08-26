@@ -56,6 +56,11 @@ const entityQueryFiltersHr = {
     no: "Ne",
     chooseValue: "Odaberite vrijednost",
     searchOptions: "Pretražite opcije",
+    loadingOptions: "Učitavanje opcija",
+    noOptions: "Nema odgovarajućih opcija",
+    optionsLoadError: "Opcije nije moguće učitati.",
+    optionsRefreshError: "Opcije nije moguće osvježiti. Prikazuju se posljednji spremljeni rezultati.",
+    retryOptions: "Pokušaj ponovno",
   },
   validation: {
     unavailableField: "Ovo polje filtra više nije dostupno.",
