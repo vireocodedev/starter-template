@@ -63,6 +63,7 @@ type ItemOverlayModes = {
 const ITEM_LIST_STATE_KEY = "items";
 const ITEM_TABLE_LAYERS = { stickyToolbar: 4, stickyRowHeader: 3 } as const;
 const ITEM_TABLE_SX = { flex: 1, height: "100%", minHeight: 0 } as const;
+const ITEM_COMMAND_CONTROL_HEIGHT = { xs: 44, sm: 40 } as const;
 const DEFAULT_TABLE_FILTERS: VireoResponsiveTableFilters = {
   page: 0,
   rowsPerPage: 10,
@@ -164,10 +165,14 @@ const ItemListContent = React.memo(function ItemListContent({
   );
 
   return (
-    <Stack spacing={0} sx={{ flex: 1, height: "100%", minHeight: 0, overflow: "hidden" }}>
+    <Stack spacing={{ xs: 0, sm: 2 }} sx={{ flex: 1, height: "100%", minHeight: 0, overflow: "hidden" }}>
       <Box
         sx={{
           bgcolor: "surface.base",
+          borderColor: "divider",
+          borderStyle: { xs: "none", sm: "solid" },
+          borderWidth: { xs: 0, sm: 1 },
+          borderRadius: { xs: 0, sm: 1 },
           flex: "0 0 auto",
           p: { xs: 2, sm: 1.5 },
         }}
@@ -176,6 +181,7 @@ const ItemListContent = React.memo(function ItemListContent({
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: { sm: "center" } }}>
             <TextField
               fullWidth
+              size="small"
               value={search.input}
               onChange={event => search.setInput(event.target.value)}
               onKeyDown={event => {
@@ -198,9 +204,13 @@ const ItemListContent = React.memo(function ItemListContent({
                   ) : undefined,
                 },
               }}
-              sx={{ maxWidth: 520 }}
+              sx={{ maxWidth: 520, "& .MuiInputBase-root": { height: ITEM_COMMAND_CONTROL_HEIGHT } }}
             />
-            <ButtonGroup size="large" variant="outlined" sx={{ display: { xs: "none", sm: "inline-flex" } }}>
+            <ButtonGroup
+              size="large"
+              variant="outlined"
+              sx={{ display: { xs: "none", sm: "inline-flex" }, height: ITEM_COMMAND_CONTROL_HEIGHT }}
+            >
               <Button startIcon={<FilterAltOutlined />} onClick={onOpenFilters}>
                 {t("filters.open")}
                 {structuredFilterCount > 0 ? ` (${structuredFilterCount})` : ""}
@@ -243,7 +253,11 @@ const ItemListContent = React.memo(function ItemListContent({
               alignItems: "center",
             }}
           >
-            <ButtonGroup size="large" variant="outlined" sx={{ gridColumn: 1, justifySelf: "start" }}>
+            <ButtonGroup
+              size="large"
+              variant="outlined"
+              sx={{ gridColumn: 1, height: ITEM_COMMAND_CONTROL_HEIGHT, justifySelf: "start" }}
+            >
               <Button startIcon={<FilterAltOutlined />} onClick={onOpenFilters}>
                 {t("filters.open")}
                 {structuredFilterCount > 0 ? ` (${structuredFilterCount})` : ""}
@@ -348,7 +362,7 @@ const ItemListContent = React.memo(function ItemListContent({
             value={reducedMotion ? 100 : undefined}
             sx={{
               position: "absolute",
-              top: result.layout === "desktop" ? 24 : 0,
+              top: 0,
               insetInline: 0,
               height: 2,
               zIndex: 5,
