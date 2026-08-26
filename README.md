@@ -52,4 +52,5 @@ Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md
 - [Entity query-filter standard](docs/entity-query-filters.md)
 - [Frontend architecture contract](frontend/docs/architecture/README.md)
 - [Command interface visual language](frontend/docs/VISUAL_LANGUAGE.md)
+- [Loading-state and skeleton standard](frontend/docs/LOADING_STATES.md)
 - [Vireo Starter documentation](https://vireocodedev.github.io/starter/?path=/docs/documentation-overview--docs)
