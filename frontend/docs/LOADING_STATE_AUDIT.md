@@ -1,8 +1,8 @@
 # Loading-State and Skeleton Audit
 
-**Phase:** 7 — remaining application-surface rollout
+**Phase:** 8 — enforcement
 
-**Status:** Overlay, widget, and busy-action slices remediated and verified
+**Status:** Loading-state standard implemented and enforced
 
 **Audited against:** [Vireo Loading-State and Skeleton Standard](LOADING_STATES.md)
 
@@ -42,7 +42,7 @@ The Phase 7 baseline is:
 5. Overview now verifies exact loaded/loading geometry across English and Croatian, every page-width preference, and real compact/desktop viewports; Items and the shared responsive table retain their alignment contracts.
 6. History, filter-definition, and relation-option surfaces now cover initial loading, retained refresh, empty, recoverable error, accessibility ownership, and their applicable geometry contract.
 7. Item form, item deletion, and login mutations retain their real context, prevent duplicate or unsafe actions, and recover without replacing established content.
-8. Cross-theme, explicit reduced-motion, CLS, and enforcement work remains for Phase 8.
+8. Cross-theme, explicit reduced-motion, layout-shift, accessibility, localization, authoring, and architecture contracts are enforced in Phase 8.
 
 ## Route-code loading inventory
 
@@ -64,26 +64,26 @@ The later eager-versus-lazy review may remove waits from static routes, but it i
 
 ## Application surface inventory
 
-| Surface                          | Wait type and category                     | Current treatment                                                                                                                   | Geometry target    | Rating                                      | Priority | Owner                      |
-| -------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------- | -------- | -------------------------- |
-| `AppBootstrapFallback`           | Auth/bootstrap; `boundary`                 | Branded full-screen progress through one shared delayed loading boundary.                                                           | C                  | Aligned                                     | —        | App shell                  |
-| `AppRouteFallback` — Overview    | Route code; `boundary`, `skeleton-capable` | Reuses `AppPageHomeView`; skeletonizes leaves in the real page composition through the shared boundary.                             | A                  | Aligned                                     | —        | App shell + Overview       |
-| `AppRouteFallback` — progress    | Route code; `boundary`                     | Reuses the page frame, width preference, localized static header, and bounded progress region without invented content.             | C                  | Aligned                                     | —        | App shell + route registry |
-| `AppPageHomeView loading`        | Route code; `skeleton-capable`             | Reuses real header, width preference, frame, card grid, typography, and localized text geometry with shared skeleton leaves.        | A                  | Aligned                                     | —        | Overview page              |
-| Items initial query              | Initial data; `skeleton-capable`           | Keeps toolbar, reserved result-count slot, table/list frame, headings, and pagination; delegates unknown rows to the shared table.  | B; A outer anchors | Aligned                                     | —        | Items feature + Starter UI |
-| Items background refresh         | Refresh; `content-preserving`              | Keeps usable rows and controls; one shared delayed boundary owns busy/status semantics and a decorative two-pixel progress line.    | A                  | Aligned                                     | —        | Items feature              |
-| Items incremental mobile page    | Pagination; `content-preserving`           | Keeps loaded rows and adds local progress below them.                                                                               | B                  | Aligned                                     | P2       | Items feature + Starter UI |
-| Items empty result               | Empty                                      | Keeps table region and renders filtered/first-item/no-data copy with contextual actions.                                            | B                  | Aligned                                     | P2       | Items feature              |
-| Items query error                | Error/recovery                             | Renders first-load failure exclusively inside table content; refresh failure retains rows with an overlaid warning and retry.       | B                  | Aligned                                     | —        | Items feature              |
-| Item form create/update          | Mutation; `busy-action`                    | Keeps the form and overlay, disables submit, cancel, and close while pending, and prevents duplicate submission.                    | A                  | Aligned                                     | —        | Item feature + Starter UI  |
-| Item delete confirmation         | Mutation; `busy-action`                    | Keeps the dialog and target visible while its async confirmation runs; rejection re-enables retry and cancel.                       | A                  | Aligned                                     | —        | Item feature + Starter UI  |
-| Item history overlay             | Initial/refresh data; `skeleton-capable`   | Reuses the real history-entry anatomy, centralizes delay/announcements, retains records on refresh, and exposes retry/empty states. | B; A outer anchors | Aligned                                     | —        | Item feature + Starter UI  |
-| Entity-filter definition overlay | Initial/refresh data; `boundary`           | Uses one Level C reserved region initially, retains a usable form during refresh/error, and exposes local retry.                    | C initial; A frame | Aligned                                     | —        | Query-filter feature       |
-| Relation value editor            | Widget query; `content-preserving`         | Keeps the autocomplete and selected values, distinguishes loading/empty/error, and supports retained-data retry.                    | A control frame    | Aligned                                     | —        | Query-filter feature       |
-| Login submission                 | Mutation; `busy-action`                    | Keeps the login card and fields, prevents duplicate submission, and restores the action with local error feedback.                  | A                  | Aligned                                     | —        | Login page + Starter UI    |
-| Async data-state example         | Initial data/error; `boundary`             | Demonstrates Suspense success, empty, and error through `VireoQueryBoundary`.                                                       | C by default       | Partial, inherits Starter boundary contract | P2       | Dev tools + Starter UI     |
-| Initialization-readiness example | Initialization; `boundary`                 | Keeps the page and card, replaces the card body with step progress, and delegates lifecycle to `VireoInitializationBoundary`.       | B                  | Partial                                     | P2       | Dev tools + Starter UI     |
-| Remaining page content           | `static`                                   | No independent data-loading surface was found; only route-code loading applies.                                                     | Not applicable     | Not applicable                              | —        | Owning route               |
+| Surface                          | Wait type and category                     | Current treatment                                                                                                                   | Geometry target    | Rating         | Priority | Owner                      |
+| -------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------- | -------- | -------------------------- |
+| `AppBootstrapFallback`           | Auth/bootstrap; `boundary`                 | Branded full-screen progress through one shared delayed loading boundary.                                                           | C                  | Aligned        | —        | App shell                  |
+| `AppRouteFallback` — Overview    | Route code; `boundary`, `skeleton-capable` | Reuses `AppPageHomeView`; skeletonizes leaves in the real page composition through the shared boundary.                             | A                  | Aligned        | —        | App shell + Overview       |
+| `AppRouteFallback` — progress    | Route code; `boundary`                     | Reuses the page frame, width preference, localized static header, and bounded progress region without invented content.             | C                  | Aligned        | —        | App shell + route registry |
+| `AppPageHomeView loading`        | Route code; `skeleton-capable`             | Reuses real header, width preference, frame, card grid, typography, and localized text geometry with shared skeleton leaves.        | A                  | Aligned        | —        | Overview page              |
+| Items initial query              | Initial data; `skeleton-capable`           | Keeps toolbar, reserved result-count slot, table/list frame, headings, and pagination; delegates unknown rows to the shared table.  | B; A outer anchors | Aligned        | —        | Items feature + Starter UI |
+| Items background refresh         | Refresh; `content-preserving`              | Keeps usable rows and controls; one shared delayed boundary owns busy/status semantics and a decorative two-pixel progress line.    | A                  | Aligned        | —        | Items feature              |
+| Items incremental mobile page    | Pagination; `content-preserving`           | Keeps loaded rows and adds local progress below them.                                                                               | B                  | Aligned        | P2       | Items feature + Starter UI |
+| Items empty result               | Empty                                      | Keeps table region and renders filtered/first-item/no-data copy with contextual actions.                                            | B                  | Aligned        | P2       | Items feature              |
+| Items query error                | Error/recovery                             | Renders first-load failure exclusively inside table content; refresh failure retains rows with an overlaid warning and retry.       | B                  | Aligned        | —        | Items feature              |
+| Item form create/update          | Mutation; `busy-action`                    | Keeps the form and overlay, disables submit, cancel, and close while pending, and prevents duplicate submission.                    | A                  | Aligned        | —        | Item feature + Starter UI  |
+| Item delete confirmation         | Mutation; `busy-action`                    | Keeps the dialog and target visible while its async confirmation runs; rejection re-enables retry and cancel.                       | A                  | Aligned        | —        | Item feature + Starter UI  |
+| Item history overlay             | Initial/refresh data; `skeleton-capable`   | Reuses the real history-entry anatomy, centralizes delay/announcements, retains records on refresh, and exposes retry/empty states. | B; A outer anchors | Aligned        | —        | Item feature + Starter UI  |
+| Entity-filter definition overlay | Initial/refresh data; `boundary`           | Uses one Level C reserved region initially, retains a usable form during refresh/error, and exposes local retry.                    | C initial; A frame | Aligned        | —        | Query-filter feature       |
+| Relation value editor            | Widget query; `content-preserving`         | Keeps the autocomplete and selected values, distinguishes loading/empty/error, and supports retained-data retry.                    | A control frame    | Aligned        | —        | Query-filter feature       |
+| Login submission                 | Mutation; `busy-action`                    | Keeps the login card and fields, prevents duplicate submission, and restores the action with local error feedback.                  | A                  | Aligned        | —        | Login page + Starter UI    |
+| Async data-state example         | Initial data/error; `boundary`             | Demonstrates Suspense success, empty, and error through the standardized delayed `VireoQueryBoundary`.                              | C by default       | Aligned        | —        | Dev tools + Starter UI     |
+| Initialization-readiness example | Initialization; `boundary`                 | Keeps the page and card, replaces the card body with step progress, and delegates lifecycle to the standardized boundary.           | B                  | Aligned        | —        | Dev tools + Starter UI     |
+| Remaining page content           | `static`                                   | No independent data-loading surface was found; only route-code loading applies.                                                     | Not applicable     | Not applicable | —        | Owning route               |
 
 ## Detailed findings
 
@@ -125,7 +125,7 @@ The generic detailed skeleton has been removed. Progress routes preserve only st
 
 Overview shares one real page structure across loading and loaded modes. `AppSkeletonText` paints one skeleton fragment per real wrapped line while preserving the same localized typography boxes. Page width flows through `AppPageLayout`, and one shared boundary owns delay, `aria-busy`, and announcement semantics.
 
-**Remediation record:** The browser alignment matrix compares the real loaded and loading anchors for `md`, `lg`, `xl`, and `full` widths in English and Croatian. Storybook runs the matrix at 1440 × 900 and 390 × 844, with its shell navigation context derived from the same `md` breakpoint as the application. Theme and explicit reduced-motion sweeps remain global verification work rather than Overview-specific geometry gaps.
+**Remediation record:** The browser alignment matrix compares the real loaded and loading anchors for `md`, `lg`, `xl`, and `full` widths in English and Croatian under light and dark schemes. Storybook runs the matrix at 1440 × 900 and 390 × 844, with its shell navigation context derived from the same `md` breakpoint as the application. An additional browser project forces `prefers-reduced-motion: reduce`, and the contract asserts that skeleton animation is disabled. Loaded-to-loading transitions are measured through the Layout Instability API with an explicit Level A threshold.
 
 ### T-05 — Items initial loading preserves the workflow frame
 
@@ -186,25 +186,25 @@ Authentication bootstrap and login route-code loading now provide separate label
 
 ### T-11 — verification now includes the Items reference workflow
 
-**Rating:** Partial
+**Rating:** Aligned
 
 **Priority:** P1
 
-Overview and Items have Storybook alignment contracts. Overview exercises both supported locales, all page-width preferences, and real compact/desktop browser viewports. Items exercises loaded, initial loading, refreshing, empty, initial error, retained refresh-error, compact mobile loading, small density, retry, delayed visibility, and announcement uniqueness. Phase 7 adds focused transition, retention, error/retry, empty, duplicate-action, and accessibility-ownership coverage for history, filter-definition, relation-option, item-form, deletion, and login surfaces. Theme variants, explicit reduced-motion assertions, CLS thresholds, and the broader enforcement matrix remain open.
+Overview and Items have Storybook alignment and unexpected-layout-shift contracts. Overview exercises both supported locales, both color schemes, all page-width preferences, real compact/desktop browser viewports, and an explicit reduced-motion assertion. Items exercises loaded, initial loading, refreshing, empty, initial error, retained refresh-error, compact mobile loading, small density, retry, delayed visibility, announcement uniqueness, and a bounded CLS threshold. Phase 7's focused transition, retention, error/retry, empty, duplicate-action, and accessibility-ownership coverage remains mandatory for history, filter-definition, relation-option, item-form, deletion, and login surfaces.
 
-**Required remediation:** Add tests alongside each remediation. Remaining state transitions, accessibility ownership, themes, reduced motion, and CLS thresholds must become executable contracts without weakening the existing Level A/B, responsive, density, and localization coverage.
+**Phase 8 enforcement record:** Storybook accessibility violations fail in ordinary desktop/mobile and reduced-motion projects. Async canonical stories declare loading category and geometry metadata. Architecture checks reject undeclared async story contracts, raw MUI skeleton imports, and standalone page-skeleton trees. The component generator and public-component registry in Starter enforce the same classification at the reusable layer, and both repositories provide a loading-state PR checklist.
 
 ## State-transition coverage baseline
 
-| Transition                                    | Best current reference                | Gap                                                                          |
-| --------------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------- |
-| Initial loading → content                     | Overview and Items                    | Overview's width/locale/viewport geometry is covered; broader themes remain. |
-| Initial loading → empty                       | Items and async-state example         | Items is covered; other query boundaries remain inconsistent.                |
-| Initial loading → error                       | Items and Phase 7 overlays            | Covered for current data-owning reference surfaces.                          |
-| Content → refresh → updated                   | Items                                 | Retention, ownership, and state coverage are aligned.                        |
-| Content → refresh error with retained content | Items and Phase 7 overlays            | Covered for history, filter definitions, and relation options.               |
-| Content → mutation → success/error            | Item form, delete confirmation, login | Real context is retained and unsafe duplicate/close actions are prevented.   |
-| Route code → destination                      | Overview and page progress            | Overview is exact; other routes preserve known anchors only.                 |
+| Transition                                    | Best current reference                | Gap                                                                              |
+| --------------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------- |
+| Initial loading → content                     | Overview and Items                    | Width, locale, viewport, theme, motion, geometry, and CLS contracts are covered. |
+| Initial loading → empty                       | Items and async-state example         | Items is covered; other query boundaries remain inconsistent.                    |
+| Initial loading → error                       | Items and Phase 7 overlays            | Covered for current data-owning reference surfaces.                              |
+| Content → refresh → updated                   | Items                                 | Retention, ownership, and state coverage are aligned.                            |
+| Content → refresh error with retained content | Items and Phase 7 overlays            | Covered for history, filter definitions, and relation options.                   |
+| Content → mutation → success/error            | Item form, delete confirmation, login | Real context is retained and unsafe duplicate/close actions are prevented.       |
+| Route code → destination                      | Overview and page progress            | Overview is exact; other routes preserve known anchors only.                     |
 
 ## Remediation order
 
@@ -214,7 +214,7 @@ Overview and Items have Storybook alignment contracts. Overview exercises both s
 4. **Overview return (complete):** refine multiline leaves and verify exact geometry across locale, page width, compact, and desktop scenarios.
 5. **Overlay migration (complete):** item history, filter definition, and relation-option states now have explicit loading, refresh, empty/error, recovery, accessibility, and geometry ownership.
 6. **Busy-action integration (complete):** item form, deletion, and login flows retain context and prevent unsafe duplicate actions through the shared Starter contracts.
-7. **Verification and enforcement:** add the remaining theme, reduced-motion, CLS, authoring, and architecture checks in Phase 8.
+7. **Verification and enforcement (complete):** theme, reduced-motion, CLS, accessibility, localization, authoring, and architecture checks run in the authoritative gates.
 8. **Separate route strategy review:** only after visual contracts are stable, decide which static routes should be eager or lazy.
 
 ## Phase 2 exit record
@@ -230,4 +230,4 @@ Overview and Items have Storybook alignment contracts. Overview exercises both s
 - [x] Phase 5 Items data-workflow pilot remediated and verified.
 - [x] Phase 6 Overview visual leaves and width/locale/viewport geometry remediated and verified.
 - [x] Phase 7 overlay, widget, and busy-action vertical slices remediated and verified.
-- [ ] Remaining cross-theme, reduced-motion, CLS, and enforcement findings remediated in Phase 8.
+- [x] Cross-theme, reduced-motion, CLS, accessibility, localization, authoring, and architecture findings remediated in Phase 8.
