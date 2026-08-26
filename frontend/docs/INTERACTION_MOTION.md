@@ -4,7 +4,7 @@ The application consumes Vireo's shared motion language and owns only shell, rou
 
 ## Application-owned behavior
 
-- The authenticated shell remains mounted while lazy routes load. Route fallback skeletons replace only the page subtree.
+- The authenticated shell remains mounted while lazy routes load. Route fallbacks replace only the page subtree; eager Overview renders without a route transition.
 - Supported navigations use the browser View Transition API for a short page crossfade; unsupported browsers navigate immediately.
 - Browser-history entries restore their own contained page scroll position. New entries start at the top.
 - Mobile navigation and full-screen workflows preserve safe areas and use spatial overlay transitions.

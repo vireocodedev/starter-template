@@ -1,8 +1,17 @@
 # Routing and shell
 
-`app.pages.ts` is the authoritative typed route registry. Each route declares an ID, path, lazy component, access metadata, loading presentation policy, navigation metadata, and path builders where parameters exist. Sidebar and mobile navigation derive from the same registry. Hidden routes remain addressable but do not appear in navigation.
+`app.pages.ts` is the authoritative typed route registry. Each route declares an ID, path, eager or lazy render strategy, access metadata, loading presentation policy, navigation metadata, and path builders where parameters exist. Sidebar and mobile navigation derive from the same registry. Hidden routes remain addressable but do not appear in navigation.
 
-Routes are lazy by default. Registry tests enforce unique IDs and paths. Raw route paths must not be scattered through UI code.
+Routes are lazy by default. Eager rendering is reserved for a small, synchronous, high-frequency route when splitting it would not materially reduce the entry bundle. Registry tests enforce the strategy and loading-policy pairing, unique IDs, and paths. Raw route paths must not be scattered through UI code.
+
+## Render strategy
+
+| Strategy | Use                                                                                                                                                   |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `eager`  | The route is synchronous, frequently reached, and its composition is already required by the entry shell or a fallback.                               |
+| `lazy`   | The route owns feature code, is access-specific or infrequent, or benefits materially from a separate chunk. Intent prefetch warms navigation routes. |
+
+Overview is eager. Its former skeleton imported the complete page composition synchronously, leaving only a tiny icon wrapper in the lazy chunk; removing that request is simpler and faster. Items, Settings, Login, Dev tools, examples, and exceptional routes remain lazy because their feature/access boundaries still provide useful code separation. This decision is explicit registry metadata and can be revisited with bundle evidence.
 
 ## Route-loading policy
 
@@ -15,7 +24,7 @@ Every lazy route must declare exactly one presentation policy. This metadata con
 | `skeleton` | Use a named synchronous composition shared with the loaded route. Never build an independent imitation. |
 | `none`     | Render no waiting surface when silence is intentional and documented.                                   |
 
-Overview is currently the only `skeleton` route because `AppPageHomeView` owns both loaded and loading modes. Other authenticated routes use page-framed progress with their real localized static header. Login uses application-framed progress. The resolver in `AppLoadingSurface.tsx` is exhaustive, and registry tests verify both policy coverage and localized header keys.
+No production route currently uses `skeleton`: eager Overview has no route-code wait. `AppPageHomeView` retains its loaded/loading modes as the verified Level A reference composition in Storybook. Lazy authenticated routes use page-framed progress with their real localized static header. Login uses application-framed progress. The resolver in `AppLoadingSurface.tsx` remains exhaustive so a future route may adopt a named shared skeleton composition when bundle evidence supports it.
 
 ## Stable page-state architecture
 

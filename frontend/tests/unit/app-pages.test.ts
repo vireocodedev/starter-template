@@ -22,20 +22,26 @@ describe("application page registry", () => {
     for (const [id, definition] of Object.entries(APP_PAGE_REGISTRY)) {
       expect(APP_PAGES[id as keyof typeof APP_PAGES]).toBe(definition.path);
       expect(definition.buildPath()).toBe(definition.path);
-      expect(definition.load).toEqual(expect.any(Function));
+      expect(["eager", "lazy"]).toContain(definition.render);
+      if (definition.render === "lazy") expect(definition.load).toEqual(expect.any(Function));
+      else expect(definition.component).toEqual(expect.any(Function));
       expect(["none", "progress", "retain", "skeleton"]).toContain(definition.loading.policy);
     }
   });
 
   it("declares exact skeletons only for routes with shared synchronous composition", () => {
-    const skeletonRoutes = Object.entries(APP_PAGE_REGISTRY)
-      .filter(([, definition]) => definition.loading.policy === "skeleton")
-      .map(([id]) => id);
-
-    expect(skeletonRoutes).toEqual(["home"]);
+    expect(Object.values(APP_PAGE_REGISTRY).map(definition => definition.loading.policy)).not.toContain("skeleton");
     expect(Object.keys(APP_ROUTE_SKELETON_COMPOSITIONS)).toEqual(["overview"]);
-    expect(APP_PAGE_REGISTRY.home.loading).toEqual({ policy: "skeleton", composition: "overview" });
+    expect(APP_PAGE_REGISTRY.home.loading).toEqual({ policy: "none" });
     expect(APP_PAGE_REGISTRY.login.loading).toEqual({ policy: "progress", frame: "application" });
+  });
+
+  it("renders the synchronous Overview eagerly and preserves lazy boundaries for feature routes", () => {
+    expect(APP_PAGE_REGISTRY.home.render).toBe("eager");
+    expect(APP_PAGE_REGISTRY.items.render).toBe("lazy");
+    expect(APP_PAGE_REGISTRY.settings.render).toBe("lazy");
+    expect(APP_PAGE_REGISTRY.devTools.render).toBe("lazy");
+    expect(APP_PAGE_REGISTRY.login.render).toBe("lazy");
   });
 
   it("resolves every progress-header key in every supported locale", () => {
@@ -67,10 +73,10 @@ describe("application page registry", () => {
   });
 
   it("shares one route-module promise between intent prefetch and rendering", async () => {
-    const load = vi.spyOn(APP_PAGE_REGISTRY.home, "load");
+    const load = vi.spyOn(APP_PAGE_REGISTRY.items, "load");
 
-    preloadAppPage(APP_PAGES.home);
-    await loadAppPage("home");
+    preloadAppPage(APP_PAGES.items);
+    await loadAppPage("items");
 
     expect(load).toHaveBeenCalledOnce();
   });

@@ -7,54 +7,51 @@ import { AppShellLayout } from "@/app/shell/layout/AppShellLayout";
 import { AppSessionRecoveryProvider } from "@/app/shell/providers/AppSessionRecoveryProvider";
 import { useAppAuth } from "./shell/hooks/useAppAuth";
 
-const pages = Object.fromEntries(
-  Object.keys(APP_PAGE_REGISTRY).map(id => [id, React.lazy(() => loadAppPage(id as AppPageId))]),
-) as unknown as Record<AppPageId, React.LazyExoticComponent<React.ComponentType>>;
+const lazyPages = Object.fromEntries(
+  Object.entries(APP_PAGE_REGISTRY)
+    .filter(([, definition]) => definition.render === "lazy")
+    .map(([id]) => [id, React.lazy(() => loadAppPage(id as AppPageId))]),
+) as Partial<Record<AppPageId, React.LazyExoticComponent<React.ComponentType>>>;
+
+function AppPageRoute({ id }: { id: AppPageId }) {
+  const definition = APP_PAGE_REGISTRY[id];
+  if (definition.render === "eager") {
+    const Page = definition.component;
+    return <Page />;
+  }
+
+  const Page = lazyPages[id];
+  if (!Page) throw new Error(`Missing lazy page component for ${id}`);
+
+  return (
+    <React.Suspense fallback={<AppRouteFallback loading={definition.loading} />}>
+      <Page />
+    </React.Suspense>
+  );
+}
 
 function AppRoutes() {
   const { user, loading } = useAppAuth();
   if (loading) return <AppBootstrapFallback />;
 
-  const LoginPage = pages.login;
-  const NotFoundPage = pages.notFound;
-
   return (
     <Routes>
-      <Route
-        path={APP_PAGES.login}
-        element={
-          <React.Suspense fallback={<AppRouteFallback loading={APP_PAGE_REGISTRY.login.loading} />}>
-            <LoginPage />
-          </React.Suspense>
-        }
-      />
+      <Route path={APP_PAGES.login} element={<AppPageRoute id="login" />} />
       {user ? (
         <Route element={<AppShellLayout />}>
           {Object.entries(APP_PAGE_REGISTRY)
             .filter(([id, definition]) => definition.access === "AUTHENTICATED" && id !== "notFound")
             .map(([id, definition]) => {
-              const Page = pages[id as AppPageId];
               return (
                 <Route
                   key={id}
                   index={id === "home"}
                   path={id === "home" ? undefined : definition.path}
-                  element={
-                    <React.Suspense fallback={<AppRouteFallback loading={definition.loading} />}>
-                      <Page />
-                    </React.Suspense>
-                  }
+                  element={<AppPageRoute id={id as AppPageId} />}
                 />
               );
             })}
-          <Route
-            path="*"
-            element={
-              <React.Suspense fallback={<AppRouteFallback loading={APP_PAGE_REGISTRY.notFound.loading} />}>
-                <NotFoundPage />
-              </React.Suspense>
-            }
-          />
+          <Route path="*" element={<AppPageRoute id="notFound" />} />
         </Route>
       ) : null}
       <Route path="*" element={<Navigate replace to={APP_PAGES.login} />} />

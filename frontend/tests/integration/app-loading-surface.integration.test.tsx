@@ -32,8 +32,8 @@ function renderFallback(loading: AppRouteLoadingPolicy, pageWidth: "md" | "lg" |
 }
 
 describe("AppRouteFallback", () => {
-  it("uses the real page geometry and preferred body width for Overview", async () => {
-    const view = renderFallback(APP_PAGE_REGISTRY.home.loading);
+  it("keeps the exact Overview composition available as a reference skeleton", async () => {
+    const view = renderFallback({ policy: "skeleton", composition: "overview" });
 
     expect(await screen.findByRole("status")).toHaveTextContent("Loading page");
     expect(view.container.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);

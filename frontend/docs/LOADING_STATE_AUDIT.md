@@ -12,7 +12,7 @@
 
 This document is the Phase 2 compliance baseline for the Starter Template frontend. It records every current loading owner, separates route-code loading from data and action loading, assigns geometry expectations, and establishes the application remediation queue.
 
-This phase does not decide whether a route should remain lazy or become eager. It audits the behavior required whenever a route or its content is pending.
+The original audit deliberately separated waiting-state behavior from eager-versus-lazy decisions. The post-Phase 8 strategy follow-up now records that decision while preserving the loading contracts for every route that remains lazy.
 
 ## Rating and priority
 
@@ -46,44 +46,44 @@ The Phase 7 baseline is:
 
 ## Route-code loading inventory
 
-All route modules in `APP_PAGE_REGISTRY` remain loaded through `React.lazy`. The registry now requires an explicit `retain`, `progress`, `skeleton`, or `none` presentation policy independently of that loading strategy.
+Every route in `APP_PAGE_REGISTRY` declares `eager` or `lazy` rendering plus an explicit `retain`, `progress`, `skeleton`, or `none` presentation policy. Overview is eager; the remaining 21 routes retain lazy boundaries.
 
-| Effective route group                 | Route IDs                                                                           | Current fallback                                                                                                        | Geometry                       | Rating  | Priority |
-| ------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------- | -------- |
-| Application bootstrap and login chunk | `login`, plus authentication recovery before route selection                        | Branded application progress with separate labels, one shared boundary, and delayed visible feedback.                   | C, progress-only               | Aligned | —        |
-| Overview route                        | `home`                                                                              | `AppPageHomeView loading`; loaded and loading states share the real header, page body, frame, grid, and card structure. | A                              | Aligned | —        |
-| Progress-only authenticated routes    | `items`, `settings`, `devTools`, every `devTools*` example, `forbidden`, `notFound` | Real shell, page layout, width preference, and localized static header with bounded progress-only content.              | C; stable frame/header anchors | Aligned | —        |
+| Effective route group                 | Route IDs                                                                           | Current fallback                                                                                           | Geometry                       | Rating  | Priority |
+| ------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------ | ------- | -------- |
+| Application bootstrap and login chunk | `login`, plus authentication recovery before route selection                        | Branded application progress with separate labels, one shared boundary, and delayed visible feedback.      | C, progress-only               | Aligned | —        |
+| Eager Overview                        | `home`                                                                              | Synchronous page composition; no route-code fallback or skeleton appears.                                  | No wait                        | Aligned | —        |
+| Progress-only authenticated routes    | `items`, `settings`, `devTools`, every `devTools*` example, `forbidden`, `notFound` | Real shell, page layout, width preference, and localized static header with bounded progress-only content. | C; stable frame/header anchors | Aligned | —        |
 
 The progress-only group contains 20 routes. Its fallback preserves the application shell, `AppPageLayout`, the user's page-width preference, localized static header content, and known back navigation. It deliberately does not speculate about destination actions, tables, forms, cards, canvases, or vertical geometry.
 
 ### Required route-policy direction
 
-Every registry entry now declares a policy. A `skeleton` policy remains valid only when the route imports a shared synchronous structure also used by its loaded page; Overview is currently the sole qualifying route.
+Every registry entry declares both render strategy and loading policy. A `skeleton` policy remains valid only when a lazy route imports a shared synchronous structure also used by its loaded page; no production route currently needs that tradeoff.
 
-The later eager-versus-lazy review may remove waits from static routes, but it is deliberately separate from this policy remediation.
+Overview is eager because its exact skeleton already imported the full page structure synchronously, so the route split saved negligible code while creating a visible transition. Other routes remain lazy where feature, access, or infrequent-use boundaries still reduce entry cost. Navigation intent prefetch limits their perceived latency.
 
 ## Application surface inventory
 
-| Surface                          | Wait type and category                     | Current treatment                                                                                                                   | Geometry target    | Rating         | Priority | Owner                      |
-| -------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------- | -------- | -------------------------- |
-| `AppBootstrapFallback`           | Auth/bootstrap; `boundary`                 | Branded full-screen progress through one shared delayed loading boundary.                                                           | C                  | Aligned        | —        | App shell                  |
-| `AppRouteFallback` — Overview    | Route code; `boundary`, `skeleton-capable` | Reuses `AppPageHomeView`; skeletonizes leaves in the real page composition through the shared boundary.                             | A                  | Aligned        | —        | App shell + Overview       |
-| `AppRouteFallback` — progress    | Route code; `boundary`                     | Reuses the page frame, width preference, localized static header, and bounded progress region without invented content.             | C                  | Aligned        | —        | App shell + route registry |
-| `AppPageHomeView loading`        | Route code; `skeleton-capable`             | Reuses real header, width preference, frame, card grid, typography, and localized text geometry with shared skeleton leaves.        | A                  | Aligned        | —        | Overview page              |
-| Items initial query              | Initial data; `skeleton-capable`           | Keeps toolbar, reserved result-count slot, table/list frame, headings, and pagination; delegates unknown rows to the shared table.  | B; A outer anchors | Aligned        | —        | Items feature + Starter UI |
-| Items background refresh         | Refresh; `content-preserving`              | Keeps usable rows and controls; one shared delayed boundary owns busy/status semantics and a decorative two-pixel progress line.    | A                  | Aligned        | —        | Items feature              |
-| Items incremental mobile page    | Pagination; `content-preserving`           | Keeps loaded rows and adds local progress below them.                                                                               | B                  | Aligned        | P2       | Items feature + Starter UI |
-| Items empty result               | Empty                                      | Keeps table region and renders filtered/first-item/no-data copy with contextual actions.                                            | B                  | Aligned        | P2       | Items feature              |
-| Items query error                | Error/recovery                             | Renders first-load failure exclusively inside table content; refresh failure retains rows with an overlaid warning and retry.       | B                  | Aligned        | —        | Items feature              |
-| Item form create/update          | Mutation; `busy-action`                    | Keeps the form and overlay, disables submit, cancel, and close while pending, and prevents duplicate submission.                    | A                  | Aligned        | —        | Item feature + Starter UI  |
-| Item delete confirmation         | Mutation; `busy-action`                    | Keeps the dialog and target visible while its async confirmation runs; rejection re-enables retry and cancel.                       | A                  | Aligned        | —        | Item feature + Starter UI  |
-| Item history overlay             | Initial/refresh data; `skeleton-capable`   | Reuses the real history-entry anatomy, centralizes delay/announcements, retains records on refresh, and exposes retry/empty states. | B; A outer anchors | Aligned        | —        | Item feature + Starter UI  |
-| Entity-filter definition overlay | Initial/refresh data; `boundary`           | Uses one Level C reserved region initially, retains a usable form during refresh/error, and exposes local retry.                    | C initial; A frame | Aligned        | —        | Query-filter feature       |
-| Relation value editor            | Widget query; `content-preserving`         | Keeps the autocomplete and selected values, distinguishes loading/empty/error, and supports retained-data retry.                    | A control frame    | Aligned        | —        | Query-filter feature       |
-| Login submission                 | Mutation; `busy-action`                    | Keeps the login card and fields, prevents duplicate submission, and restores the action with local error feedback.                  | A                  | Aligned        | —        | Login page + Starter UI    |
-| Async data-state example         | Initial data/error; `boundary`             | Demonstrates Suspense success, empty, and error through the standardized delayed `VireoQueryBoundary`.                              | C by default       | Aligned        | —        | Dev tools + Starter UI     |
-| Initialization-readiness example | Initialization; `boundary`                 | Keeps the page and card, replaces the card body with step progress, and delegates lifecycle to the standardized boundary.           | B                  | Aligned        | —        | Dev tools + Starter UI     |
-| Remaining page content           | `static`                                   | No independent data-loading surface was found; only route-code loading applies.                                                     | Not applicable     | Not applicable | —        | Owning route               |
+| Surface                          | Wait type and category                    | Current treatment                                                                                                                   | Geometry target    | Rating         | Priority | Owner                      |
+| -------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------- | -------- | -------------------------- |
+| `AppBootstrapFallback`           | Auth/bootstrap; `boundary`                | Branded full-screen progress through one shared delayed loading boundary.                                                           | C                  | Aligned        | —        | App shell                  |
+| Overview reference composition   | Reference; `boundary`, `skeleton-capable` | Storybook retains `AppPageHomeView` loaded/loading modes as the exact Level A implementation; the eager route does not invoke it.   | A                  | Aligned        | —        | Overview                   |
+| `AppRouteFallback` — progress    | Route code; `boundary`                    | Reuses the page frame, width preference, localized static header, and bounded progress region without invented content.             | C                  | Aligned        | —        | App shell + route registry |
+| `AppPageHomeView loading`        | Reference; `skeleton-capable`             | Reuses real header, width preference, frame, card grid, typography, and localized text geometry with shared skeleton leaves.        | A                  | Aligned        | —        | Overview page              |
+| Items initial query              | Initial data; `skeleton-capable`          | Keeps toolbar, reserved result-count slot, table/list frame, headings, and pagination; delegates unknown rows to the shared table.  | B; A outer anchors | Aligned        | —        | Items feature + Starter UI |
+| Items background refresh         | Refresh; `content-preserving`             | Keeps usable rows and controls; one shared delayed boundary owns busy/status semantics and a decorative two-pixel progress line.    | A                  | Aligned        | —        | Items feature              |
+| Items incremental mobile page    | Pagination; `content-preserving`          | Keeps loaded rows and adds local progress below them.                                                                               | B                  | Aligned        | P2       | Items feature + Starter UI |
+| Items empty result               | Empty                                     | Keeps table region and renders filtered/first-item/no-data copy with contextual actions.                                            | B                  | Aligned        | P2       | Items feature              |
+| Items query error                | Error/recovery                            | Renders first-load failure exclusively inside table content; refresh failure retains rows with an overlaid warning and retry.       | B                  | Aligned        | —        | Items feature              |
+| Item form create/update          | Mutation; `busy-action`                   | Keeps the form and overlay, disables submit, cancel, and close while pending, and prevents duplicate submission.                    | A                  | Aligned        | —        | Item feature + Starter UI  |
+| Item delete confirmation         | Mutation; `busy-action`                   | Keeps the dialog and target visible while its async confirmation runs; rejection re-enables retry and cancel.                       | A                  | Aligned        | —        | Item feature + Starter UI  |
+| Item history overlay             | Initial/refresh data; `skeleton-capable`  | Reuses the real history-entry anatomy, centralizes delay/announcements, retains records on refresh, and exposes retry/empty states. | B; A outer anchors | Aligned        | —        | Item feature + Starter UI  |
+| Entity-filter definition overlay | Initial/refresh data; `boundary`          | Uses one Level C reserved region initially, retains a usable form during refresh/error, and exposes local retry.                    | C initial; A frame | Aligned        | —        | Query-filter feature       |
+| Relation value editor            | Widget query; `content-preserving`        | Keeps the autocomplete and selected values, distinguishes loading/empty/error, and supports retained-data retry.                    | A control frame    | Aligned        | —        | Query-filter feature       |
+| Login submission                 | Mutation; `busy-action`                   | Keeps the login card and fields, prevents duplicate submission, and restores the action with local error feedback.                  | A                  | Aligned        | —        | Login page + Starter UI    |
+| Async data-state example         | Initial data/error; `boundary`            | Demonstrates Suspense success, empty, and error through the standardized delayed `VireoQueryBoundary`.                              | C by default       | Aligned        | —        | Dev tools + Starter UI     |
+| Initialization-readiness example | Initialization; `boundary`                | Keeps the page and card, replaces the card body with step progress, and delegates lifecycle to the standardized boundary.           | B                  | Aligned        | —        | Dev tools + Starter UI     |
+| Remaining page content           | `static`                                  | No independent data-loading surface was found; only route-code loading applies.                                                     | Not applicable     | Not applicable | —        | Owning route               |
 
 ## Detailed findings
 
@@ -93,9 +93,9 @@ The later eager-versus-lazy review may remove waits from static routes, but it i
 
 **Priority:** Remediated in Phase 4
 
-Every route remains lazy but now declares its presentation policy in `APP_PAGE_REGISTRY`. `AppRouteFallback` exhaustively resolves that metadata without making eager-versus-lazy decisions.
+Every route declares render strategy and presentation policy in `APP_PAGE_REGISTRY`. `AppPageRoute` renders eager routes directly and gives only lazy routes a Suspense boundary; `AppRouteFallback` exhaustively resolves their waiting presentation.
 
-**Remediation record:** The registry requires presentation-only policy metadata and the route boundary resolves it exhaustively. Eager-versus-lazy strategy remains separate.
+**Remediation record:** The registry makes strategy reviewable and testable. Overview is eager; feature and access-specific routes stay lazy with intent prefetch and explicit fallbacks.
 
 ### T-02 — unknown route structures use progress only
 
@@ -204,7 +204,7 @@ Overview and Items have Storybook alignment and unexpected-layout-shift contract
 | Content → refresh → updated                   | Items                                 | Retention, ownership, and state coverage are aligned.                            |
 | Content → refresh error with retained content | Items and Phase 7 overlays            | Covered for history, filter definitions, and relation options.                   |
 | Content → mutation → success/error            | Item form, delete confirmation, login | Real context is retained and unsafe duplicate/close actions are prevented.       |
-| Route code → destination                      | Overview and page progress            | Overview is exact; other routes preserve known anchors only.                     |
+| Route code → destination                      | Eager Overview and page progress      | Overview has no route wait; lazy routes preserve known anchors while loading.    |
 
 ## Remediation order
 
@@ -215,17 +215,17 @@ Overview and Items have Storybook alignment and unexpected-layout-shift contract
 5. **Overlay migration (complete):** item history, filter definition, and relation-option states now have explicit loading, refresh, empty/error, recovery, accessibility, and geometry ownership.
 6. **Busy-action integration (complete):** item form, deletion, and login flows retain context and prevent unsafe duplicate actions through the shared Starter contracts.
 7. **Verification and enforcement (complete):** theme, reduced-motion, CLS, accessibility, localization, authoring, and architecture checks run in the authoritative gates.
-8. **Separate route strategy review:** only after visual contracts are stable, decide which static routes should be eager or lazy.
+8. **Separate route strategy review (complete):** Overview is eager; routes with meaningful feature, access, or infrequent-use boundaries remain lazy and prefetch on intent.
 
 ## Phase 2 exit record
 
-- [x] All 22 lazy routes inventoried.
+- [x] All 22 routes inventoried; one eager and 21 lazy strategies are explicit.
 - [x] Route-code, initial-data, refresh, pagination, mutation, empty, and error states separated.
 - [x] Application loading surfaces classified.
 - [x] Geometry targets assigned.
 - [x] Accessibility and announcement ownership gaps recorded.
 - [x] Remediation priorities and repository owners assigned.
-- [x] Eager-versus-lazy decisions explicitly deferred.
+- [x] Eager-versus-lazy strategy reviewed after visual contracts stabilized.
 - [x] Phase 4 route-policy and page-loading convention findings remediated.
 - [x] Phase 5 Items data-workflow pilot remediated and verified.
 - [x] Phase 6 Overview visual leaves and width/locale/viewport geometry remediated and verified.

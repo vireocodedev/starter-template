@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { AppPageHome } from "@/pages/home/AppPageHome";
 import { AppPageHomeView } from "@/pages/home/AppPageHomeView";
 
 export type AppPageAccess = "PUBLIC" | "AUTHENTICATED";
@@ -25,17 +26,23 @@ export type AppRouteLoadingPolicy =
   | { policy: "progress"; frame: "application" | "page"; header?: AppRouteLoadingHeader }
   | { policy: "skeleton"; composition: AppRouteSkeletonComposition };
 
-type AppPageDefinition = {
+type AppPageDefinitionBase = {
   access: AppPageAccess;
   buildPath: () => string;
-  load: () => Promise<AppPageModule>;
   loading: AppRouteLoadingPolicy;
   navigation?: { icon: AppNavigationIcon; labelKey: AppNavigationIcon; order: number };
   path: string;
 };
 
-function page<const T extends AppPageDefinition>(definition: T): T {
-  return definition;
+type AppPageDefinition = AppPageDefinitionBase &
+  ({ render: "eager"; component: ComponentType } | { render: "lazy"; load: () => Promise<AppPageModule> });
+
+function eagerPage<const T extends AppPageDefinitionBase & { component: ComponentType }>(definition: T) {
+  return { ...definition, render: "eager" as const };
+}
+
+function lazyPage<const T extends AppPageDefinitionBase & { load: () => Promise<AppPageModule> }>(definition: T) {
+  return { ...definition, render: "lazy" as const };
 }
 
 function pageProgress(
@@ -53,18 +60,16 @@ function pageProgress(
 }
 
 const APPLICATION_PROGRESS = { policy: "progress", frame: "application" } as const satisfies AppRouteLoadingPolicy;
-const OVERVIEW_SKELETON = { policy: "skeleton", composition: "overview" } as const satisfies AppRouteLoadingPolicy;
-
 export const APP_PAGE_REGISTRY = {
-  home: page({
+  home: eagerPage({
     access: "AUTHENTICATED",
-    loading: OVERVIEW_SKELETON,
+    component: AppPageHome,
+    loading: { policy: "none" },
     path: "/",
     buildPath: () => "/",
     navigation: { icon: "OVERVIEW", labelKey: "OVERVIEW", order: 10 },
-    load: async () => ({ default: (await import("@/pages/home/AppPageHome")).AppPageHome }),
   }),
-  items: page({
+  items: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress("items"),
     path: "/items",
@@ -72,7 +77,7 @@ export const APP_PAGE_REGISTRY = {
     navigation: { icon: "ITEMS", labelKey: "ITEMS", order: 20 },
     load: async () => ({ default: (await import("@/pages/items/AppPageItems")).AppPageItems }),
   }),
-  settings: page({
+  settings: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress("settings"),
     path: "/settings",
@@ -80,7 +85,7 @@ export const APP_PAGE_REGISTRY = {
     navigation: { icon: "SETTINGS", labelKey: "SETTINGS", order: 30 },
     load: async () => ({ default: (await import("@/pages/settings/AppPageSettings")).AppPageSettings }),
   }),
-  devTools: page({
+  devTools: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress("devTools"),
     path: "/dev-tools",
@@ -88,7 +93,7 @@ export const APP_PAGE_REGISTRY = {
     navigation: { icon: "DEV_TOOLS", labelKey: "DEV_TOOLS", order: 40 },
     load: async () => ({ default: (await import("@/pages/dev-tools/AppPageDevTools")).AppPageDevTools }),
   }),
-  devToolsBasicPage: page({
+  devToolsBasicPage: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress("basicPage", "header.title", "header.description", "/dev-tools", "header.back"),
     path: "/dev-tools/page-examples/basic-page",
@@ -97,7 +102,7 @@ export const APP_PAGE_REGISTRY = {
       default: (await import("@/pages/dev-tools/page-examples/basic-page/AppPageBasicPage")).AppPageBasicPage,
     }),
   }),
-  devToolsBasicFormPage: page({
+  devToolsBasicFormPage: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress("basicForm", "header.title", "header.description", "/dev-tools", "header.back"),
     path: "/dev-tools/page-examples/basic-form-page",
@@ -107,7 +112,7 @@ export const APP_PAGE_REGISTRY = {
         .AppPageBasicFormPage,
     }),
   }),
-  devToolsMultiStepFormPage: page({
+  devToolsMultiStepFormPage: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress("multiStepForm", "header.title", "header.description", "/dev-tools", "header.back"),
     path: "/dev-tools/page-examples/multi-step-form-page",
@@ -117,7 +122,7 @@ export const APP_PAGE_REGISTRY = {
         .AppPageMultiStepFormPage,
     }),
   }),
-  devToolsRelatedRecordCreation: page({
+  devToolsRelatedRecordCreation: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress(
       "relatedRecordCreation",
@@ -133,7 +138,7 @@ export const APP_PAGE_REGISTRY = {
         .AppPageRelatedRecordCreation,
     }),
   }),
-  devToolsEntityQueryFilters: page({
+  devToolsEntityQueryFilters: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress(
       "entityQueryFiltersExample",
@@ -149,7 +154,7 @@ export const APP_PAGE_REGISTRY = {
         .AppPageEntityQueryFilters,
     }),
   }),
-  devToolsAdvancedFieldForm: page({
+  devToolsAdvancedFieldForm: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress(
       "devToolsExamples",
@@ -165,7 +170,7 @@ export const APP_PAGE_REGISTRY = {
         .AppPageAdvancedFieldForm,
     }),
   }),
-  devToolsUrlSynchronizedState: page({
+  devToolsUrlSynchronizedState: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress(
       "devToolsExamples",
@@ -181,7 +186,7 @@ export const APP_PAGE_REGISTRY = {
         .AppPageUrlSynchronizedState,
     }),
   }),
-  devToolsAsyncDataStates: page({
+  devToolsAsyncDataStates: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress(
       "devToolsExamples",
@@ -197,7 +202,7 @@ export const APP_PAGE_REGISTRY = {
         .AppPageAsyncDataStates,
     }),
   }),
-  devToolsOfflineCrud: page({
+  devToolsOfflineCrud: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress(
       "devToolsExamples",
@@ -212,7 +217,7 @@ export const APP_PAGE_REGISTRY = {
       default: (await import("@/pages/dev-tools/page-examples/offline-crud/AppPageOfflineCrud")).AppPageOfflineCrud,
     }),
   }),
-  devToolsRealtimeUpdates: page({
+  devToolsRealtimeUpdates: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress(
       "devToolsExamples",
@@ -228,7 +233,7 @@ export const APP_PAGE_REGISTRY = {
         .AppPageRealtimeUpdates,
     }),
   }),
-  devToolsDragDropBoard: page({
+  devToolsDragDropBoard: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress(
       "devToolsExamples",
@@ -244,7 +249,7 @@ export const APP_PAGE_REGISTRY = {
         .AppPageDragDropBoard,
     }),
   }),
-  devToolsInfiniteCanvas: page({
+  devToolsInfiniteCanvas: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress(
       "devToolsExamples",
@@ -260,7 +265,7 @@ export const APP_PAGE_REGISTRY = {
         .AppPageInfiniteCanvas,
     }),
   }),
-  devToolsRegionalFormatting: page({
+  devToolsRegionalFormatting: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress(
       "devToolsExamples",
@@ -276,7 +281,7 @@ export const APP_PAGE_REGISTRY = {
         .AppPageRegionalFormatting,
     }),
   }),
-  devToolsBrowserCapabilities: page({
+  devToolsBrowserCapabilities: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress(
       "devToolsExamples",
@@ -292,7 +297,7 @@ export const APP_PAGE_REGISTRY = {
         .AppPageBrowserCapabilities,
     }),
   }),
-  devToolsInitializationReadiness: page({
+  devToolsInitializationReadiness: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress(
       "devToolsExamples",
@@ -308,28 +313,28 @@ export const APP_PAGE_REGISTRY = {
         .AppPageInitializationReadiness,
     }),
   }),
-  forbidden: page({
+  forbidden: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress("forbidden"),
     path: "/forbidden",
     buildPath: () => "/forbidden",
     load: async () => ({ default: (await import("@/pages/forbidden/AppPageForbidden")).AppPageForbidden }),
   }),
-  notFound: page({
+  notFound: lazyPage({
     access: "AUTHENTICATED",
     loading: pageProgress("notFound"),
     path: "/not-found",
     buildPath: () => "/not-found",
     load: async () => ({ default: (await import("@/pages/not-found/AppPageNotFound")).AppPageNotFound }),
   }),
-  login: page({
+  login: lazyPage({
     access: "PUBLIC",
     loading: APPLICATION_PROGRESS,
     path: "/login",
     buildPath: () => "/login",
     load: async () => ({ default: (await import("@/pages/login/AppPageLogin")).AppPageLogin }),
   }),
-} as const;
+} as const satisfies Record<string, AppPageDefinition>;
 
 export type AppPageId = keyof typeof APP_PAGE_REGISTRY;
 
@@ -337,10 +342,13 @@ const pageModuleCache = new Map<AppPageId, Promise<AppPageModule>>();
 
 /** Loads each route module once and reuses the promise for intent prefetch and React.lazy. */
 export function loadAppPage(id: AppPageId): Promise<AppPageModule> {
+  const definition = APP_PAGE_REGISTRY[id];
+  if (definition.render === "eager") return Promise.resolve({ default: definition.component });
+
   const cached = pageModuleCache.get(id);
   if (cached) return cached;
 
-  const pending = APP_PAGE_REGISTRY[id].load();
+  const pending = definition.load();
   pageModuleCache.set(id, pending);
   void pending.catch(() => pageModuleCache.delete(id));
   return pending;
@@ -349,7 +357,7 @@ export function loadAppPage(id: AppPageId): Promise<AppPageModule> {
 /** Warms a route chunk from navigation intent without delaying navigation. */
 export function preloadAppPage(path: string): void {
   const match = Object.entries(APP_PAGE_REGISTRY).find(([, definition]) => definition.path === path);
-  if (match) void loadAppPage(match[0] as AppPageId);
+  if (match?.[1].render === "lazy") void loadAppPage(match[0] as AppPageId);
 }
 
 export const APP_PAGES = Object.fromEntries(

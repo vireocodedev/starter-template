@@ -12,7 +12,7 @@ Page skeletons MUST be modes of the real page composition. Standalone `*PageSkel
 
 Items is the reference data-workflow matrix. In addition to the canonical states, it exposes `RefreshError` to prove that stale rows remain usable when a background request fails. Its alignment contract compares the real loaded and initial-loading page frame, toolbar, table region, and reserved result-count geometry.
 
-Overview is the reference Level A route-skeleton contract. Its alignment matrix renders one shared loaded/loading composition for English and Croatian, light and dark color schemes, and every supported page-width preference (`md`, `lg`, `xl`, and `full`), then compares the real header, frame, title, and card rectangles. Skeleton text uses the loaded copy's real typography and wrapping rather than a separately estimated line layout.
+Overview is the reference Level A skeleton composition, retained in Storybook even though the static production route is now eager and has no route-code wait. Its alignment matrix renders one shared loaded/loading composition for English and Croatian, light and dark color schemes, and every supported page-width preference (`md`, `lg`, `xl`, and `full`), then compares the real header, frame, title, and card rectangles. Skeleton text uses the loaded copy's real typography and wrapping rather than a separately estimated line layout.
 
 Alignment stories initiate loading programmatically and observe the browser's Layout Instability API so recent user input cannot mask a shift. Exact Level A surfaces use a `0.001` maximum unexpected CLS score; bounded Level B surfaces use `0.01`. The rectangle contract remains alongside CLS because it identifies which anchor broke, while CLS captures movement visible to the user.
 

@@ -31,7 +31,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Overview is a static route with a synchronously shared Level A loading composition. Refreshing, Empty, and Error stories are intentionally omitted because the page owns no asynchronous data state.",
+          "Overview is an eager static route with no production loading state. Its loaded/loading modes remain here as the verified Level A reference composition. Refreshing, Empty, and Error are intentionally omitted because the page owns no asynchronous data state.",
       },
     },
   },
