@@ -13,6 +13,11 @@ export async function measureUnexpectedLayoutShift(transition: () => Promise<voi
     throw new Error("This browser does not expose the Layout Instability API.");
   }
 
+  // Flush layout work from the story's scenario setup so the observer owns only
+  // the transition supplied by the caller.
+  await nextAnimationFrame();
+  await nextAnimationFrame();
+
   let score = 0;
   const observer = new PerformanceObserver(list => {
     for (const entry of list.getEntries() as LayoutShiftEntry[]) {
