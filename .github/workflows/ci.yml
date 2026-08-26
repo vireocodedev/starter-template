@@ -57,6 +57,15 @@ jobs:
       - name: Run authoritative verification
         run: ./scripts/verify.sh silent
 
+      - name: Upload verification timing evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: verification-timing-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .verification-evidence/latest.json
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Validate deployment descriptor
         env:
           POSTGRES_PASSWORD: ci-only-password

@@ -19,5 +19,6 @@ frontend/playwright-report/
 frontend/storybook-static/
 frontend/test-results/
 .support-evidence/
+.verification-evidence/
 *.iml
 .DS_Store
