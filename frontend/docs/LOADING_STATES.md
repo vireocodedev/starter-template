@@ -5,6 +5,8 @@ Vireo Starter Template follows the normative
 
 The canonical standard is maintained in Vireo Starter so reusable UI contracts and consuming application conventions have one source of truth. Template route policies, page compositions, feature loading states, and tests MUST comply with that standard. Application-specific decisions and documented exceptions remain in this repository.
 
+The [Phase 2 template audit](LOADING_STATE_AUDIT.md) records the current route and feature baseline, compliance gaps, geometry targets, and prioritized remediation queue.
+
 The current adoption roadmap is:
 
 1. Audit routes and async-capable visual surfaces.
