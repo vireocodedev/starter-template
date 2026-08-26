@@ -57,7 +57,7 @@
     "@vireocodedev/starter-localization": "^3.0.0",
     "@vireocodedev/starter-queryengine": "^5.0.0",
     "@vireocodedev/starter-shell": "^4.0.0",
-    "@vireocodedev/starter-ui": "^7.0.0",
+    "@vireocodedev/starter-ui": "^7.1.0",
     "axios": "^1.7.9",
     "dayjs": "^1.11.23",
     "i18next": "^26.4.0",
