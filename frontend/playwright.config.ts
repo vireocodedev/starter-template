@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const useLocalStarter = process.env.USE_LOCAL_STARTER_SOURCE === "true";
 const webServerStartupTimeout = 90_000;
-const frontendDevCommand = useLocalStarter ? "npm run dev:local-starter" : "npm run dev";
+const frontendDevCommand = useLocalStarter ? "corepack npm run dev:local-starter" : "corepack npm run dev";
 
 export default defineConfig({
   testDir: "./tests/e2e",

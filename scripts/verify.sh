@@ -10,14 +10,14 @@ fi
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repository_root"
 
-frontend_verify_command="cd frontend && npm run verify"
+frontend_verify_command="cd frontend && corepack npm run verify"
 if $silent; then
   frontend_verify_command+=" -- silent"
 fi
 
 steps=(
   "Frontend contract|${frontend_verify_command}"
-  "Browser smoke tests|cd frontend && npm run test:e2e"
+  "Browser smoke tests|cd frontend && corepack npm run test:e2e"
   "JVM build|./gradlew build"
 )
 

@@ -16,24 +16,26 @@ frontend_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$frontend_root"
 
 if [[ "$starter_mode" == "local-starter" ]]; then
-  npm run starter:mode:local >/dev/null
-  test_command="npm run test:local-starter"
-  storybook_test_command="npm run test:storybook:local-starter"
-  application_build_command="npm run build:local-starter"
-  storybook_build_command="npm run build-storybook:local-starter"
+  corepack npm run starter:mode:local >/dev/null
+  test_command="corepack npm run test:local-starter"
+  storybook_test_command="corepack npm run test:storybook:local-starter"
+  application_build_command="corepack npm run build:local-starter"
+  storybook_build_command="corepack npm run build-storybook:local-starter"
 else
-  npm run starter:mode:published >/dev/null
-  test_command="npm run test"
-  storybook_test_command="npm run test:storybook"
-  application_build_command="npm run build"
-  storybook_build_command="npm run build-storybook"
+  corepack npm run starter:mode:published >/dev/null
+  test_command="corepack npm run test"
+  storybook_test_command="corepack npm run test:storybook"
+  application_build_command="corepack npm run build"
+  storybook_build_command="corepack npm run build-storybook"
 fi
 
 steps=(
-  "Published Starter boundary|npm run starter:boundary:check"
-  "Architecture|npm run architecture:check"
-  "Formatting|npm run format:check"
-  "Lint|npm run lint"
+  "Toolchain policy|corepack npm run toolchain:check"
+  "Workflow security|corepack npm run workflow:check"
+  "Published Starter boundary|corepack npm run starter:boundary:check"
+  "Architecture|corepack npm run architecture:check"
+  "Formatting|corepack npm run format:check"
+  "Lint|corepack npm run lint"
   "Unit and integration tests|${test_command}"
   "Storybook tests|${storybook_test_command}"
   "Application build|${application_build_command}"

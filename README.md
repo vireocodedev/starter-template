@@ -22,8 +22,8 @@ set -a && source .env && set +a
 
 # Terminal 2: React PWA
 cd frontend
-npm ci
-npm run dev
+corepack npm ci
+corepack npm run dev
 ```
 
 Open <http://localhost:3000>. API documentation is available at <http://localhost:8080/swagger-ui.html> only in the `dev` profile.

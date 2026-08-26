@@ -2,7 +2,7 @@
 
 ## Toolchain and packages
 
-Use Java 21, Node.js 24.15 or newer, and npm 12. Configure GitHub Packages as described in the root README, then run `npm ci` in `frontend`.
+Use Java 21, Node.js 24.15 or newer, and npm 12. Configure GitHub Packages as described in the root README, then run `corepack npm ci` in `frontend`.
 
 ## Development gate
 

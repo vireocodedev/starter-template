@@ -7,10 +7,10 @@ Normal development consumes released `@vireocodedev/starter-*` packages and the 
 1. Create a GitHub token with `read:packages`.
 2. Export `GITHUB_ACTOR`, `GITHUB_TOKEN`, and `NODE_AUTH_TOKEN`.
 3. Copy `.env.example` to `.env` and choose H2 or PostgreSQL.
-4. Run `npm ci` in `frontend`.
-5. Start `./gradlew bootRun` and `npm run dev` in separate terminals.
+4. Run `corepack npm ci` in `frontend`.
+5. Start `./gradlew bootRun` and `corepack npm run dev` in separate terminals.
 
-The repository also commits a VS Code **Full stack (published Starter)** launch compound. It compiles JVM classes through Gradle so generated MapStruct implementations are present, launches Spring Boot with the `dev` profile and H2 configuration, and starts the published-package frontend. Run `npm ci` in `frontend` before using it.
+The repository also commits a VS Code **Full stack (published Starter)** launch compound. It compiles JVM classes through Gradle so generated MapStruct implementations are present, launches Spring Boot with the `dev` profile and H2 configuration, and starts the published-package frontend. Run `corepack npm ci` in `frontend` before using it.
 
 The `dev` Spring profile is the only profile that seeds the documented demo accounts. Never activate it in a public deployment.
 

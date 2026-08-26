@@ -18,9 +18,9 @@ The lockfiles are the reproducibility boundary. Updating a supported package ran
 
 ## Local Starter development
 
-Use `npm run dev:local-starter` only when changing Starter and this template together. Use `npm run dev` to prove the published-consumer experience. See [Developing against local Starter libraries](local-starter-development.md) for the complete mode matrix.
+Use `corepack npm run dev:local-starter` only when changing Starter and this template together. Use `corepack npm run dev` to prove the published-consumer experience. See [Developing against local Starter libraries](local-starter-development.md) for the complete mode matrix.
 
-`npm run starter:boundary:check` prevents published commands and TypeScript configuration from silently depending on a sibling Starter checkout.
+`corepack npm run starter:boundary:check` prevents published commands and TypeScript configuration from silently depending on a sibling Starter checkout.
 
 ## Bundle budgets
 

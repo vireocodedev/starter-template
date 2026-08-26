@@ -18,14 +18,14 @@ Published frontend packages come from GitHub Packages. Export a token with `read
 ```bash
 export NODE_AUTH_TOKEN=<github-token>
 cd starter-template/frontend
-npm ci
+corepack npm ci
 ```
 
 Start the frontend with:
 
 ```bash
 cd starter-template/frontend
-npm run dev
+corepack npm run dev
 ```
 
 This mode:
@@ -34,14 +34,14 @@ This mode:
 - selects the published Starter TypeScript project automatically;
 - makes VS Code and command-line TypeScript validate the published API.
 
-Normal tests, Storybook, E2E, builds, and `npm run verify` follow the same published-package rule. The presence of an adjacent `starter` checkout never changes a default command implicitly.
+Normal tests, Storybook, E2E, builds, and `corepack npm run verify` follow the same published-package rule. The presence of an adjacent `starter` checkout never changes a default command implicitly.
 
 The JVM build follows the same rule. Published Vireo artifacts are resolved from GitHub Packages, so configure credentials with `GITHUB_ACTOR` and either `VIREO_PACKAGES_TOKEN` or `GITHUB_TOKEN`, or with `gpr.user` and `gpr.key` in your Gradle user properties. `VIREO_PACKAGES_TOKEN` takes precedence when present. A plain Gradle command never reads artifacts from Maven Local.
 
 You can select the published TypeScript mode without starting Vite:
 
 ```bash
-npm run starter:mode:published
+corepack npm run starter:mode:published
 ```
 
 ## Local Starter development
@@ -50,7 +50,7 @@ When changing Starter and testing those changes in the template, run only:
 
 ```bash
 cd starter-template/frontend
-npm run dev:local-starter
+corepack npm run dev:local-starter
 ```
 
 This mode:
@@ -61,7 +61,7 @@ This mode:
 - selects the local Starter TypeScript project automatically;
 - deduplicates shared React, Emotion, MUI, TanStack, Day.js, Sonner, and Zod runtimes.
 
-Do not run Starter's monorepo `npm run dev` alongside this command. The template's Vite process owns the required source watcher.
+Do not run Starter's monorepo `corepack npm run dev` alongside this command. The template's Vite process owns the required source watcher.
 
 For the JVM libraries, first publish the Starter artifacts to Maven Local and then opt the template build into that repository explicitly:
 
@@ -78,7 +78,7 @@ The `useLocalStarter` Gradle property affects only JVM dependency resolution. Wi
 You can select local TypeScript resolution without starting Vite:
 
 ```bash
-npm run starter:mode:local
+corepack npm run starter:mode:local
 ```
 
 ## How VS Code TypeScript resolution works
@@ -100,14 +100,14 @@ For Starter UI:
 
 ```bash
 cd starter
-npm run build --workspace @vireocodedev/starter-ui
+corepack npm run build --workspace @vireocodedev/starter-ui
 ```
 
 For changes across several Starter packages:
 
 ```bash
 cd starter
-npm run build
+corepack npm run build
 ```
 
 The template's local TypeScript mode will read the refreshed declarations automatically.
@@ -118,10 +118,10 @@ Use dist mode when validating the actual JavaScript and declarations emitted by 
 
 ```bash
 cd starter
-npm run build
+corepack npm run build
 
 cd ../starter-template/frontend
-npm run dev:local-starter:dist
+corepack npm run dev:local-starter:dist
 ```
 
 This is an integration check, not the normal local development loop.
@@ -132,43 +132,43 @@ Validate the template against local Starter declarations and emitted output with
 
 ```bash
 cd starter-template/frontend
-npm run typecheck:local-starter
-npm run build:local-starter
-npm run verify:local-starter
+corepack npm run typecheck:local-starter
+corepack npm run build:local-starter
+corepack npm run verify:local-starter
 ```
 
 Use the normal verification workflow when validating a release-compatible template:
 
 ```bash
-npm run verify
+corepack npm run verify
 ```
 
 `verify` always selects and exercises published packages. `verify:local-starter` is the explicit integration suite for an adjacent Starter checkout.
 
 ## Command summary
 
-| Command                          | Starter runtime        | TypeScript API     |
-| -------------------------------- | ---------------------- | ------------------ |
-| `npm run dev`                    | Published packages     | Published packages |
-| `npm run dev:local-starter`      | Local source           | Local declarations |
-| `npm run dev:local-starter:dist` | Local emitted output   | Local declarations |
-| `npm run starter:mode:published` | Does not start runtime | Published packages |
-| `npm run starter:mode:local`     | Does not start runtime | Local declarations |
-| `npm run build`                  | Published packages     | Published packages |
-| `npm run build:local-starter`    | Local emitted output   | Local declarations |
-| `npm run test`                   | Published packages     | Published packages |
-| `npm run test:local-starter`     | Local emitted output   | Local declarations |
-| `npm run storybook`              | Published packages     | Published packages |
-| `npm run storybook:local-starter` | Local source          | Local declarations |
-| `npm run test:e2e`               | Published packages     | Published packages |
-| `npm run test:e2e:local-starter` | Local source           | Local declarations |
-| `npm run verify`                 | Published packages     | Published packages |
-| `npm run verify:local-starter`   | Local emitted output   | Local declarations |
+| Command                                    | Starter runtime        | TypeScript API     |
+| ------------------------------------------ | ---------------------- | ------------------ |
+| `corepack npm run dev`                     | Published packages     | Published packages |
+| `corepack npm run dev:local-starter`       | Local source           | Local declarations |
+| `corepack npm run dev:local-starter:dist`  | Local emitted output   | Local declarations |
+| `corepack npm run starter:mode:published`  | Does not start runtime | Published packages |
+| `corepack npm run starter:mode:local`      | Does not start runtime | Local declarations |
+| `corepack npm run build`                   | Published packages     | Published packages |
+| `corepack npm run build:local-starter`     | Local emitted output   | Local declarations |
+| `corepack npm run test`                    | Published packages     | Published packages |
+| `corepack npm run test:local-starter`      | Local emitted output   | Local declarations |
+| `corepack npm run storybook`               | Published packages     | Published packages |
+| `corepack npm run storybook:local-starter` | Local source           | Local declarations |
+| `corepack npm run test:e2e`                | Published packages     | Published packages |
+| `corepack npm run test:e2e:local-starter`  | Local source           | Local declarations |
+| `corepack npm run verify`                  | Published packages     | Published packages |
+| `corepack npm run verify:local-starter`    | Local emitted output   | Local declarations |
 
 The equivalent JVM distinction is:
 
-| Command                                      | Starter JVM artifacts |
-| -------------------------------------------- | --------------------- |
-| `./gradlew build`                            | Published packages    |
-| `./gradlew build -PuseLocalStarter=true`     | Maven Local           |
-| `./gradlew bootRun -PuseLocalStarter=true`   | Maven Local           |
+| Command                                    | Starter JVM artifacts |
+| ------------------------------------------ | --------------------- |
+| `./gradlew build`                          | Published packages    |
+| `./gradlew build -PuseLocalStarter=true`   | Maven Local           |
+| `./gradlew bootRun -PuseLocalStarter=true` | Maven Local           |
