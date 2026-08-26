@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useVireoMutation } from "@vireocodedev/starter-ui/tanstack-query";
 import { useItemTranslation } from "../localization/use-item-translation";
 import type { Item } from "../models/Item";
+import { insertItemIntoUnfilteredSearchQueries } from "../services/itemQueryCache";
 
 export function useItemCreateMutation() {
   const { t } = useItemTranslation();
@@ -12,9 +13,10 @@ export function useItemCreateMutation() {
   return useVireoMutation<Item, Error, Item>({
     mutationKey: ItemMutationKeys.create,
     mutationFn: itemApi.create.bind(itemApi),
-    successMessage: t("messages.created"),
+    successMessage: item => t("messages.created", { name: item.name }),
     errorMessage: t("messages.createFailed"),
-    onSuccess: () => {
+    onSuccess: item => {
+      insertItemIntoUnfilteredSearchQueries(queryClient, item);
       void queryClient.invalidateQueries({ queryKey: ItemQueryKeys.all });
     },
   });

@@ -7,6 +7,7 @@ import { createTheme } from "@mui/material/styles";
 import type {} from "@mui/material/themeCssVarsAugmentation";
 
 export const APP_THEME = createTheme({
+  appMotion: APP_THEME_TOKENS.motion,
   cssVariables: {
     colorSchemeSelector: "data",
   },
@@ -15,6 +16,26 @@ export const APP_THEME = createTheme({
     dark: APP_THEME_DARK_COLOR_SCHEME,
   },
   components: APP_THEME_COMPONENTS,
+  motion: {
+    reducedMotion: "system",
+  },
   shape: APP_THEME_TOKENS.shape,
+  transitions: {
+    duration: {
+      shortest: APP_THEME_TOKENS.motion.duration.micro,
+      shorter: APP_THEME_TOKENS.motion.duration.exit,
+      short: APP_THEME_TOKENS.motion.duration.standard,
+      standard: APP_THEME_TOKENS.motion.duration.standard,
+      complex: APP_THEME_TOKENS.motion.duration.emphasized,
+      enteringScreen: APP_THEME_TOKENS.motion.duration.enter,
+      leavingScreen: APP_THEME_TOKENS.motion.duration.exit,
+    },
+    easing: {
+      easeInOut: APP_THEME_TOKENS.motion.easing.standard,
+      easeOut: APP_THEME_TOKENS.motion.easing.enter,
+      easeIn: APP_THEME_TOKENS.motion.easing.exit,
+      sharp: APP_THEME_TOKENS.motion.easing.exit,
+    },
+  },
   typography: APP_THEME_TOKENS.typography,
 });

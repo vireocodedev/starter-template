@@ -18,7 +18,23 @@ export default mergeConfig(
               enabled: true,
               headless: true,
               provider: playwright({}),
-              instances: [{ browser: "chromium" }],
+              instances: [
+                { browser: "chromium", name: "desktop", viewport: { height: 900, width: 1440 } },
+                { browser: "chromium", name: "mobile", viewport: { height: 844, width: 390 } },
+              ],
+            },
+          },
+        },
+        {
+          extends: true,
+          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, ".storybook") })],
+          test: {
+            name: "storybook-reduced-motion",
+            browser: {
+              enabled: true,
+              headless: true,
+              provider: playwright({ contextOptions: { reducedMotion: "reduce" } }),
+              instances: [{ browser: "chromium", name: "desktop-reduced", viewport: { height: 900, width: 1440 } }],
             },
           },
         },

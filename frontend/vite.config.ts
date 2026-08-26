@@ -165,7 +165,7 @@ export default defineConfig({
     ...(!IS_STORYBOOK
       ? [
           VitePWA({
-            registerType: "autoUpdate",
+            registerType: "prompt",
             manifest: {
               name: "Vireo Starter App",
               short_name: "Vireo",

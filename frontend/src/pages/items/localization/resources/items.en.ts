@@ -3,6 +3,7 @@ const en = {
     title: "Items",
     description: "A complete responsive CRUD workflow backed by one Starter entity.",
     create: "Create item",
+    createPreview: "Adds one record to this workspace",
   },
   search: { placeholder: "Search by name, description or status", clear: "Clear search" },
   results_one: "{{formattedCount}} result",
@@ -10,8 +11,17 @@ const en = {
   filters: { open: "Filters", clearAll: "Clear all", clearAllLabel: "Clear all filters", title: "Filter items" },
   error: {
     message: "Items could not be loaded. Check the API connection, session, or active filters.",
+    refreshMessage: "Items could not be refreshed. The last available results are still shown.",
+    retry: "Retry",
     edit: "Edit",
     clear: "Clear",
+  },
+  empty: {
+    filtered: "No items match the current search and filters.",
+    first: "This workspace has no items yet.",
+    none: "There are no items to show yet.",
+    clear: "Clear search and filters",
+    create: "Create the first item",
   },
   delete: {
     title: "Delete item?",
@@ -21,6 +31,7 @@ const en = {
   table: {
     table: "Items",
     loadingTable: "Loading items",
+    refreshing: "Refreshing items",
     noData: "No items match this search.",
     showMore: "Show more",
     showLess: "Show less",

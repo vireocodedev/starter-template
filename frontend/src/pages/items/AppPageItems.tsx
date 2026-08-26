@@ -17,6 +17,7 @@ import {
   ItemFormOverlay,
   ItemHistoryOverlay,
   useItemDeleteMutation,
+  usePendingItemUpdateId,
   useItemSearchQuery,
   useItemTableColumns,
   type Item,
@@ -27,18 +28,22 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Chip,
   IconButton,
   InputAdornment,
+  LinearProgress,
   Stack,
   TextField,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import {
   PageOverlay,
   useGuardedOverlayModeSwitch,
   usePageOverlayModes,
   useVireoConfirmation,
+  VireoLoadingRegion,
   VireoResponsiveTable,
   type OverlayRenderers,
   type VireoResponsiveTableFilters,
@@ -47,6 +52,7 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { ITEMS_TRANSLATION_NAMESPACE } from "@/app/app.localization";
+import { APP_THEME_TOKENS } from "@/app/ui/theme/config/theme.tokens";
 
 type ItemOverlayModes = {
   form: { item?: Item };
@@ -57,6 +63,7 @@ type ItemOverlayModes = {
 const ITEM_LIST_STATE_KEY = "items";
 const ITEM_TABLE_LAYERS = { stickyToolbar: 4, stickyRowHeader: 3 } as const;
 const ITEM_TABLE_SX = { flex: 1, height: "100%", minHeight: 0 } as const;
+const ITEM_COMMAND_CONTROL_HEIGHT = { xs: 44, sm: 40 } as const;
 const DEFAULT_TABLE_FILTERS: VireoResponsiveTableFilters = {
   page: 0,
   rowsPerPage: 10,
@@ -77,14 +84,22 @@ type ItemListContentProps = {
   tableSize: "small" | "medium";
   presentation: EntityQueryFilterPresentation;
   onClearQueryFilters: () => void;
+  onClearAllFilters: () => void;
   onRemoveQueryFilter: (index: number) => void;
   onOpenEdit: (item: Item) => void;
+  onOpenCreate: () => void;
   onOpenFilters: () => void;
   onOpenHistory: (item: Item) => void;
   onRequestDelete: (item: Item) => Promise<void>;
 };
 
-const ItemListContent = React.memo(function ItemListContent({
+export type AppPageItemsListState = ReturnType<typeof useItemSearchQuery>;
+
+type AppPageItemsListViewProps = ItemListContentProps & {
+  result: AppPageItemsListState;
+};
+
+export const AppPageItemsListView = React.memo(function AppPageItemsListView({
   canManage,
   filters,
   onFiltersChange,
@@ -94,12 +109,15 @@ const ItemListContent = React.memo(function ItemListContent({
   tableSize,
   presentation,
   onClearQueryFilters,
+  onClearAllFilters,
   onRemoveQueryFilter,
   onOpenEdit,
+  onOpenCreate,
   onOpenFilters,
   onOpenHistory,
   onRequestDelete,
-}: ItemListContentProps) {
+  result,
+}: AppPageItemsListViewProps) {
   const { t, i18n } = useTranslation(ITEMS_TRANSLATION_NAMESPACE);
   const labels = React.useMemo<VireoResponsiveTableLabels>(
     () => ({
@@ -124,21 +142,72 @@ const ItemListContent = React.memo(function ItemListContent({
     }),
     [t],
   );
-  const result = useItemSearchQuery(filters, { searchText: search.committed, queryFilters });
+  const pendingUpdateId = usePendingItemUpdateId();
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const totalResults = result.data?.totalElements;
+  const items = result.data?.content ?? [];
+  const hasResolvedData = result.data !== undefined;
+  const initialError = result.isError && !hasResolvedData;
+  const refreshError = result.isError && hasResolvedData;
+  const hasActiveConstraints = search.committed.length > 0 || queryFilters !== null;
+  const resultCountLabel = t("results", {
+    count: totalResults ?? 0,
+    formattedCount: formatQueryResultCount(totalResults ?? 0, i18n.resolvedLanguage),
+  });
+  const dataState = result.isLoading
+    ? "loading"
+    : initialError
+      ? "error"
+      : refreshError
+        ? "refresh-error"
+        : result.isRefreshing
+          ? "refreshing"
+          : items.length === 0
+            ? "empty"
+            : "loaded";
   const columns = useItemTableColumns({
     onHistory: onOpenHistory,
     onEdit: canManage ? onOpenEdit : undefined,
     onDelete: canManage ? onRequestDelete : undefined,
   });
+  const getRowSx = React.useCallback(
+    (
+      item: Item,
+      _rowIndex: number,
+      layout: "mobile" | "desktop",
+    ): Record<
+      string,
+      { backgroundColor: string; transition: string; "@media (prefers-reduced-motion: reduce)": { transition: string } }
+    > => {
+      const feedback = {
+        backgroundColor: item.id === pendingUpdateId ? "action.selected" : "surface.raised",
+        transition: `background-color ${APP_THEME_TOKENS.motion.duration.emphasized}ms ${APP_THEME_TOKENS.motion.easing.standard}`,
+        "@media (prefers-reduced-motion: reduce)": { transition: "none" },
+      };
+      return layout === "desktop" ? { "& > td": feedback } : { "& .MuiAccordionSummary-root": feedback };
+    },
+    [pendingUpdateId],
+  );
 
   return (
-    <Stack spacing={2} sx={{ flex: 1, height: "100%", minHeight: 0, overflow: "hidden" }}>
-      <Box sx={{ flex: "0 0 auto", px: { xs: 2, sm: 0 }, pt: { xs: 2, sm: 0 } }}>
+    <Stack spacing={{ xs: 0, sm: 2 }} sx={{ flex: 1, height: "100%", minHeight: 0, overflow: "hidden" }}>
+      <Box
+        data-items-toolbar
+        sx={{
+          bgcolor: "surface.base",
+          borderColor: "divider",
+          borderStyle: { xs: "none", sm: "solid" },
+          borderWidth: { xs: 0, sm: 1 },
+          borderRadius: { xs: 0, sm: 1 },
+          flex: "0 0 auto",
+          p: { xs: 2, sm: 1.5 },
+        }}
+      >
         <Stack spacing={1}>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: { sm: "center" } }}>
             <TextField
               fullWidth
+              size="small"
               value={search.input}
               onChange={event => search.setInput(event.target.value)}
               onKeyDown={event => {
@@ -161,42 +230,13 @@ const ItemListContent = React.memo(function ItemListContent({
                   ) : undefined,
                 },
               }}
-              sx={{ maxWidth: 520 }}
+              sx={{ maxWidth: 520, "& .MuiInputBase-root": { height: ITEM_COMMAND_CONTROL_HEIGHT } }}
             />
-            <Stack direction="row" spacing={0.5} sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center" }}>
-              <Button size="large" startIcon={<FilterAltOutlined />} variant="outlined" onClick={onOpenFilters}>
-                {t("filters.open")}
-                {structuredFilterCount > 0 ? ` (${structuredFilterCount})` : ""}
-              </Button>
-              {structuredFilterCount > 0 && (
-                <Button size="large" onClick={onClearQueryFilters}>
-                  {t("filters.clearAll")}
-                </Button>
-              )}
-            </Stack>
-            {totalResults != null && (
-              <Typography
-                color="text.secondary"
-                variant="body2"
-                sx={{ display: { xs: "none", sm: "block" }, ml: { sm: "auto !important" }, whiteSpace: "nowrap" }}
-              >
-                {t("results", {
-                  count: totalResults,
-                  formattedCount: totalResults.toLocaleString(i18n.resolvedLanguage),
-                })}
-              </Typography>
-            )}
-          </Stack>
-          <Box
-            sx={{
-              display: { xs: "grid", sm: "none" },
-              gridTemplateColumns: "minmax(0, 1fr) auto",
-              columnGap: 0.5,
-              minWidth: 0,
-              alignItems: "center",
-            }}
-          >
-            <ButtonGroup size="large" variant="outlined" sx={{ gridColumn: 1, justifySelf: "start" }}>
+            <ButtonGroup
+              size="large"
+              variant="outlined"
+              sx={{ display: { xs: "none", sm: "inline-flex" }, height: ITEM_COMMAND_CONTROL_HEIGHT }}
+            >
               <Button startIcon={<FilterAltOutlined />} onClick={onOpenFilters}>
                 {t("filters.open")}
                 {structuredFilterCount > 0 ? ` (${structuredFilterCount})` : ""}
@@ -213,18 +253,70 @@ const ItemListContent = React.memo(function ItemListContent({
                 </Tooltip>
               )}
             </ButtonGroup>
-            {totalResults != null && (
-              <Typography
-                color="text.secondary"
-                variant="body2"
-                sx={{ gridColumn: 2, minWidth: 0, textAlign: "right", whiteSpace: "nowrap" }}
-              >
-                {t("results", {
-                  count: totalResults,
-                  formattedCount: formatQueryResultCount(totalResults, i18n.resolvedLanguage),
-                })}
-              </Typography>
-            )}
+            <Chip
+              aria-hidden={totalResults == null ? true : undefined}
+              color={result.isRefreshing ? "primary" : "default"}
+              data-items-result-count="desktop"
+              data-items-result-count-state={totalResults == null ? "reserved" : "resolved"}
+              label={resultCountLabel}
+              size="small"
+              sx={{
+                display: { xs: "none", sm: "inline-flex" },
+                justifyContent: "center",
+                ml: { sm: "auto !important" },
+                minWidth: "11ch",
+                visibility: totalResults == null ? "hidden" : "visible",
+                whiteSpace: "nowrap",
+              }}
+              variant="outlined"
+            />
+          </Stack>
+          <Box
+            sx={{
+              display: { xs: "grid", sm: "none" },
+              gridTemplateColumns: "minmax(0, 1fr) auto",
+              columnGap: 0.5,
+              minWidth: 0,
+              alignItems: "center",
+            }}
+          >
+            <ButtonGroup
+              size="large"
+              variant="outlined"
+              sx={{ gridColumn: 1, height: ITEM_COMMAND_CONTROL_HEIGHT, justifySelf: "start" }}
+            >
+              <Button startIcon={<FilterAltOutlined />} onClick={onOpenFilters}>
+                {t("filters.open")}
+                {structuredFilterCount > 0 ? ` (${structuredFilterCount})` : ""}
+              </Button>
+              {structuredFilterCount > 0 && (
+                <Tooltip title={t("filters.clearAllLabel")}>
+                  <Button
+                    aria-label={t("filters.clearAllLabel")}
+                    onClick={onClearQueryFilters}
+                    sx={{ minWidth: 44, px: 1 }}
+                  >
+                    <CloseRounded />
+                  </Button>
+                </Tooltip>
+              )}
+            </ButtonGroup>
+            <Chip
+              aria-hidden={totalResults == null ? true : undefined}
+              color={result.isRefreshing ? "primary" : "default"}
+              data-items-result-count="mobile"
+              data-items-result-count-state={totalResults == null ? "reserved" : "resolved"}
+              label={resultCountLabel}
+              size="small"
+              sx={{
+                gridColumn: 2,
+                justifyContent: "center",
+                minWidth: "11ch",
+                visibility: totalResults == null ? "hidden" : "visible",
+                whiteSpace: "nowrap",
+              }}
+              variant="outlined"
+            />
           </Box>
           {queryFilters && (
             <Box
@@ -257,50 +349,169 @@ const ItemListContent = React.memo(function ItemListContent({
           )}
         </Stack>
       </Box>
-      {result.isError && (
-        <Alert
-          severity="error"
-          action={
-            queryFilters ? (
-              <Stack direction="row">
-                <Button color="inherit" onClick={onOpenFilters}>
-                  {t("error.edit")}
-                </Button>
-                <Button color="inherit" onClick={onClearQueryFilters}>
-                  {t("error.clear")}
-                </Button>
-              </Stack>
-            ) : undefined
-          }
-        >
-          {t("error.message")}
-        </Alert>
-      )}
-      <Box sx={{ display: "flex", flex: 1, minHeight: 0 }}>
-        <VireoResponsiveTable
-          layout={result.layout}
-          columns={columns}
-          data={result.data?.content ?? []}
-          filters={filters}
-          onFiltersChange={onFiltersChange}
-          labels={labels}
-          layers={ITEM_TABLE_LAYERS}
-          getRowKey={getItemRowKey}
-          totalCount={result.data?.totalElements ?? 0}
-          skeleton={result.isLoading}
-          titleColumn="name"
-          titleEndAdornmentColumn="status"
-          actionsColumn="actions"
-          hasNextPage={result.hasNextPage}
-          isFetchingNextPage={result.isFetchingNextPage}
-          onLoadNextPage={result.onLoadNextPage}
-          size={tableSize}
-          sx={ITEM_TABLE_SX}
-        />
-      </Box>
+      <VireoLoadingRegion
+        loading={result.isRefreshing}
+        loadingLabel={t("table.refreshing")}
+        data-items-data-state={dataState}
+        sx={{
+          bgcolor: "surface.base",
+          borderBlock: { xs: 1, sm: 0 },
+          borderColor: "divider",
+          display: "flex",
+          flex: 1,
+          minHeight: 0,
+          position: "relative",
+        }}
+      >
+        {({ loadingVisible }) => (
+          <>
+            {loadingVisible && (
+              <LinearProgress
+                aria-hidden
+                variant={reducedMotion ? "determinate" : "indeterminate"}
+                value={reducedMotion ? 100 : undefined}
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  insetInline: 0,
+                  height: 2,
+                  zIndex: 5,
+                }}
+              />
+            )}
+            {refreshError && (
+              <Alert
+                data-items-refresh-error
+                severity="warning"
+                action={
+                  <Button color="inherit" onClick={result.onRetry}>
+                    {t("error.retry")}
+                  </Button>
+                }
+                sx={{
+                  boxShadow: 4,
+                  insetInline: 8,
+                  maxWidth: 720,
+                  position: "absolute",
+                  top: 8,
+                  zIndex: 6,
+                }}
+              >
+                {t("error.refreshMessage")}
+              </Alert>
+            )}
+            <VireoResponsiveTable
+              data-items-table
+              layout={result.layout}
+              columns={columns}
+              data={items}
+              filters={filters}
+              onFiltersChange={onFiltersChange}
+              labels={labels}
+              layers={ITEM_TABLE_LAYERS}
+              getRowKey={getItemRowKey}
+              getRowSx={getRowSx}
+              totalCount={totalResults ?? 0}
+              skeleton={result.isLoading && !hasResolvedData}
+              titleColumn="name"
+              titleEndAdornmentColumn="status"
+              actionsColumn="actions"
+              hasNextPage={result.hasNextPage}
+              isFetchingNextPage={result.isFetchingNextPage}
+              onLoadNextPage={result.onLoadNextPage}
+              size={tableSize}
+              sx={ITEM_TABLE_SX}
+              renderEmptyState={() =>
+                initialError ? (
+                  <Alert
+                    data-items-initial-error
+                    severity="error"
+                    action={
+                      <Stack direction="row" sx={{ flexWrap: "wrap" }}>
+                        <Button color="inherit" onClick={result.onRetry}>
+                          {t("error.retry")}
+                        </Button>
+                        {queryFilters ? (
+                          <>
+                            <Button color="inherit" onClick={onOpenFilters}>
+                              {t("error.edit")}
+                            </Button>
+                            <Button color="inherit" onClick={onClearQueryFilters}>
+                              {t("error.clear")}
+                            </Button>
+                          </>
+                        ) : null}
+                      </Stack>
+                    }
+                    sx={{ maxWidth: 720 }}
+                  >
+                    {t("error.message")}
+                  </Alert>
+                ) : (
+                  <Stack data-items-empty-state spacing={1} sx={{ alignItems: "center", py: 1 }}>
+                    <Typography color="text.secondary">
+                      {hasActiveConstraints ? t("empty.filtered") : t(canManage ? "empty.first" : "empty.none")}
+                    </Typography>
+                    {hasActiveConstraints ? (
+                      <Button size="small" onClick={onClearAllFilters}>
+                        {t("empty.clear")}
+                      </Button>
+                    ) : canManage ? (
+                      <Button size="small" variant="contained" onClick={onOpenCreate}>
+                        {t("empty.create")}
+                      </Button>
+                    ) : null}
+                  </Stack>
+                )
+              }
+            />
+          </>
+        )}
+      </VireoLoadingRegion>
     </Stack>
   );
 });
+
+const ItemListContent = React.memo(function ItemListContent(props: ItemListContentProps) {
+  const result = useItemSearchQuery(props.filters, {
+    searchText: props.search.committed,
+    queryFilters: props.queryFilters,
+  });
+  return <AppPageItemsListView {...props} result={result} />;
+});
+
+export function AppPageItemsFrame({
+  canManage,
+  children,
+  onOpenCreate,
+}: React.PropsWithChildren<{ canManage: boolean; onOpenCreate: () => void }>) {
+  const { t } = useTranslation(ITEMS_TRANSLATION_NAMESPACE);
+
+  return (
+    <AppPageLayout
+      paddingOnCompact={false}
+      scrollMode="contained"
+      header={
+        <AppPageHeader
+          title={t("header.title")}
+          description={t("header.description")}
+          primaryAction={
+            canManage
+              ? {
+                  icon: <AddRounded />,
+                  label: t("header.create"),
+                  onClick: onOpenCreate,
+                  preview: t("header.createPreview"),
+                }
+              : undefined
+          }
+        />
+      }
+    >
+      {children}
+    </AppPageLayout>
+  );
+}
 
 export function AppPageItems() {
   const { t } = useTranslation(ITEMS_TRANSLATION_NAMESPACE);
@@ -380,6 +591,12 @@ export function AppPageItems() {
     setFilters(current => ({ ...current, page: 0 }));
   }, []);
 
+  const clearAllFilters = React.useCallback(() => {
+    search.clear();
+    setQueryFilters(null);
+    setFilters(current => ({ ...current, page: 0 }));
+  }, [search]);
+
   const removeQueryFilter = React.useCallback((index: number) => {
     setQueryFilters(current => {
       if (!current) return null;
@@ -402,32 +619,19 @@ export function AppPageItems() {
   }, [filters, queryFilters, search.input]);
   const requestDelete = React.useCallback(
     async (item: Item) => {
-      const accepted = await confirm({
+      await confirm({
         title: t("delete.title"),
         message: <>{t("delete.message", { name: item.name })}</>,
         confirmLabel: t("delete.confirm"),
         confirmColor: "error",
+        onConfirm: () => deleteItem(item),
       });
-      if (!accepted) return;
-      await deleteItem(item.id);
     },
     [confirm, deleteItem, t],
   );
 
   return (
-    <AppPageLayout
-      paddingOnCompact={false}
-      scrollMode="contained"
-      header={
-        <AppPageHeader
-          title={t("header.title")}
-          description={t("header.description")}
-          primaryAction={
-            canManage ? { icon: <AddRounded />, label: t("header.create"), onClick: openCreate } : undefined
-          }
-        />
-      }
-    >
+    <AppPageItemsFrame canManage={canManage} onOpenCreate={openCreate}>
       <ItemListContent
         canManage={canManage}
         filters={filters}
@@ -438,8 +642,10 @@ export function AppPageItems() {
         tableSize={preferences.tableSize}
         presentation={presentation}
         onClearQueryFilters={clearQueryFilters}
+        onClearAllFilters={clearAllFilters}
         onRemoveQueryFilter={removeQueryFilter}
         onOpenEdit={openEdit}
+        onOpenCreate={openCreate}
         onOpenFilters={openFilters}
         onOpenHistory={openHistory}
         onRequestDelete={requestDelete}
@@ -450,6 +656,6 @@ export function AppPageItems() {
         onRequestClose={overlays.close}
         render={overlays.overlay.render}
       />
-    </AppPageLayout>
+    </AppPageItemsFrame>
   );
 }

@@ -5,13 +5,13 @@ export const APP_THEME_LIGHT_COLOR_SCHEME: ColorSystemOptions = {
   palette: {
     mode: "light",
     primary: {
-      main: "#009ee0",
-      light: "#36c7fa",
-      dark: "#0170a3",
+      main: "#8a5d00",
+      light: "#c58a00",
+      dark: "#5c3e00",
       contrastText: "#ffffff",
     },
     secondary: {
-      main: "#7f56d9",
+      main: "#087ea4",
       contrastText: "#ffffff",
     },
     background: {
@@ -20,14 +20,14 @@ export const APP_THEME_LIGHT_COLOR_SCHEME: ColorSystemOptions = {
     },
     surface: APP_SURFACES_LIGHT,
     text: {
-      primary: "#101828",
-      secondary: "#475467",
-      disabled: "#98a2b3",
+      primary: "#191c18",
+      secondary: "#51584f",
+      disabled: "#8a9188",
     },
-    divider: "#d0d5dd",
+    divider: "#cbd0c7",
     action: {
-      hover: "rgba(16, 24, 40, 0.04)",
-      selected: "rgba(16, 24, 40, 0.08)",
+      hover: "rgba(138, 93, 0, 0.07)",
+      selected: "rgba(197, 138, 0, 0.13)",
     },
   },
 };

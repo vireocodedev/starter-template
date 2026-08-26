@@ -1,6 +1,7 @@
 const en = {
   title: "Welcome back",
   description: "Sign in to the Vireo Starter workspace.",
+  access: "Secure workspace access",
   fields: { username: "Username", password: "Password" },
   validation: { username: "Enter your username.", password: "Enter your password." },
   invalidCredentials: "The username or password is incorrect.",

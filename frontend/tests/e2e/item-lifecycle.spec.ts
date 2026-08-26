@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("an administrator can create an item through the complete application stack", async ({ page }, testInfo) => {
-  const itemName = `E2E item ${testInfo.project.name}`;
+  const itemName = `E2E item ${testInfo.project.name} ${Date.now()}`;
 
   await page.goto("/login");
   await page.getByRole("button", { name: "Sign in" }).click();

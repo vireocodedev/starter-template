@@ -12,6 +12,7 @@ export type ItemFormProps = {
 export type ItemFormActionsProps = ItemFormProps & {
   editing: boolean;
   onCancel: () => void;
+  pending?: boolean;
 };
 
 export function ItemForm({ form }: ItemFormProps) {
@@ -75,13 +76,15 @@ export function ItemForm({ form }: ItemFormProps) {
   );
 }
 
-export function ItemFormActions({ editing, form, onCancel }: ItemFormActionsProps) {
+export function ItemFormActions({ editing, form, onCancel, pending = false }: ItemFormActionsProps) {
   const { t } = usePlatformTranslation();
   const { t: tItem } = useItemTranslation();
 
   return (
     <form.Actions>
-      <Button onClick={onCancel}>{t("common.cancel")}</Button>
+      <Button disabled={pending} onClick={onCancel}>
+        {t("common.cancel")}
+      </Button>
       <form.SubmitButton variant="contained">{editing ? tItem("form.update") : tItem("form.create")}</form.SubmitButton>
     </form.Actions>
   );

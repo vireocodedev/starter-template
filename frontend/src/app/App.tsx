@@ -1,56 +1,61 @@
 import React from "react";
-import { Box, CircularProgress } from "@mui/material";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { AppProviders } from "./app.providers";
-import { APP_PAGE_REGISTRY, APP_PAGES, type AppPageId } from "@/app/app.pages";
+import { APP_PAGE_REGISTRY, APP_PAGES, loadAppPage, type AppPageId } from "@/app/app.pages";
+import { AppBootstrapFallback, AppRouteFallback } from "@/app/shell/components/AppLoadingSurface";
 import { AppShellLayout } from "@/app/shell/layout/AppShellLayout";
 import { AppSessionRecoveryProvider } from "@/app/shell/providers/AppSessionRecoveryProvider";
 import { useAppAuth } from "./shell/hooks/useAppAuth";
 
-const pages = Object.fromEntries(
-  Object.entries(APP_PAGE_REGISTRY).map(([id, definition]) => [id, React.lazy(definition.load)]),
-) as unknown as Record<AppPageId, React.LazyExoticComponent<React.ComponentType>>;
+const lazyPages = Object.fromEntries(
+  Object.entries(APP_PAGE_REGISTRY)
+    .filter(([, definition]) => definition.render === "lazy")
+    .map(([id]) => [id, React.lazy(() => loadAppPage(id as AppPageId))]),
+) as Partial<Record<AppPageId, React.LazyExoticComponent<React.ComponentType>>>;
 
-function LoadingPage() {
+function AppPageRoute({ id }: { id: AppPageId }) {
+  const definition = APP_PAGE_REGISTRY[id];
+  if (definition.render === "eager") {
+    const Page = definition.component;
+    return <Page />;
+  }
+
+  const Page = lazyPages[id];
+  if (!Page) throw new Error(`Missing lazy page component for ${id}`);
+
   return (
-    <Box sx={{ alignItems: "center", display: "flex", justifyContent: "center", minHeight: "100vh" }}>
-      <CircularProgress />
-    </Box>
+    <React.Suspense fallback={<AppRouteFallback loading={definition.loading} />}>
+      <Page />
+    </React.Suspense>
   );
 }
 
 function AppRoutes() {
   const { user, loading } = useAppAuth();
-  if (loading) return <LoadingPage />;
-
-  const LoginPage = pages.login;
-  const NotFoundPage = pages.notFound;
+  if (loading) return <AppBootstrapFallback />;
 
   return (
-    <React.Suspense fallback={<LoadingPage />}>
-      <Routes>
-        <Route path={APP_PAGES.login} element={<LoginPage />} />
-        {user ? (
-          <Route element={<AppShellLayout />}>
-            {Object.entries(APP_PAGE_REGISTRY)
-              .filter(([id, definition]) => definition.access === "AUTHENTICATED" && id !== "notFound")
-              .map(([id, definition]) => {
-                const Page = pages[id as AppPageId];
-                return (
-                  <Route
-                    key={id}
-                    index={id === "home"}
-                    path={id === "home" ? undefined : definition.path}
-                    element={<Page />}
-                  />
-                );
-              })}
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
-        ) : null}
-        <Route path="*" element={<Navigate replace to={APP_PAGES.login} />} />
-      </Routes>
-    </React.Suspense>
+    <Routes>
+      <Route path={APP_PAGES.login} element={<AppPageRoute id="login" />} />
+      {user ? (
+        <Route element={<AppShellLayout />}>
+          {Object.entries(APP_PAGE_REGISTRY)
+            .filter(([id, definition]) => definition.access === "AUTHENTICATED" && id !== "notFound")
+            .map(([id, definition]) => {
+              return (
+                <Route
+                  key={id}
+                  index={id === "home"}
+                  path={id === "home" ? undefined : definition.path}
+                  element={<AppPageRoute id={id as AppPageId} />}
+                />
+              );
+            })}
+          <Route path="*" element={<AppPageRoute id="notFound" />} />
+        </Route>
+      ) : null}
+      <Route path="*" element={<Navigate replace to={APP_PAGES.login} />} />
+    </Routes>
   );
 }
 

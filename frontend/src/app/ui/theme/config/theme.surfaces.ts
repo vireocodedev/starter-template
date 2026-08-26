@@ -8,13 +8,13 @@ export type AppSurfacePalette = {
 };
 
 export const APP_SURFACES_LIGHT: AppSurfacePalette = {
-  sunken: "#f9fafb",
-  base: "#ffffff",
+  sunken: "#eff1ec",
+  base: "#fafbf7",
   raised: "#ffffff",
 };
 
 export const APP_SURFACES_DARK: AppSurfacePalette = {
-  sunken: "#0c111d",
-  base: "#101828",
-  raised: "#16202e",
+  sunken: "#0d100e",
+  base: "#151916",
+  raised: "#1d231e",
 };

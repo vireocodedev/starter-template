@@ -10,8 +10,10 @@ import { DEFAULT_APP_PREFERENCES, type AppPreferences } from "@/app/ui/preferenc
 import { AppAuthContext } from "@/app/shell/contexts/AppAuthContext";
 
 const navigationPropsSpy = vi.hoisted(() => vi.fn());
+const onlineStatusSpy = vi.hoisted(() => vi.fn(() => true));
 
 vi.mock("@vireocodedev/starter-ui", () => ({
+  useVireoOnlineStatus: onlineStatusSpy,
   VireoApplicationNavigation: ({
     children,
     mode,
@@ -135,6 +137,7 @@ function renderShell(preferenceOverrides: Partial<AppPreferences> = {}) {
 describe("AppShellLayout", () => {
   beforeEach(() => {
     navigationPropsSpy.mockClear();
+    onlineStatusSpy.mockReturnValue(true);
   });
 
   it("lets unlocked desktop navigation resize independently of the overlay resize preference", async () => {
@@ -174,5 +177,14 @@ describe("AppShellLayout", () => {
     expect(screen.getByRole("button", { name: "Close navigation" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Close navigation" }));
     expect(screen.queryByRole("button", { name: "Close navigation" })).not.toBeInTheDocument();
+  });
+
+  it("shows a calm status message without replacing page content while offline", () => {
+    onlineStatusSpy.mockReturnValue(false);
+    setDesktop(false);
+    renderShell();
+
+    expect(screen.getByRole("status")).toHaveTextContent("You are offline");
+    expect(screen.getByRole("heading", { name: "Overview" })).toBeVisible();
   });
 });

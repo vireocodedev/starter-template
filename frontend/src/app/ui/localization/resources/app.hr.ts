@@ -2,7 +2,12 @@ import type { WidenLeaves } from "@vireocodedev/starter-localization";
 import type en from "./app.en";
 
 const hr = {
-  brand: { name: "Vireo Starter", tagline: "Full-stack PWA" },
+  brand: {
+    name: "Vireo Starter",
+    tagline: "Full-stack PWA",
+    online: "Sustav je povezan",
+    offline: "Veza je prekinuta",
+  },
   navigation: {
     OVERVIEW: "Pregled",
     ITEMS: "Stavke",
@@ -16,6 +21,15 @@ const hr = {
   },
   account: { OPEN_MENU: "Otvori izbornik računa", SIGN_OUT: "Odjava" },
   actions: { BACK: "Natrag" },
+  loading: { application: "Učitavanje aplikacije", page: "Učitavanje stranice" },
+  pwa: {
+    later: "Kasnije",
+    offline: "Izvan mreže ste. Podaci s poslužitelja možda nisu dostupni.",
+    offlineReady:
+      "Aplikacijska ljuska spremna je za ograničeni izvanmrežni rad. Podaci s poslužitelja i dalje zahtijevaju vezu.",
+    update: "Ažuriraj",
+    updateReady: "Nova verzija je spremna.",
+  },
   unsavedChanges: {
     title: "Odbaciti nespremljene promjene?",
     message: "Promjene će se izgubiti ako zatvorite ovaj obrazac.",

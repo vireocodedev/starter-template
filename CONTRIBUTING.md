@@ -16,6 +16,8 @@ Use `./scripts/verify.sh silent` when only failures should print command output.
 
 Follow the frontend architecture contract and update tests, stories, localization resources, and documentation with behavior changes. Never make normal production commands depend on a sibling Starter checkout; the local mode is an explicit integration workflow only.
 
+For every new or changed asynchronous visual surface, declare its loading category (`content-preserving`, `skeleton-capable`, `busy-action`, or `boundary`), geometry level (`A`, `B`, or `C`), canonical state coverage, accessibility owner, and reduced-motion behavior. Page loading MUST reuse the real page composition. See `frontend/docs/LOADING_STATES.md` and the Storybook architecture guide before implementation.
+
 ## Pull requests
 
 - Keep commits focused and preserve unrelated worktree changes.

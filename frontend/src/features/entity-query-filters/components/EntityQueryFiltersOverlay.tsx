@@ -1,8 +1,9 @@
 import React from "react";
-import { Alert, Box, Button, CircularProgress, Stack } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, LinearProgress, Stack } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import {
   VireoOverlayHeader,
+  VireoLoadingRegion,
   VireoResponsiveOverlayFrame,
   useUnsavedChangesRegistration,
   useUnsavedChangesRequestDiscard,
@@ -57,6 +58,8 @@ export function EntityQueryFiltersOverlay({
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const initializedToken = React.useRef("");
   const token = `${open}:${definition.data?.key ?? "pending"}:${JSON.stringify(value)}`;
+  const initialLoading = definition.isPending && !definition.data;
+  const refreshing = definition.isFetching && !!definition.data;
 
   React.useEffect(() => {
     if (!open || !definition.data || initializedToken.current === token) return;
@@ -97,32 +100,59 @@ export function EntityQueryFiltersOverlay({
       desktopNavWidth={preferences.navigationMode === "compact" ? 80 : preferences.navigationWidth}
       desktopSidePanelWidth={680}
       maxWidth="md"
+      mobileMaxHeight="92dvh"
+      mobileSurface="bottomDrawer"
     >
       <VireoOverlayHeader title={title} closeLabel={t("overlay.close")} onClose={requestClose} />
       <Box sx={{ bgcolor: "surface.sunken", flex: 1, minHeight: 0, overflowY: "auto", p: 2 }}>
-        {definition.isPending ? (
-          <Box sx={{ minHeight: 240, display: "grid", placeItems: "center" }}>
-            <CircularProgress aria-label={t("overlay.loading")} />
-          </Box>
-        ) : definition.isError ? (
-          <Alert
-            severity="error"
-            action={<Button onClick={() => void definition.refetch()}>{t("overlay.retry")}</Button>}
-          >
-            {t("overlay.loadError")}
-          </Alert>
-        ) : (
-          <EntityQueryFiltersForm
-            entityKey={entityKey}
-            candidates={candidates}
-            rules={rules}
-            errors={errors}
-            onChange={next => {
-              setRules(next);
-              setErrors({});
-            }}
-          />
-        )}
+        <VireoLoadingRegion loading={initialLoading || refreshing} loadingLabel={t("overlay.loading")}>
+          {({ loadingVisible }) => (
+            <Box
+              data-filter-definition-state={initialLoading ? "loading" : refreshing ? "refreshing" : "settled"}
+              sx={{ minHeight: initialLoading ? 240 : 0, position: "relative" }}
+            >
+              {refreshing && loadingVisible ? (
+                <LinearProgress
+                  aria-hidden
+                  sx={{ height: 2, insetInline: 0, position: "absolute", top: 0, zIndex: 1 }}
+                />
+              ) : null}
+              {initialLoading ? (
+                <Box sx={{ display: "grid", minHeight: 240, placeItems: "center" }}>
+                  {loadingVisible ? <CircularProgress aria-hidden /> : null}
+                </Box>
+              ) : definition.isError && !definition.data ? (
+                <Alert
+                  severity="error"
+                  action={<Button onClick={() => void definition.refetch()}>{t("overlay.retry")}</Button>}
+                >
+                  {t("overlay.loadError")}
+                </Alert>
+              ) : (
+                <Stack spacing={2}>
+                  {definition.isError ? (
+                    <Alert
+                      severity="warning"
+                      action={<Button onClick={() => void definition.refetch()}>{t("overlay.retry")}</Button>}
+                    >
+                      {t("overlay.staleError")}
+                    </Alert>
+                  ) : null}
+                  <EntityQueryFiltersForm
+                    entityKey={entityKey}
+                    candidates={candidates}
+                    rules={rules}
+                    errors={errors}
+                    onChange={next => {
+                      setRules(next);
+                      setErrors({});
+                    }}
+                  />
+                </Stack>
+              )}
+            </Box>
+          )}
+        </VireoLoadingRegion>
       </Box>
       <Stack
         direction="row"
@@ -133,7 +163,7 @@ export function EntityQueryFiltersOverlay({
           {t("overlay.clear")}
         </Button>
         <Button onClick={requestClose}>{t("overlay.cancel")}</Button>
-        <Button disabled={definition.isPending || definition.isError} variant="contained" onClick={apply}>
+        <Button disabled={!definition.data} variant="contained" onClick={apply}>
           {t("overlay.apply")}
         </Button>
       </Stack>

@@ -1,8 +1,8 @@
 import React from "react";
-import { Autocomplete, MenuItem, Select, Stack, TextField } from "@mui/material";
+import { Alert, Autocomplete, Button, MenuItem, Select, Stack, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import type { QueryEngineRelationOption } from "@vireocodedev/starter-queryengine";
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
+import { VireoLabelBox, VireoLoadingRegion } from "@vireocodedev/starter-ui";
 import { queryEngineApi } from "@/app/data/query/api/queryEngine.api";
 import type { AppQueryEntityKey } from "@/app/data/query/models/AppQueryEntityKey";
 import type { QueryFilterCandidate, QueryFilterRuleDraft } from "../models/EntityQueryFilters";
@@ -141,6 +141,7 @@ function RelationValueEditor({
   searchPlaceholder,
   valueLabel,
 }: RelationValueEditorProps) {
+  const { t } = useEntityQueryFiltersTranslation();
   const [inputValue, setInputValue] = React.useState("");
   const [debouncedSearch, setDebouncedSearch] = React.useState("");
   React.useEffect(() => {
@@ -154,21 +155,38 @@ function RelationValueEditor({
   });
 
   return (
-    <VireoLabelBox label={valueLabel}>
-      <Autocomplete
-        multiple={candidate.multiple}
-        options={options.data ?? []}
-        value={candidate.multiple ? value : (value[0] ?? null)}
-        inputValue={inputValue}
-        loading={options.isPending}
-        getOptionKey={option => option.value}
-        getOptionLabel={option => option.label}
-        isOptionEqualToValue={(option, selected) => option.value === selected.value}
-        onInputChange={(_, next) => setInputValue(next)}
-        onChange={(_, next) => onChange(Array.isArray(next) ? next : next ? [next] : [])}
-        renderInput={params => <TextField {...params} placeholder={searchPlaceholder} />}
-      />
-    </VireoLabelBox>
+    <VireoLoadingRegion loading={options.isFetching} loadingLabel={t("form.loadingOptions")}>
+      <Stack
+        spacing={1}
+        data-relation-options-state={options.isError ? (options.data ? "stale-error" : "error") : "ready"}
+      >
+        <VireoLabelBox label={valueLabel}>
+          <Autocomplete
+            multiple={candidate.multiple}
+            options={options.data ?? []}
+            value={candidate.multiple ? value : (value[0] ?? null)}
+            inputValue={inputValue}
+            loading={options.isFetching}
+            loadingText={t("form.loadingOptions")}
+            noOptionsText={options.isError ? t("form.optionsLoadError") : t("form.noOptions")}
+            getOptionKey={option => option.value}
+            getOptionLabel={option => option.label}
+            isOptionEqualToValue={(option, selected) => option.value === selected.value}
+            onInputChange={(_, next) => setInputValue(next)}
+            onChange={(_, next) => onChange(Array.isArray(next) ? next : next ? [next] : [])}
+            renderInput={params => <TextField {...params} placeholder={searchPlaceholder} />}
+          />
+        </VireoLabelBox>
+        {options.isError ? (
+          <Alert
+            severity={options.data ? "warning" : "error"}
+            action={<Button onClick={() => void options.refetch()}>{t("form.retryOptions")}</Button>}
+          >
+            {options.data ? t("form.optionsRefreshError") : t("form.optionsLoadError")}
+          </Alert>
+        ) : null}
+      </Stack>
+    </VireoLoadingRegion>
   );
 }
 

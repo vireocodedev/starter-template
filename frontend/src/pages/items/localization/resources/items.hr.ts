@@ -5,6 +5,7 @@ const hr = {
     title: "Stavke",
     description: "Cjelovit responzivni CRUD tijek rada podržan jednim Starter entitetom.",
     create: "Stvori stavku",
+    createPreview: "Dodaje jedan zapis u ovaj radni prostor",
   },
   search: { placeholder: "Pretraži po nazivu, opisu ili statusu", clear: "Očisti pretraživanje" },
   results_one: "{{formattedCount}} rezultat",
@@ -12,8 +13,17 @@ const hr = {
   filters: { open: "Filtri", clearAll: "Očisti sve", clearAllLabel: "Očisti sve filtre", title: "Filtriraj stavke" },
   error: {
     message: "Stavke nije moguće učitati. Provjerite API vezu, sesiju ili aktivne filtre.",
+    refreshMessage: "Stavke nije moguće osvježiti. Posljednji dostupni rezultati i dalje su prikazani.",
+    retry: "Pokušaj ponovno",
     edit: "Uredi",
     clear: "Očisti",
+  },
+  empty: {
+    filtered: "Nijedna stavka ne odgovara trenutačnoj pretrazi i filtrima.",
+    first: "Ovaj radni prostor još nema stavki.",
+    none: "Još nema stavki za prikaz.",
+    clear: "Očisti pretragu i filtre",
+    create: "Kreiraj prvu stavku",
   },
   delete: {
     title: "Izbrisati stavku?",
@@ -23,6 +33,7 @@ const hr = {
   table: {
     table: "Stavke",
     loadingTable: "Učitavanje stavki",
+    refreshing: "Osvježavanje stavki",
     noData: "Nijedna stavka ne odgovara pretraživanju.",
     showMore: "Prikaži više",
     showLess: "Prikaži manje",

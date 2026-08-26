@@ -44,11 +44,69 @@ export function AppPageLogin() {
   if (user) return <Navigate replace to={APP_PAGES.home} />;
 
   return (
-    <Box sx={{ alignItems: "center", display: "flex", justifyContent: "center", minHeight: "100vh", p: 2.5 }}>
-      <Card sx={{ maxWidth: 420, width: "100%", borderColor: "divider" }}>
+    <Box
+      sx={{
+        alignItems: "center",
+        bgcolor: "surface.sunken",
+        backgroundImage: theme =>
+          `radial-gradient(circle at 50% 28%, color-mix(in srgb, ${theme.palette.primary.main} 14%, transparent), transparent 36%), linear-gradient(color-mix(in srgb, ${theme.palette.divider} 18%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, ${theme.palette.divider} 18%, transparent) 1px, transparent 1px)`,
+        backgroundSize: "auto, 28px 28px, 28px 28px",
+        display: "flex",
+        justifyContent: "center",
+        minHeight: "100dvh",
+        p: 2.5,
+      }}
+    >
+      <Card
+        sx={{
+          borderColor: "divider",
+          boxShadow: theme =>
+            `0 24px 72px color-mix(in srgb, ${theme.palette.common.black} 26%, transparent), inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 10%, transparent)`,
+          maxWidth: 420,
+          overflow: "hidden",
+          position: "relative",
+          width: "100%",
+          "&::before": {
+            bgcolor: "primary.main",
+            content: '""',
+            height: 4,
+            insetInline: 0,
+            position: "absolute",
+            top: 0,
+          },
+        }}
+      >
         <CardContent sx={{ p: { xs: 3, sm: 4 }, "&:last-child": { pb: { xs: 3, sm: 4 } } }}>
           <Box sx={{ mb: 3, textAlign: "center" }}>
-            <Typography component="h1" variant="h4" sx={{ fontWeight: 800 }}>
+            <Box
+              aria-hidden
+              sx={{
+                alignItems: "center",
+                bgcolor: "primary.main",
+                border: 1,
+                borderColor: "primary.light",
+                borderRadius: 1,
+                boxShadow: theme =>
+                  `0 8px 24px color-mix(in srgb, ${theme.palette.primary.main} 25%, transparent), inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 28%, transparent)`,
+                color: "primary.contrastText",
+                display: "inline-flex",
+                fontSize: "1.125rem",
+                fontWeight: 900,
+                height: 44,
+                justifyContent: "center",
+                mb: 2,
+                width: 44,
+              }}
+            >
+              V
+            </Box>
+            <Typography
+              color="primary.main"
+              sx={{ fontSize: "0.6875rem", fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase" }}
+            >
+              {t("access")}
+            </Typography>
+            <Typography component="h1" variant="h4" sx={{ mt: 0.5 }}>
               {t("title")}
             </Typography>
             <Typography color="text.secondary" sx={{ mt: 0.75 }}>
