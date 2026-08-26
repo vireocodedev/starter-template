@@ -4,10 +4,25 @@ export type AppPageAccess = "PUBLIC" | "AUTHENTICATED";
 export type AppNavigationIcon = "OVERVIEW" | "ITEMS" | "SETTINGS" | "DEV_TOOLS";
 export type AppPageModule = { default: ComponentType };
 
+export type AppRouteLoadingHeader = {
+  backLabelKey?: string;
+  backTo?: string;
+  descriptionKey: string;
+  namespace: string;
+  titleKey: string;
+};
+
+export type AppRouteLoadingPolicy =
+  | { policy: "none" }
+  | { policy: "retain" }
+  | { policy: "progress"; frame: "application" | "page"; header?: AppRouteLoadingHeader }
+  | { policy: "skeleton"; composition: "overview" };
+
 type AppPageDefinition = {
   access: AppPageAccess;
   buildPath: () => string;
   load: () => Promise<AppPageModule>;
+  loading: AppRouteLoadingPolicy;
   navigation?: { icon: AppNavigationIcon; labelKey: AppNavigationIcon; order: number };
   path: string;
 };
@@ -16,9 +31,27 @@ function page<const T extends AppPageDefinition>(definition: T): T {
   return definition;
 }
 
+function pageProgress(
+  namespace: string,
+  titleKey = "header.title",
+  descriptionKey = "header.description",
+  backTo?: string,
+  backLabelKey?: string,
+) {
+  return {
+    policy: "progress",
+    frame: "page",
+    header: { backLabelKey, backTo, descriptionKey, namespace, titleKey },
+  } as const satisfies AppRouteLoadingPolicy;
+}
+
+const APPLICATION_PROGRESS = { policy: "progress", frame: "application" } as const satisfies AppRouteLoadingPolicy;
+const OVERVIEW_SKELETON = { policy: "skeleton", composition: "overview" } as const satisfies AppRouteLoadingPolicy;
+
 export const APP_PAGE_REGISTRY = {
   home: page({
     access: "AUTHENTICATED",
+    loading: OVERVIEW_SKELETON,
     path: "/",
     buildPath: () => "/",
     navigation: { icon: "OVERVIEW", labelKey: "OVERVIEW", order: 10 },
@@ -26,6 +59,7 @@ export const APP_PAGE_REGISTRY = {
   }),
   items: page({
     access: "AUTHENTICATED",
+    loading: pageProgress("items"),
     path: "/items",
     buildPath: () => "/items",
     navigation: { icon: "ITEMS", labelKey: "ITEMS", order: 20 },
@@ -33,6 +67,7 @@ export const APP_PAGE_REGISTRY = {
   }),
   settings: page({
     access: "AUTHENTICATED",
+    loading: pageProgress("settings"),
     path: "/settings",
     buildPath: () => "/settings",
     navigation: { icon: "SETTINGS", labelKey: "SETTINGS", order: 30 },
@@ -40,6 +75,7 @@ export const APP_PAGE_REGISTRY = {
   }),
   devTools: page({
     access: "AUTHENTICATED",
+    loading: pageProgress("devTools"),
     path: "/dev-tools",
     buildPath: () => "/dev-tools",
     navigation: { icon: "DEV_TOOLS", labelKey: "DEV_TOOLS", order: 40 },
@@ -47,6 +83,7 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsBasicPage: page({
     access: "AUTHENTICATED",
+    loading: pageProgress("basicPage", "header.title", "header.description", "/dev-tools", "header.back"),
     path: "/dev-tools/page-examples/basic-page",
     buildPath: () => "/dev-tools/page-examples/basic-page",
     load: async () => ({
@@ -55,6 +92,7 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsBasicFormPage: page({
     access: "AUTHENTICATED",
+    loading: pageProgress("basicForm", "header.title", "header.description", "/dev-tools", "header.back"),
     path: "/dev-tools/page-examples/basic-form-page",
     buildPath: () => "/dev-tools/page-examples/basic-form-page",
     load: async () => ({
@@ -64,6 +102,7 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsMultiStepFormPage: page({
     access: "AUTHENTICATED",
+    loading: pageProgress("multiStepForm", "header.title", "header.description", "/dev-tools", "header.back"),
     path: "/dev-tools/page-examples/multi-step-form-page",
     buildPath: () => "/dev-tools/page-examples/multi-step-form-page",
     load: async () => ({
@@ -73,6 +112,13 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsRelatedRecordCreation: page({
     access: "AUTHENTICATED",
+    loading: pageProgress(
+      "relatedRecordCreation",
+      "header.invoiceTitle",
+      "header.invoiceDescription",
+      "/dev-tools",
+      "header.backDevTools",
+    ),
     path: "/dev-tools/page-examples/related-record-creation",
     buildPath: () => "/dev-tools/page-examples/related-record-creation",
     load: async () => ({
@@ -82,6 +128,13 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsEntityQueryFilters: page({
     access: "AUTHENTICATED",
+    loading: pageProgress(
+      "entityQueryFiltersExample",
+      "header.title",
+      "header.description",
+      "/dev-tools",
+      "header.back",
+    ),
     path: "/dev-tools/page-examples/entity-query-filters",
     buildPath: () => "/dev-tools/page-examples/entity-query-filters",
     load: async () => ({
@@ -91,6 +144,13 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsAdvancedFieldForm: page({
     access: "AUTHENTICATED",
+    loading: pageProgress(
+      "devToolsExamples",
+      "advancedForm.header.title",
+      "advancedForm.header.description",
+      "/dev-tools",
+      "common.back",
+    ),
     path: "/dev-tools/page-examples/advanced-field-form",
     buildPath: () => "/dev-tools/page-examples/advanced-field-form",
     load: async () => ({
@@ -100,6 +160,13 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsUrlSynchronizedState: page({
     access: "AUTHENTICATED",
+    loading: pageProgress(
+      "devToolsExamples",
+      "urlState.header.title",
+      "urlState.header.description",
+      "/dev-tools",
+      "common.back",
+    ),
     path: "/dev-tools/page-examples/url-synchronized-state",
     buildPath: () => "/dev-tools/page-examples/url-synchronized-state",
     load: async () => ({
@@ -109,6 +176,13 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsAsyncDataStates: page({
     access: "AUTHENTICATED",
+    loading: pageProgress(
+      "devToolsExamples",
+      "asyncStates.header.title",
+      "asyncStates.header.description",
+      "/dev-tools",
+      "common.back",
+    ),
     path: "/dev-tools/page-examples/async-data-states",
     buildPath: () => "/dev-tools/page-examples/async-data-states",
     load: async () => ({
@@ -118,6 +192,13 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsOfflineCrud: page({
     access: "AUTHENTICATED",
+    loading: pageProgress(
+      "devToolsExamples",
+      "offlineCrud.header.title",
+      "offlineCrud.header.description",
+      "/dev-tools",
+      "common.back",
+    ),
     path: "/dev-tools/page-examples/offline-crud",
     buildPath: () => "/dev-tools/page-examples/offline-crud",
     load: async () => ({
@@ -126,6 +207,13 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsRealtimeUpdates: page({
     access: "AUTHENTICATED",
+    loading: pageProgress(
+      "devToolsExamples",
+      "realtime.header.title",
+      "realtime.header.description",
+      "/dev-tools",
+      "common.back",
+    ),
     path: "/dev-tools/page-examples/realtime-updates",
     buildPath: () => "/dev-tools/page-examples/realtime-updates",
     load: async () => ({
@@ -135,6 +223,13 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsDragDropBoard: page({
     access: "AUTHENTICATED",
+    loading: pageProgress(
+      "devToolsExamples",
+      "dragDrop.header.title",
+      "dragDrop.header.description",
+      "/dev-tools",
+      "common.back",
+    ),
     path: "/dev-tools/page-examples/drag-drop-board",
     buildPath: () => "/dev-tools/page-examples/drag-drop-board",
     load: async () => ({
@@ -144,6 +239,13 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsInfiniteCanvas: page({
     access: "AUTHENTICATED",
+    loading: pageProgress(
+      "devToolsExamples",
+      "canvas.header.title",
+      "canvas.header.description",
+      "/dev-tools",
+      "common.back",
+    ),
     path: "/dev-tools/page-examples/infinite-canvas",
     buildPath: () => "/dev-tools/page-examples/infinite-canvas",
     load: async () => ({
@@ -153,6 +255,13 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsRegionalFormatting: page({
     access: "AUTHENTICATED",
+    loading: pageProgress(
+      "devToolsExamples",
+      "regional.header.title",
+      "regional.header.description",
+      "/dev-tools",
+      "common.back",
+    ),
     path: "/dev-tools/page-examples/regional-formatting",
     buildPath: () => "/dev-tools/page-examples/regional-formatting",
     load: async () => ({
@@ -162,6 +271,13 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsBrowserCapabilities: page({
     access: "AUTHENTICATED",
+    loading: pageProgress(
+      "devToolsExamples",
+      "browser.header.title",
+      "browser.header.description",
+      "/dev-tools",
+      "common.back",
+    ),
     path: "/dev-tools/page-examples/browser-capabilities",
     buildPath: () => "/dev-tools/page-examples/browser-capabilities",
     load: async () => ({
@@ -171,6 +287,13 @@ export const APP_PAGE_REGISTRY = {
   }),
   devToolsInitializationReadiness: page({
     access: "AUTHENTICATED",
+    loading: pageProgress(
+      "devToolsExamples",
+      "initialization.header.title",
+      "initialization.header.description",
+      "/dev-tools",
+      "common.back",
+    ),
     path: "/dev-tools/page-examples/initialization-readiness",
     buildPath: () => "/dev-tools/page-examples/initialization-readiness",
     load: async () => ({
@@ -180,18 +303,21 @@ export const APP_PAGE_REGISTRY = {
   }),
   forbidden: page({
     access: "AUTHENTICATED",
+    loading: pageProgress("forbidden"),
     path: "/forbidden",
     buildPath: () => "/forbidden",
     load: async () => ({ default: (await import("@/pages/forbidden/AppPageForbidden")).AppPageForbidden }),
   }),
   notFound: page({
     access: "AUTHENTICATED",
+    loading: pageProgress("notFound"),
     path: "/not-found",
     buildPath: () => "/not-found",
     load: async () => ({ default: (await import("@/pages/not-found/AppPageNotFound")).AppPageNotFound }),
   }),
   login: page({
     access: "PUBLIC",
+    loading: APPLICATION_PROGRESS,
     path: "/login",
     buildPath: () => "/login",
     load: async () => ({ default: (await import("@/pages/login/AppPageLogin")).AppPageLogin }),
