@@ -24,6 +24,8 @@ const allowedFeatureDirectories = new Set([
   "tests",
 ]);
 const forbiddenDirectoryNames = new Set(["common", "helpers", "shared", "utils"]);
+const loadingCategories = new Set(["boundary", "busy-action", "content-preserving", "skeleton-capable"]);
+const canonicalAsyncStoryPattern = /export\s+const\s+(?:Loading|Refreshing|Empty|Error|AlignmentContract)\b/u;
 
 async function filesBelow(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -91,6 +93,32 @@ for (const file of sourceFiles) {
   const relativeFile = path.relative(sourceRoot, file);
   const ownFeature = relativeFile.startsWith(`features${path.sep}`) ? relativeFile.split(path.sep)[1] : undefined;
   const source = await readFile(file, "utf8");
+
+  if (/from\s+["']@mui\/material["'][\s\S]*\bSkeleton\b/u.test(source)) {
+    errors.push(`${relativeFile} imports raw MUI Skeleton; use the Vireo skeleton leaves and loading boundary`);
+  }
+
+  if (
+    relativeFile.startsWith(`pages${path.sep}`) &&
+    /(?:function|const)\s+[A-Za-z0-9]*(?:Page|Route)?Skeleton\b/u.test(source)
+  ) {
+    errors.push(
+      `${relativeFile} declares a standalone page skeleton tree; render loading leaves through the real page composition`,
+    );
+  }
+
+  if (relativeFile.endsWith(".stories.tsx") && canonicalAsyncStoryPattern.test(source)) {
+    const categoryMatch = source.match(/categories:\s*\[([^\]]+)\]/u);
+    const geometryMatch = source.match(/geometry:\s*["']([ABC])["']/u);
+    const declaredCategories = categoryMatch?.[1].match(/["']([^"']+)["']/gu)?.map(value => value.slice(1, -1));
+
+    if (!declaredCategories?.length || declaredCategories.some(category => !loadingCategories.has(category))) {
+      errors.push(`${relativeFile} must declare supported parameters.vireo.loading.categories`);
+    }
+    if (!geometryMatch) {
+      errors.push(`${relativeFile} must declare parameters.vireo.loading.geometry as A, B, or C`);
+    }
+  }
 
   if (/\/index\.[cm]?[jt]sx?$/.test(file.replaceAll(path.sep, "/"))) {
     errors.push(`${relativeFile} is an index barrel; use an explicit file or feature public.ts`);

@@ -120,6 +120,12 @@ const meta = {
   args: { state: "loaded" },
   parameters: {
     controls: { disable: true },
+    vireo: {
+      loading: {
+        categories: ["boundary", "content-preserving", "skeleton-capable"],
+        geometry: "B",
+      },
+    },
     docs: {
       description: {
         component:

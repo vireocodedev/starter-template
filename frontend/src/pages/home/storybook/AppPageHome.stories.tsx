@@ -21,6 +21,12 @@ const meta = {
   component: AppPageHome,
   parameters: {
     controls: { disable: true },
+    vireo: {
+      loading: {
+        categories: ["boundary", "skeleton-capable"],
+        geometry: "A",
+      },
+    },
     docs: {
       description: {
         component:
