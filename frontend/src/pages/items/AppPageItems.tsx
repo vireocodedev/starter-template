@@ -164,13 +164,10 @@ const ItemListContent = React.memo(function ItemListContent({
   );
 
   return (
-    <Stack spacing={2} sx={{ flex: 1, height: "100%", minHeight: 0, overflow: "hidden" }}>
+    <Stack spacing={0} sx={{ flex: 1, height: "100%", minHeight: 0, overflow: "hidden" }}>
       <Box
         sx={{
           bgcolor: "surface.base",
-          border: { xs: 0, sm: 1 },
-          borderColor: "divider",
-          boxShadow: theme => `inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 8%, transparent)`,
           flex: "0 0 auto",
           p: { xs: 2, sm: 1.5 },
         }}
@@ -203,17 +200,23 @@ const ItemListContent = React.memo(function ItemListContent({
               }}
               sx={{ maxWidth: 520 }}
             />
-            <Stack direction="row" spacing={0.5} sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center" }}>
-              <Button size="large" startIcon={<FilterAltOutlined />} variant="outlined" onClick={onOpenFilters}>
+            <ButtonGroup size="large" variant="outlined" sx={{ display: { xs: "none", sm: "inline-flex" } }}>
+              <Button startIcon={<FilterAltOutlined />} onClick={onOpenFilters}>
                 {t("filters.open")}
                 {structuredFilterCount > 0 ? ` (${structuredFilterCount})` : ""}
               </Button>
               {structuredFilterCount > 0 && (
-                <Button size="large" onClick={onClearQueryFilters}>
-                  {t("filters.clearAll")}
-                </Button>
+                <Tooltip title={t("filters.clearAllLabel")}>
+                  <Button
+                    aria-label={t("filters.clearAllLabel")}
+                    onClick={onClearQueryFilters}
+                    sx={{ minWidth: 44, px: 1 }}
+                  >
+                    <CloseRounded />
+                  </Button>
+                </Tooltip>
               )}
-            </Stack>
+            </ButtonGroup>
             {totalResults != null && (
               <Chip
                 color={result.isRefreshing ? "primary" : "default"}
