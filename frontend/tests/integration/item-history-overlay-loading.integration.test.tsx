@@ -42,7 +42,7 @@ function historyState(overrides: Record<string, unknown> = {}) {
     isPending: false,
     refetch,
     ...overrides,
-  };
+  } as unknown as ReturnType<typeof useItemHistory>;
 }
 
 function renderHistory() {
@@ -59,9 +59,7 @@ describe("Item history overlay loading-state contract", () => {
   });
 
   it("keeps the overlay frame and one busy boundary around the real entry skeleton", async () => {
-    vi.mocked(useItemHistory).mockReturnValue(
-      historyState({ isFetching: true, isPending: true }) as ReturnType<typeof useItemHistory>,
-    );
+    vi.mocked(useItemHistory).mockReturnValue(historyState({ isFetching: true, isPending: true }));
     renderHistory();
 
     expect(screen.getByText("History · Starter audit")).toBeVisible();
@@ -73,9 +71,7 @@ describe("Item history overlay loading-state contract", () => {
   });
 
   it("retains usable history and shows subtle progress while refreshing", async () => {
-    vi.mocked(useItemHistory).mockReturnValue(
-      historyState({ data: [record], isFetching: true }) as ReturnType<typeof useItemHistory>,
-    );
+    vi.mocked(useItemHistory).mockReturnValue(historyState({ data: [record], isFetching: true }));
     renderHistory();
 
     expect(screen.getByText("Quantity")).toBeVisible();
@@ -86,7 +82,7 @@ describe("Item history overlay loading-state contract", () => {
   });
 
   it("renders recoverable initial and retained-data errors exclusively", () => {
-    vi.mocked(useItemHistory).mockReturnValue(historyState({ isError: true }) as ReturnType<typeof useItemHistory>);
+    vi.mocked(useItemHistory).mockReturnValue(historyState({ isError: true }));
     const initialError = renderHistory();
 
     expect(screen.getByText("Item history could not be loaded.")).toBeVisible();
@@ -95,9 +91,7 @@ describe("Item history overlay loading-state contract", () => {
     expect(refetch).toHaveBeenCalledOnce();
     initialError.unmount();
 
-    vi.mocked(useItemHistory).mockReturnValue(
-      historyState({ data: [record], isError: true }) as ReturnType<typeof useItemHistory>,
-    );
+    vi.mocked(useItemHistory).mockReturnValue(historyState({ data: [record], isError: true }));
     renderHistory();
 
     expect(screen.getByText("History could not be refreshed. Showing the most recent saved copy.")).toBeVisible();
@@ -107,7 +101,7 @@ describe("Item history overlay loading-state contract", () => {
   });
 
   it("renders the stable empty state without loading or error content", () => {
-    vi.mocked(useItemHistory).mockReturnValue(historyState({ data: [] }) as ReturnType<typeof useItemHistory>);
+    vi.mocked(useItemHistory).mockReturnValue(historyState({ data: [] }));
     renderHistory();
 
     expect(screen.getByText("No history has been recorded for this item.")).toBeVisible();
