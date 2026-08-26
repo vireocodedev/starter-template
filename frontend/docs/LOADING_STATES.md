@@ -14,3 +14,5 @@ The current adoption roadmap is:
 3. Pilot the standard on a data-driven workflow.
 4. Migrate remaining surfaces incrementally.
 5. Enforce stable contracts through authoring guidance and CI.
+
+The Overview Level A reference is verified across English and Croatian, all supported page-width preferences, and desktop/mobile browser viewports. This verification concerns presentation and geometry only; whether static routes should render eagerly or remain lazy is a separate routing decision.

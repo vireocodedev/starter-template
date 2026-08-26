@@ -8,13 +8,15 @@ Async-capable page stories use the applicable canonical names: `Loaded`, `Loadin
 
 Items is the reference data-workflow matrix. In addition to the canonical states, it exposes `RefreshError` to prove that stale rows remain usable when a background request fails. Its alignment contract compares the real loaded and initial-loading page frame, toolbar, table region, and reserved result-count geometry.
 
+Overview is the reference Level A route-skeleton contract. Its alignment matrix renders one shared loaded/loading composition for English and Croatian at every supported page-width preference (`md`, `lg`, `xl`, and `full`) and compares the real header, frame, title, and card rectangles. Skeleton text uses the loaded copy's real typography and wrapping rather than a separately estimated line layout.
+
 Frontend confidence has three pillars:
 
 1. Vitest unit and integration tests for models, services, hooks, and composition.
 2. Storybook interaction, accessibility, and visual-state coverage for UI contracts. Every story is smoke-rendered and accessibility violations fail.
 3. Playwright E2E tests for boot, authentication/session recovery, shell navigation, Item CRUD, and 403/404 behavior.
 
-`npm run test:storybook` transforms every story into a browser test through Storybook's Vitest addon. Every story is smoke-rendered, every `play` function is executed, and project-level accessibility violations fail through `@storybook/addon-a11y`.
+`npm run test:storybook` transforms every story into a browser test through Storybook's Vitest addon. Every story is smoke-rendered, every `play` function is executed, and project-level accessibility violations fail through `@storybook/addon-a11y`. The suite runs in desktop Chromium at 1440 × 900 and mobile Chromium at 390 × 844. Storybook derives shell compactness from the same `md` breakpoint as the application unless a story explicitly overrides it.
 
 `npm run verify` runs architecture checks, formatting, lint, unit/integration tests, browser-based Storybook tests, the production application build, and the production Storybook build with ordered steps and timings. It always exercises published Starter packages and is the release-facing default. E2E remains a separate command.
 

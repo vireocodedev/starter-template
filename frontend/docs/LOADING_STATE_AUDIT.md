@@ -1,8 +1,8 @@
 # Loading-State and Skeleton Audit
 
-**Phase:** 5 — Items data-workflow pilot
+**Phase:** 6 — Overview visual and verification refinement
 
-**Status:** Items loading-state vertical slice remediated
+**Status:** Overview Level A contract remediated and verified
 
 **Audited against:** [Vireo Loading-State and Skeleton Standard](LOADING_STATES.md)
 
@@ -33,13 +33,14 @@ This phase does not decide whether a route should remain lazy or become eager. I
 
 The template already distinguishes initial item loading, retained refresh, incremental pagination, empty results, query errors, and busy mutations in several important paths. Overview also demonstrates the correct structural technique: loaded and loading modes share one page composition and replace only leaves.
 
-The Phase 5 baseline is:
+The Phase 6 baseline is:
 
 1. Every lazy route now declares its loading presentation policy in the route registry.
 2. Unknown route structures use progress-only Level C treatment instead of an invented detailed skeleton.
 3. Route, bootstrap, and Overview loading surfaces consume the shared Starter loading boundary and skeleton leaves.
 4. Items now applies the shared table and loading-region contracts across initial loading, refresh, empty, initial error, and retained refresh-error states.
-5. Overview, Items, and the shared responsive table have alignment contracts; overlay, mutation, and broader visual-matrix coverage remain for later phases.
+5. Overview now verifies exact loaded/loading geometry across English and Croatian, every page-width preference, and real compact/desktop viewports; Items and the shared responsive table retain their alignment contracts.
+6. Overlay, mutation, theme, reduced-motion, and broader state-matrix coverage remain for later phases.
 
 ## Route-code loading inventory
 
@@ -48,7 +49,7 @@ All route modules in `APP_PAGE_REGISTRY` remain loaded through `React.lazy`. The
 | Effective route group                 | Route IDs                                                                           | Current fallback                                                                                                        | Geometry                       | Rating  | Priority |
 | ------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------- | -------- |
 | Application bootstrap and login chunk | `login`, plus authentication recovery before route selection                        | Branded application progress with separate labels, one shared boundary, and delayed visible feedback.                   | C, progress-only               | Aligned | —        |
-| Overview route                        | `home`                                                                              | `AppPageHomeView loading`; loaded and loading states share the real header, page body, frame, grid, and card structure. | A                              | Partial | P1       |
+| Overview route                        | `home`                                                                              | `AppPageHomeView loading`; loaded and loading states share the real header, page body, frame, grid, and card structure. | A                              | Aligned | —        |
 | Progress-only authenticated routes    | `items`, `settings`, `devTools`, every `devTools*` example, `forbidden`, `notFound` | Real shell, page layout, width preference, and localized static header with bounded progress-only content.              | C; stable frame/header anchors | Aligned | —        |
 
 The progress-only group contains 20 routes. Its fallback preserves the application shell, `AppPageLayout`, the user's page-width preference, localized static header content, and known back navigation. It deliberately does not speculate about destination actions, tables, forms, cards, canvases, or vertical geometry.
@@ -64,9 +65,9 @@ The later eager-versus-lazy review may remove waits from static routes, but it i
 | Surface                          | Wait type and category                     | Current treatment                                                                                                                  | Geometry target    | Rating                                      | Priority | Owner                      |
 | -------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------- | -------- | -------------------------- |
 | `AppBootstrapFallback`           | Auth/bootstrap; `boundary`                 | Branded full-screen progress through one shared delayed loading boundary.                                                          | C                  | Aligned                                     | —        | App shell                  |
-| `AppRouteFallback` — Overview    | Route code; `boundary`, `skeleton-capable` | Reuses `AppPageHomeView`; skeletonizes leaves in the real page composition through the shared boundary.                            | A                  | Partial                                     | P1       | App shell + Overview       |
+| `AppRouteFallback` — Overview    | Route code; `boundary`, `skeleton-capable` | Reuses `AppPageHomeView`; skeletonizes leaves in the real page composition through the shared boundary.                            | A                  | Aligned                                     | —        | App shell + Overview       |
 | `AppRouteFallback` — progress    | Route code; `boundary`                     | Reuses the page frame, width preference, localized static header, and bounded progress region without invented content.            | C                  | Aligned                                     | —        | App shell + route registry |
-| `AppPageHomeView loading`        | Route code; `skeleton-capable`             | Reuses real header, width preference, frame, card grid, typography, and localized text geometry with shared skeleton leaves.       | A                  | Partial                                     | P1       | Overview page              |
+| `AppPageHomeView loading`        | Route code; `skeleton-capable`             | Reuses real header, width preference, frame, card grid, typography, and localized text geometry with shared skeleton leaves.       | A                  | Aligned                                     | —        | Overview page              |
 | Items initial query              | Initial data; `skeleton-capable`           | Keeps toolbar, reserved result-count slot, table/list frame, headings, and pagination; delegates unknown rows to the shared table. | B; A outer anchors | Aligned                                     | —        | Items feature + Starter UI |
 | Items background refresh         | Refresh; `content-preserving`              | Keeps usable rows and controls; one shared delayed boundary owns busy/status semantics and a decorative two-pixel progress line.   | A                  | Aligned                                     | —        | Items feature              |
 | Items incremental mobile page    | Pagination; `content-preserving`           | Keeps loaded rows and adds local progress below them.                                                                              | B                  | Aligned                                     | P2       | Items feature + Starter UI |
@@ -114,15 +115,15 @@ The generic detailed skeleton has been removed. Progress routes preserve only st
 
 **Remaining remediation:** Migrate `ItemHistoryOverlay` from raw skeletons and independent timing to the shared foundation during the overlay phase.
 
-### T-04 — Overview proves the structural pattern but remains partially verified
+### T-04 — Overview proves and verifies the structural pattern
 
-**Rating:** Partial
+**Rating:** Aligned
 
-**Priority:** P1, intentionally paused for later visual remediation
+**Priority:** Remediated in Phase 6
 
-Overview shares one real page structure across loading and loaded modes. `AppSkeletonText` preserves real localized typography and wrapping geometry, page width flows through `AppPageLayout`, and one shared boundary now owns delay, `aria-busy`, and announcement semantics. The broader width/localization/responsive/theme matrix remains intentionally paused for later verification.
+Overview shares one real page structure across loading and loaded modes. `AppSkeletonText` paints one skeleton fragment per real wrapped line while preserving the same localized typography boxes. Page width flows through `AppPageLayout`, and one shared boundary owns delay, `aria-busy`, and announcement semantics.
 
-**Remaining remediation:** Expand the existing Level A contract across supported widths, localization, responsive modes, and themes without creating a second skeleton tree.
+**Remediation record:** The browser alignment matrix compares the real loaded and loading anchors for `md`, `lg`, `xl`, and `full` widths in English and Croatian. Storybook runs the matrix at 1440 × 900 and 390 × 844, with its shell navigation context derived from the same `md` breakpoint as the application. Theme and explicit reduced-motion sweeps remain global verification work rather than Overview-specific geometry gaps.
 
 ### T-05 — Items initial loading preserves the workflow frame
 
@@ -187,31 +188,32 @@ Authentication bootstrap and login route-code loading now provide separate label
 
 **Priority:** P1
 
-Overview and Items have Storybook alignment contracts. Items additionally exercises loaded, initial loading, refreshing, empty, initial error, retained refresh-error, compact mobile loading, small density, retry, delayed visibility, and announcement uniqueness. Route-policy exhaustiveness and localized header keys also have focused coverage. Overlays, mutations, longest localization, all supported page widths, explicit reduced-motion assertions, mobile pixel geometry, and the broader announcement matrix remain open.
+Overview and Items have Storybook alignment contracts. Overview exercises both supported locales, all page-width preferences, and real compact/desktop browser viewports. Items additionally exercises loaded, initial loading, refreshing, empty, initial error, retained refresh-error, compact mobile loading, small density, retry, delayed visibility, and announcement uniqueness. Route-policy exhaustiveness and localized header keys also have focused coverage. Overlays, mutations, theme variants, explicit reduced-motion assertions, and the broader announcement matrix remain open.
 
-**Required remediation:** Add tests alongside each remediation. Route-policy exhaustiveness, Level A/B anchors, state transitions, accessibility ownership, responsive modes, table density, themes, localization, reduced motion, and CLS thresholds must all become executable contracts.
+**Required remediation:** Add tests alongside each remediation. Remaining state transitions, accessibility ownership, themes, reduced motion, and CLS thresholds must become executable contracts without weakening the existing Level A/B, responsive, density, and localization coverage.
 
 ## State-transition coverage baseline
 
-| Transition                                    | Best current reference                | Gap                                                               |
-| --------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------- |
-| Initial loading → content                     | Overview and Items                    | Both have alignment contracts; the broader visual matrix remains. |
-| Initial loading → empty                       | Items and async-state example         | Items is covered; other query boundaries remain inconsistent.     |
-| Initial loading → error                       | Items                                 | Items is exclusive and recoverable; overlays remain inconsistent. |
-| Content → refresh → updated                   | Items                                 | Retention, ownership, and state coverage are aligned.             |
-| Content → refresh error with retained content | Items and item history                | Items is aligned; the pattern is not yet generalized to overlays. |
-| Content → mutation → success/error            | Item form, delete confirmation, login | Shared busy-action semantics remain incomplete.                   |
-| Route code → destination                      | Overview and page progress            | Overview is exact; other routes preserve known anchors only.      |
+| Transition                                    | Best current reference                | Gap                                                                          |
+| --------------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------- |
+| Initial loading → content                     | Overview and Items                    | Overview's width/locale/viewport geometry is covered; broader themes remain. |
+| Initial loading → empty                       | Items and async-state example         | Items is covered; other query boundaries remain inconsistent.                |
+| Initial loading → error                       | Items                                 | Items is exclusive and recoverable; overlays remain inconsistent.            |
+| Content → refresh → updated                   | Items                                 | Retention, ownership, and state coverage are aligned.                        |
+| Content → refresh error with retained content | Items and item history                | Items is aligned; the pattern is not yet generalized to overlays.            |
+| Content → mutation → success/error            | Item form, delete confirmation, login | Shared busy-action semantics remain incomplete.                              |
+| Route code → destination                      | Overview and page progress            | Overview is exact; other routes preserve known anchors only.                 |
 
 ## Remediation order
 
 1. **Route contract (complete):** typed per-route policies replace the invented generic fallback with a compliant Level C treatment.
 2. **Starter foundation adoption (complete for Phase 4 surfaces):** route, bootstrap, and Overview loading use shared boundaries, tokens, and skeleton leaves.
 3. **Items pilot (complete):** responsive-table integration, result-count geometry, exclusive error/empty behavior, refresh ownership, recovery, and canonical stories.
-4. **Overlay migration:** remediate item history, filter definition, and relation-option states.
-5. **Busy-action integration:** adopt the finalized Starter form and confirmation contracts in item and login flows.
-6. **Verification sweep:** add the full route, state, geometry, accessibility, motion, localization, theme, and responsive matrix.
-7. **Separate route strategy review:** only after visual contracts are stable, decide which static routes should be eager or lazy.
+4. **Overview return (complete):** refine multiline leaves and verify exact geometry across locale, page width, compact, and desktop scenarios.
+5. **Overlay migration:** remediate item history, filter definition, and relation-option states.
+6. **Busy-action integration:** adopt the finalized Starter form and confirmation contracts in item and login flows.
+7. **Verification sweep:** add the remaining route, state, accessibility, motion, theme, and CLS matrix.
+8. **Separate route strategy review:** only after visual contracts are stable, decide which static routes should be eager or lazy.
 
 ## Phase 2 exit record
 
@@ -224,4 +226,5 @@ Overview and Items have Storybook alignment contracts. Items additionally exerci
 - [x] Eager-versus-lazy decisions explicitly deferred.
 - [x] Phase 4 route-policy and page-loading convention findings remediated.
 - [x] Phase 5 Items data-workflow pilot remediated and verified.
+- [x] Phase 6 Overview visual leaves and width/locale/viewport geometry remediated and verified.
 - [ ] Remaining overlay, widget, busy-action, and broader verification findings remediated in later phases.
