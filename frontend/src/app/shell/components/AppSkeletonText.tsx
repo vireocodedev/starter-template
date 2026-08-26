@@ -31,19 +31,22 @@ export function AppSkeletonText({ children, visible = true }: AppSkeletonTextPro
         {children}
       </Box>
       <VireoSkeleton
+        data-app-skeleton-text
         variant="rounded"
         sx={{
-          display: "block",
+          boxDecorationBreak: "clone",
+          display: "inline",
+          lineHeight: "inherit",
+          maskImage: "linear-gradient(to bottom, transparent 12%, black 12%, black 88%, transparent 88%)",
           maxWidth: "100%",
           transform: "none",
           visibility: visible ? "visible" : "hidden",
-          width: "fit-content",
+          WebkitBoxDecorationBreak: "clone",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 12%, black 12%, black 88%, transparent 88%)",
           "& > *": { visibility: "hidden" },
         }}
       >
-        <Box component="span" sx={{ display: "block" }}>
-          {children}
-        </Box>
+        <Box component="span">{children}</Box>
       </VireoSkeleton>
     </>
   );
