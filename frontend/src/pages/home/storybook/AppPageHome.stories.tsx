@@ -9,13 +9,23 @@ import { AppPageHomeView } from "../AppPageHomeView";
 const meta = {
   title: "PAGES/Overview",
   component: AppPageHome,
-  parameters: { controls: { disable: true } },
+  parameters: {
+    controls: { disable: true },
+    docs: {
+      description: {
+        component:
+          "Overview is a static route with a synchronously shared Level A loading composition. Refreshing, Empty, and Error stories are intentionally omitted because the page owns no asynchronous data state.",
+      },
+    },
+  },
 } satisfies Meta<typeof AppPageHome>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const Loaded: Story = {};
 
 export const Loading: Story = {
   render: () => <AppPageHomeView loading />,
@@ -67,7 +77,9 @@ export const AlignmentContract: Story = {
     const loaded = measureAlignmentAnchors(canvasElement);
 
     await userEvent.click(canvas.getByTestId("toggle-overview-loading"));
-    await waitFor(() => expect(canvasElement.querySelector('[data-app-overview-state="loading"]')).not.toBeNull());
+    await waitFor(() =>
+      expect(canvasElement.querySelector('[data-app-overview-loading-phase="visible"]')).not.toBeNull(),
+    );
 
     const loading = measureAlignmentAnchors(canvasElement);
     loading.forEach((measurement, index) => {

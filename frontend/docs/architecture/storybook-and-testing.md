@@ -4,6 +4,8 @@ The application has its own Storybook; it is not merged into the Starter library
 
 Navigation groups are `DOCUMENTATION`, `APPLICATION`, `FEATURES`, and `PAGES`. Reusable and state-rich components receive colocated stories. Route components, providers, API clients, and tiny private fragments do not receive stories automatically.
 
+Async-capable page stories use the applicable canonical names: `Loaded`, `Loading`, `Refreshing`, `Empty`, `Error`, and `AlignmentContract`. Omitted states must be intentional and explained in the page documentation. `Default` may remain as the introductory story but does not replace the canonical state story.
+
 Frontend confidence has three pillars:
 
 1. Vitest unit and integration tests for models, services, hooks, and composition.
