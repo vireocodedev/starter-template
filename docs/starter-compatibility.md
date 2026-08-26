@@ -16,6 +16,10 @@ The template's ordinary install, development, test, Storybook, and production-bu
 
 The lockfiles are the reproducibility boundary. Updating a supported package range still requires reviewing and committing the resulting lockfile changes and passing the authoritative verification command.
 
+Toolchain and workflow policy are checked inside the authoritative frontend gate.
+Recurring Java, browser, and PostgreSQL compatibility evidence is described in
+[Platform support evidence](platform-support-evidence.md).
+
 ## Local Starter development
 
 Use `corepack npm run dev:local-starter` only when changing Starter and this template together. Use `corepack npm run dev` to prove the published-consumer experience. See [Developing against local Starter libraries](local-starter-development.md) for the complete mode matrix.

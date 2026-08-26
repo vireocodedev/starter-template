@@ -77,6 +77,10 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(
+                providers.gradleProperty('vireoTestJavaVersion').getOrElse('21') as Integer)
+    }
     finalizedBy tasks.named('jacocoTestReport')
 }
 

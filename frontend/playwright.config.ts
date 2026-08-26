@@ -1,8 +1,28 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const useLocalStarter = process.env.USE_LOCAL_STARTER_SOURCE === "true";
+const browserLane = process.env.VIREO_E2E_BROWSER ?? "chromium";
 const webServerStartupTimeout = 90_000;
 const frontendDevCommand = useLocalStarter ? "corepack npm run dev:local-starter" : "corepack npm run dev";
+const backendDevCommand =
+  process.env.VIREO_E2E_EXTERNAL_DATABASE === "true"
+    ? "../gradlew -p .. bootRun --console=plain"
+    : "SPRING_DATASOURCE_URL='jdbc:h2:mem:startertemplatee2e;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1' " +
+      "SPRING_DATASOURCE_USERNAME=sa SPRING_DATASOURCE_PASSWORD='' ../gradlew -p .. bootRun --console=plain";
+
+const projects =
+  browserLane === "firefox"
+    ? [{ name: "desktop-firefox", use: { ...devices["Desktop Firefox"] } }]
+    : browserLane === "webkit"
+      ? [{ name: "desktop-webkit", use: { ...devices["Desktop Safari"] } }]
+      : [
+          { name: "desktop-chromium", use: { ...devices["Desktop Chrome"] } },
+          { name: "mobile-chromium", use: { ...devices["Pixel 7"] } },
+        ];
+
+if (!new Set(["chromium", "firefox", "webkit"]).has(browserLane)) {
+  throw new Error(`Unsupported VIREO_E2E_BROWSER value: ${browserLane}`);
+}
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -11,9 +31,7 @@ export default defineConfig({
   use: { baseURL: "http://127.0.0.1:3000", trace: "on-first-retry" },
   webServer: [
     {
-      command:
-        "SPRING_DATASOURCE_URL='jdbc:h2:mem:startertemplatee2e;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1' " +
-        "SPRING_DATASOURCE_USERNAME=sa SPRING_DATASOURCE_PASSWORD='' ../gradlew -p .. bootRun --console=plain",
+      command: backendDevCommand,
       url: "http://127.0.0.1:8080/actuator/health/readiness",
       reuseExistingServer: !process.env.CI,
       timeout: webServerStartupTimeout,
@@ -27,8 +45,5 @@ export default defineConfig({
       stdout: process.env.CI ? "pipe" : "ignore",
     },
   ],
-  projects: [
-    { name: "desktop-chromium", use: { ...devices["Desktop Chrome"] } },
-    { name: "mobile-chromium", use: { ...devices["Pixel 7"] } },
-  ],
+  projects,
 });

@@ -1,0 +1,181 @@
+name: Support evidence
+
+on:
+  schedule:
+    - cron: "43 2 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: support-evidence-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  GITHUB_ACTOR: ${{ github.actor }}
+  VIREO_PACKAGES_TOKEN: ${{ secrets.VIREO_PACKAGES_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.VIREO_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+  NODE_AUTH_TOKEN: ${{ secrets.VIREO_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+
+jobs:
+  java-25:
+    name: Java 25 compatibility
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Install the Java 21 compiler toolchain
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Select the Java 25 test runtime
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
+      - run: ./scripts/require-ci-package-token.sh
+      - run: ./gradlew clean build -PvireoTestJavaVersion=25 --no-build-cache
+      - name: Record evidence
+        if: always()
+        env:
+          VIREO_EVIDENCE_COMMAND: ./gradlew clean build -PvireoTestJavaVersion=25 --no-build-cache
+          VIREO_EVIDENCE_JAVA_TARGET: "25"
+        run: node scripts/write-support-evidence.mjs java-25 ${{ job.status }} .support-evidence/java-25.json
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: support-java-25-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .support-evidence/java-25.json
+          if-no-files-found: error
+          retention-days: 14
+
+  browsers:
+    name: ${{ matrix.browser }} browser compatibility
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [firefox, webkit]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24.18.1
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+          registry-url: https://npm.pkg.github.com
+          scope: "@vireocodedev"
+      - run: ./scripts/require-ci-package-token.sh
+      - run: corepack npm ci
+        working-directory: frontend
+      - run: corepack npm exec -- playwright install --with-deps ${{ matrix.browser }}
+        working-directory: frontend
+      - name: Run full-stack browser smoke tests
+        env:
+          VIREO_E2E_BROWSER: ${{ matrix.browser }}
+        run: corepack npm run test:e2e
+        working-directory: frontend
+      - name: Record evidence
+        if: always()
+        env:
+          VIREO_EVIDENCE_BROWSER: ${{ matrix.browser }}
+          VIREO_EVIDENCE_COMMAND: corepack npm run test:e2e
+        run: node scripts/write-support-evidence.mjs browser-${{ matrix.browser }} ${{ job.status }} .support-evidence/browser-${{ matrix.browser }}.json
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: support-browser-${{ matrix.browser }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .support-evidence/browser-${{ matrix.browser }}.json
+          if-no-files-found: error
+          retention-days: 14
+
+  postgres:
+    name: PostgreSQL ${{ matrix.postgresql }} full-stack
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        postgresql: ["17", "18"]
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgresql }}-alpine
+        env:
+          POSTGRES_DB: starter_template
+          POSTGRES_USER: starter_template
+          POSTGRES_PASSWORD: support-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U starter_template -d starter_template"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24.18.1
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+          registry-url: https://npm.pkg.github.com
+          scope: "@vireocodedev"
+      - run: ./scripts/require-ci-package-token.sh
+      - run: corepack npm ci
+        working-directory: frontend
+      - run: corepack npm exec -- playwright install --with-deps chromium
+        working-directory: frontend
+      - name: Exercise migrations and CRUD through the real application
+        env:
+          VIREO_E2E_EXTERNAL_DATABASE: "true"
+          SPRING_PROFILES_ACTIVE: dev
+          SPRING_DATASOURCE_URL: jdbc:postgresql://127.0.0.1:5432/starter_template
+          SPRING_DATASOURCE_USERNAME: starter_template
+          SPRING_DATASOURCE_PASSWORD: support-only-password
+        run: corepack npm run test:e2e
+        working-directory: frontend
+      - name: Resolve tested image digest
+        if: always()
+        run: echo "VIREO_EVIDENCE_IMAGE=$(docker image inspect postgres:${{ matrix.postgresql }}-alpine --format '{{index .RepoDigests 0}}')" >> "$GITHUB_ENV"
+      - name: Record evidence
+        if: always()
+        env:
+          VIREO_EVIDENCE_COMMAND: corepack npm run test:e2e
+          VIREO_EVIDENCE_DATABASE_MODE: full-stack-dev-profile
+          VIREO_EVIDENCE_POSTGRESQL: ${{ matrix.postgresql }}
+        run: node scripts/write-support-evidence.mjs postgres-${{ matrix.postgresql }} ${{ job.status }} .support-evidence/postgres-${{ matrix.postgresql }}.json
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: support-postgres-${{ matrix.postgresql }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .support-evidence/postgres-${{ matrix.postgresql }}.json
+          if-no-files-found: error
+          retention-days: 14

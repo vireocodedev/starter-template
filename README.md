@@ -4,8 +4,8 @@ A production-shaped React PWA and Spring Boot application for starting a Vireo p
 
 ## Prerequisites
 
-- Java 21
-- Node.js 24.15 or newer and npm 12
+- Java 21 (Java 25 is exercised as a compatibility runtime)
+- Node.js 24.15–24.x through Corepack npm 12.0.2; CI uses Node 24.18.1
 - PostgreSQL 16 or newer for a production-like local environment (H2 is also supported for quick development)
 - GitHub Packages read access for the published Vireo Starter artifacts
 
@@ -48,6 +48,7 @@ Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md
 - [Customizing the template](docs/customizing-the-template.md)
 - [Deployment](docs/deployment.md)
 - [Starter compatibility and bundle policy](docs/starter-compatibility.md)
+- [Platform support evidence](docs/platform-support-evidence.md)
 - [Developing against local Starter libraries](docs/local-starter-development.md)
 - [Entity query-filter standard](docs/entity-query-filters.md)
 - [Frontend architecture contract](frontend/docs/architecture/README.md)
