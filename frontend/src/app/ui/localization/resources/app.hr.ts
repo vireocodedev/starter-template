@@ -2,7 +2,12 @@ import type { WidenLeaves } from "@vireocodedev/starter-localization";
 import type en from "./app.en";
 
 const hr = {
-  brand: { name: "Vireo Starter", tagline: "Full-stack PWA" },
+  brand: {
+    name: "Vireo Starter",
+    tagline: "Full-stack PWA",
+    online: "Sustav je povezan",
+    offline: "Veza je prekinuta",
+  },
   navigation: {
     OVERVIEW: "Pregled",
     ITEMS: "Stavke",

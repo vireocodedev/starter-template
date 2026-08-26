@@ -1,5 +1,10 @@
 const en = {
-  brand: { name: "Vireo Starter", tagline: "Full-stack PWA" },
+  brand: {
+    name: "Vireo Starter",
+    tagline: "Full-stack PWA",
+    online: "System online",
+    offline: "Connection offline",
+  },
   navigation: {
     OVERVIEW: "Overview",
     ITEMS: "Items",

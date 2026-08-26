@@ -28,6 +28,7 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Chip,
   Collapse,
   IconButton,
   InputAdornment,
@@ -164,7 +165,16 @@ const ItemListContent = React.memo(function ItemListContent({
 
   return (
     <Stack spacing={2} sx={{ flex: 1, height: "100%", minHeight: 0, overflow: "hidden" }}>
-      <Box sx={{ flex: "0 0 auto", px: { xs: 2, sm: 0 }, pt: { xs: 2, sm: 0 } }}>
+      <Box
+        sx={{
+          bgcolor: "surface.base",
+          border: { xs: 0, sm: 1 },
+          borderColor: "divider",
+          boxShadow: theme => `inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 8%, transparent)`,
+          flex: "0 0 auto",
+          p: { xs: 2, sm: 1.5 },
+        }}
+      >
         <Stack spacing={1}>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: { sm: "center" } }}>
             <TextField
@@ -205,16 +215,20 @@ const ItemListContent = React.memo(function ItemListContent({
               )}
             </Stack>
             {totalResults != null && (
-              <Typography
-                color="text.secondary"
-                variant="body2"
-                sx={{ display: { xs: "none", sm: "block" }, ml: { sm: "auto !important" }, whiteSpace: "nowrap" }}
-              >
-                {t("results", {
+              <Chip
+                color={result.isRefreshing ? "primary" : "default"}
+                label={t("results", {
                   count: totalResults,
                   formattedCount: totalResults.toLocaleString(i18n.resolvedLanguage),
                 })}
-              </Typography>
+                size="small"
+                sx={{
+                  display: { xs: "none", sm: "inline-flex" },
+                  ml: { sm: "auto !important" },
+                  whiteSpace: "nowrap",
+                }}
+                variant="outlined"
+              />
             )}
           </Stack>
           <Box
@@ -244,16 +258,15 @@ const ItemListContent = React.memo(function ItemListContent({
               )}
             </ButtonGroup>
             {totalResults != null && (
-              <Typography
-                color="text.secondary"
-                variant="body2"
-                sx={{ gridColumn: 2, minWidth: 0, textAlign: "right", whiteSpace: "nowrap" }}
-              >
-                {t("results", {
+              <Chip
+                label={t("results", {
                   count: totalResults,
                   formattedCount: formatQueryResultCount(totalResults, i18n.resolvedLanguage),
                 })}
-              </Typography>
+                size="small"
+                sx={{ gridColumn: 2, minWidth: 0, textAlign: "right", whiteSpace: "nowrap" }}
+                variant="outlined"
+              />
             )}
           </Box>
           {queryFilters && (
@@ -314,7 +327,17 @@ const ItemListContent = React.memo(function ItemListContent({
           {t("error.message")}
         </Alert>
       </Collapse>
-      <Box sx={{ display: "flex", flex: 1, minHeight: 0, position: "relative" }}>
+      <Box
+        sx={{
+          bgcolor: "surface.base",
+          borderBlock: { xs: 1, sm: 0 },
+          borderColor: "divider",
+          display: "flex",
+          flex: 1,
+          minHeight: 0,
+          position: "relative",
+        }}
+      >
         {result.isRefreshing && (
           <LinearProgress
             aria-label={t("table.refreshing")}
@@ -498,7 +521,14 @@ export function AppPageItems() {
           title={t("header.title")}
           description={t("header.description")}
           primaryAction={
-            canManage ? { icon: <AddRounded />, label: t("header.create"), onClick: openCreate } : undefined
+            canManage
+              ? {
+                  icon: <AddRounded />,
+                  label: t("header.create"),
+                  onClick: openCreate,
+                  preview: t("header.createPreview"),
+                }
+              : undefined
           }
         />
       }

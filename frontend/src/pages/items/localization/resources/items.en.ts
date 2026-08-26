@@ -3,6 +3,7 @@ const en = {
     title: "Items",
     description: "A complete responsive CRUD workflow backed by one Starter entity.",
     create: "Create item",
+    createPreview: "Adds one record to this workspace",
   },
   search: { placeholder: "Search by name, description or status", clear: "Clear search" },
   results_one: "{{formattedCount}} result",

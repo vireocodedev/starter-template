@@ -5,6 +5,7 @@ const hr = {
     title: "Stavke",
     description: "Cjelovit responzivni CRUD tijek rada podržan jednim Starter entitetom.",
     create: "Stvori stavku",
+    createPreview: "Dodaje jedan zapis u ovaj radni prostor",
   },
   search: { placeholder: "Pretraži po nazivu, opisu ili statusu", clear: "Očisti pretraživanje" },
   results_one: "{{formattedCount}} rezultat",

@@ -9,6 +9,13 @@ const hr = {
   title: "Čista polazna točka za sljedeću Vireo aplikaciju.",
   introduction:
     "Ovaj je repozitorij namjerno malen, ali svaki uključeni tijek rada oblikovan je za produkciju i oslanja se na najnovije Starter biblioteke.",
+  status: {
+    api: "API je povezan",
+    pwa: "PWA je spreman",
+    responsive: "Responzivna ljuska",
+  },
+  module: "Modul {{number}}",
+  operational: "Operativno",
   cards: {
     entity: {
       title: "Cjelovit tijek entiteta",

@@ -7,6 +7,13 @@ const en = {
   title: "A clean starting point for the next Vireo application.",
   introduction:
     "This repository is deliberately small, but every included workflow is production-shaped and backed by the latest Starter libraries.",
+  status: {
+    api: "API connected",
+    pwa: "PWA ready",
+    responsive: "Responsive shell",
+  },
+  module: "Module {{number}}",
+  operational: "Operational",
   cards: {
     entity: { title: "Complete entity flow", body: "Search, create, edit and delete a real Spring Data entity." },
     contracts: {

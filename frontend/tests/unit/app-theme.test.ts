@@ -9,30 +9,30 @@ describe("application themes", () => {
     expect(APP_THEME_LIGHT_COLOR_SCHEME.palette).toMatchObject({
       mode: "light",
       background: {
-        default: "#f9fafb",
+        default: "#eff1ec",
         paper: "#ffffff",
       },
-      divider: "#d0d5dd",
+      divider: "#cbd0c7",
     });
 
     expect(APP_THEME_DARK_COLOR_SCHEME.palette).toMatchObject({
       mode: "dark",
       background: {
-        default: "#0c111d",
-        paper: "#1d2939",
+        default: "#0d100e",
+        paper: "#191e1a",
       },
-      divider: "#344054",
+      divider: "#3b433b",
     });
   });
 
   it("assembles both schemes into one CSS-variable theme", () => {
     expect(APP_THEME.colorSchemes.light?.palette.background).toMatchObject({
-      default: "#f9fafb",
+      default: "#eff1ec",
       paper: "#ffffff",
     });
     expect(APP_THEME.colorSchemes.dark?.palette.background).toMatchObject({
-      default: "#0c111d",
-      paper: "#1d2939",
+      default: "#0d100e",
+      paper: "#191e1a",
     });
   });
 
@@ -47,6 +47,8 @@ describe("application themes", () => {
     expect(APP_THEME_COMPONENTS?.MuiButton?.styleOverrides?.root).toBeDefined();
     expect(APP_THEME_COMPONENTS?.MuiIconButton?.styleOverrides?.root).toBeDefined();
     expect(APP_THEME_COMPONENTS?.MuiTableBody?.styleOverrides?.root).toBeDefined();
+    expect(APP_THEME_COMPONENTS?.MuiTableHead?.styleOverrides?.root).toBeDefined();
+    expect(APP_THEME_COMPONENTS?.MuiOutlinedInput?.styleOverrides?.root).toBeDefined();
     expect(APP_THEME.components?.MuiCard?.defaultProps).toMatchObject({
       elevation: 0,
       variant: "outlined",

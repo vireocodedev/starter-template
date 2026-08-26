@@ -120,6 +120,14 @@ export function AppShellLayout() {
         resizable={desktop && !preferences.navigationLocked}
         onModeChange={commitNavigationMode}
         onExpandedWidthChange={commitNavigationWidth}
+        sx={{
+          "& .MuiDrawer-paper": {
+            bgcolor: "surface.base",
+            borderColor: "divider",
+            boxShadow: theme =>
+              `10px 0 28px color-mix(in srgb, ${theme.palette.common.black} 10%, transparent), inset -1px 0 0 color-mix(in srgb, ${theme.palette.primary.main} 18%, transparent)`,
+          },
+        }}
       >
         {({ mode, toggleMode }) => {
           const compact = mode === "compact";
@@ -142,7 +150,17 @@ export function AppShellLayout() {
                 {showBrandMark && (
                   <Avatar
                     variant="rounded"
-                    sx={{ bgcolor: "primary.main", color: "primary.contrastText", flex: "0 0 auto", fontWeight: 800 }}
+                    sx={{
+                      bgcolor: "primary.main",
+                      border: 1,
+                      borderColor: "primary.light",
+                      borderRadius: 1,
+                      boxShadow: theme =>
+                        `inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 30%, transparent), 0 4px 12px color-mix(in srgb, ${theme.palette.primary.main} 24%, transparent)`,
+                      color: "primary.contrastText",
+                      flex: "0 0 auto",
+                      fontWeight: 900,
+                    }}
                   >
                     V
                   </Avatar>
@@ -152,9 +170,30 @@ export function AppShellLayout() {
                     <Typography noWrap sx={{ fontWeight: 800, lineHeight: 1.2 }}>
                       {t("brand.name")}
                     </Typography>
-                    <Typography color="text.secondary" variant="caption">
-                      {t("brand.tagline")}
-                    </Typography>
+                    <Box sx={{ alignItems: "center", display: "flex", gap: 0.75, mt: 0.25 }}>
+                      <Box
+                        aria-hidden
+                        sx={{
+                          bgcolor: online ? "success.main" : "warning.main",
+                          borderRadius: "50%",
+                          boxShadow: theme =>
+                            `0 0 8px color-mix(in srgb, ${online ? theme.palette.success.main : theme.palette.warning.main} 55%, transparent)`,
+                          height: 6,
+                          width: 6,
+                        }}
+                      />
+                      <Typography
+                        color="text.secondary"
+                        sx={{
+                          fontSize: "0.625rem",
+                          fontWeight: 750,
+                          letterSpacing: "0.08em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {online ? t("brand.online") : t("brand.offline")}
+                      </Typography>
+                    </Box>
                   </Box>
                 )}
                 {desktop && !preferences.navigationLocked && (
@@ -182,7 +221,7 @@ export function AppShellLayout() {
                 )}
               </Box>
               <Divider />
-              <List sx={{ flex: 1, px: compact ? 0.75 : 1.25, py: 2 }}>
+              <List sx={{ flex: 1, px: compact ? 0.75 : 1.25, py: 1.5 }}>
                 {navigation.map(item => (
                   <VireoApplicationNavigationItem
                     key={item.path}
@@ -198,8 +237,19 @@ export function AppShellLayout() {
                     onPointerEnter={() => preloadAppPage(item.path)}
                     sx={{
                       mb: 0.5,
-                      "&.Mui-selected": { bgcolor: "action.selected", color: "primary.main" },
-                      "&.Mui-selected:hover": { bgcolor: "action.hover" },
+                      border: "1px solid transparent",
+                      "&.Mui-selected": {
+                        bgcolor: "action.selected",
+                        borderColor: theme =>
+                          `color-mix(in srgb, ${theme.palette.primary.main} 42%, ${theme.palette.divider})`,
+                        boxShadow: theme =>
+                          `inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 8%, transparent)`,
+                        color: "primary.main",
+                      },
+                      "&.Mui-selected:hover": { bgcolor: "action.selected" },
+                      "& .VireoApplicationNavigationItem-label": {
+                        letterSpacing: compact ? "0.035em" : "0.01em",
+                      },
                     }}
                   />
                 ))}
@@ -249,7 +299,7 @@ export function AppShellLayout() {
                   </Popover>
                 </Box>
               ) : (
-                <Box sx={{ alignItems: "center", display: "flex", gap: 1.25, p: 2 }}>
+                <Box sx={{ alignItems: "center", bgcolor: "surface.raised", display: "flex", gap: 1.25, p: 2 }}>
                   <Avatar sx={{ height: 36, width: 36 }}>{user?.username.slice(0, 1).toUpperCase()}</Avatar>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography noWrap variant="body2" sx={{ fontWeight: 700 }}>
@@ -310,6 +360,8 @@ export function AppShellLayout() {
               value={activeNavigationPath}
               onChange={navigateTo}
               sx={{
+                bgcolor: "surface.raised",
+                boxShadow: theme => `0 -8px 24px color-mix(in srgb, ${theme.palette.common.black} 12%, transparent)`,
                 position: "relative",
                 zIndex: theme.zIndex.appBar,
               }}
