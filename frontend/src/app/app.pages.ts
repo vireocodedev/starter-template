@@ -1,8 +1,15 @@
 import type { ComponentType } from "react";
+import { AppPageHomeView } from "@/pages/home/AppPageHomeView";
 
 export type AppPageAccess = "PUBLIC" | "AUTHENTICATED";
 export type AppNavigationIcon = "OVERVIEW" | "ITEMS" | "SETTINGS" | "DEV_TOOLS";
 export type AppPageModule = { default: ComponentType };
+
+export const APP_ROUTE_SKELETON_COMPOSITIONS = {
+  overview: AppPageHomeView,
+} as const satisfies Record<string, ComponentType<{ loading?: boolean }>>;
+
+export type AppRouteSkeletonComposition = keyof typeof APP_ROUTE_SKELETON_COMPOSITIONS;
 
 export type AppRouteLoadingHeader = {
   backLabelKey?: string;
@@ -16,7 +23,7 @@ export type AppRouteLoadingPolicy =
   | { policy: "none" }
   | { policy: "retain" }
   | { policy: "progress"; frame: "application" | "page"; header?: AppRouteLoadingHeader }
-  | { policy: "skeleton"; composition: "overview" };
+  | { policy: "skeleton"; composition: AppRouteSkeletonComposition };
 
 type AppPageDefinition = {
   access: AppPageAccess;

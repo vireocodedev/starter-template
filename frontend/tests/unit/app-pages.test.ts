@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { APP_NAVIGATION_PAGES, APP_PAGE_REGISTRY, APP_PAGES, loadAppPage, preloadAppPage } from "@/app/app.pages";
+import {
+  APP_NAVIGATION_PAGES,
+  APP_PAGE_REGISTRY,
+  APP_PAGES,
+  APP_ROUTE_SKELETON_COMPOSITIONS,
+  loadAppPage,
+  preloadAppPage,
+} from "@/app/app.pages";
 import { APP_LOCALIZATION_RESOURCES } from "@/app/app.localization";
 
 function hasNestedKey(value: unknown, path: string): boolean {
@@ -26,6 +33,7 @@ describe("application page registry", () => {
       .map(([id]) => id);
 
     expect(skeletonRoutes).toEqual(["home"]);
+    expect(Object.keys(APP_ROUTE_SKELETON_COMPOSITIONS)).toEqual(["overview"]);
     expect(APP_PAGE_REGISTRY.home.loading).toEqual({ policy: "skeleton", composition: "overview" });
     expect(APP_PAGE_REGISTRY.login.loading).toEqual({ policy: "progress", frame: "application" });
   });

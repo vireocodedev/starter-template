@@ -1,8 +1,11 @@
-import type { AppRouteLoadingHeader, AppRouteLoadingPolicy } from "@/app/app.pages";
+import {
+  APP_ROUTE_SKELETON_COMPOSITIONS,
+  type AppRouteLoadingHeader,
+  type AppRouteLoadingPolicy,
+} from "@/app/app.pages";
 import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
 import { AppPageLayout } from "@/app/shell/layout/AppPageLayout";
 import { useAppTranslation } from "@/app/ui/localization/use-app-translation";
-import { AppPageHomeView } from "@/pages/home/AppPageHomeView";
 import { Avatar, Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { VireoLoadingRegion } from "@vireocodedev/starter-ui";
 import { useTranslation } from "react-i18next";
@@ -106,13 +109,10 @@ export function AppRouteFallback({ loading }: { loading: AppRouteLoadingPolicy }
       ) : (
         <AppPageProgressFallback header={loading.header} />
       );
-    case "skeleton":
-      switch (loading.composition) {
-        case "overview":
-          return <AppPageHomeView loading />;
-        default:
-          return assertNever(loading.composition);
-      }
+    case "skeleton": {
+      const LoadingComposition = APP_ROUTE_SKELETON_COMPOSITIONS[loading.composition];
+      return <LoadingComposition loading />;
+    }
     default:
       return assertNever(loading);
   }
