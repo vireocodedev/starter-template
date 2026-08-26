@@ -619,14 +619,13 @@ export function AppPageItems() {
   }, [filters, queryFilters, search.input]);
   const requestDelete = React.useCallback(
     async (item: Item) => {
-      const accepted = await confirm({
+      await confirm({
         title: t("delete.title"),
         message: <>{t("delete.message", { name: item.name })}</>,
         confirmLabel: t("delete.confirm"),
         confirmColor: "error",
+        onConfirm: () => deleteItem(item),
       });
-      if (!accepted) return;
-      await deleteItem(item);
     },
     [confirm, deleteItem, t],
   );

@@ -49,7 +49,7 @@ export function ItemFormOverlay({ item, open, onClose, onExited }: ItemFormOverl
         </form.Form>
       )}
       actions={({ requestClose }) => (
-        <ItemFormActions form={form} editing={item !== undefined} onCancel={requestClose} />
+        <ItemFormActions form={form} editing={item !== undefined} onCancel={requestClose} pending={savePending} />
       )}
     >
       <ItemForm form={form} />
