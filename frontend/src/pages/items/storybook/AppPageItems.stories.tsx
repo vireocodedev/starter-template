@@ -4,7 +4,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { VireoResponsiveTableFilters } from "@vireocodedev/starter-ui";
 import { Button } from "@mui/material";
 import React from "react";
-import { expect, fn, userEvent, waitFor, within } from "storybook/test";
+import { expect, fn, waitFor, within } from "storybook/test";
+import { measureUnexpectedLayoutShift } from "@/app/storybook/loadingGeometry";
 import { AppPageItemsFrame, AppPageItemsListView, type AppPageItemsListState } from "../AppPageItems";
 
 type ItemsStoryState = "loaded" | "loading" | "refreshing" | "refresh-error" | "empty" | "error";
@@ -231,10 +232,13 @@ export const AlignmentContract: Story = {
     const canvas = within(canvasElement);
     const loaded = measureAlignmentAnchors(canvasElement);
 
-    await userEvent.click(canvas.getByTestId("toggle-items-loading"));
-    await waitFor(() =>
-      expect(canvasElement.querySelector('[data-items-table] [data-loading-state="visible"]')).not.toBeNull(),
-    );
+    const layoutShift = await measureUnexpectedLayoutShift(async () => {
+      canvas.getByTestId("toggle-items-loading").click();
+      await waitFor(() =>
+        expect(canvasElement.querySelector('[data-items-table] [data-loading-state="visible"]')).not.toBeNull(),
+      );
+    });
+    expect(layoutShift).toBeLessThanOrEqual(0.01);
 
     const loading = measureAlignmentAnchors(canvasElement);
     loading.forEach((measurement, index) => {

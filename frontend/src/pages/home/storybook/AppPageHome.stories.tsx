@@ -4,7 +4,7 @@ import { Box, Button } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { createInstance } from "i18next";
 import { I18nextProvider, initReactI18next } from "react-i18next";
-import { expect, userEvent, waitFor, within } from "storybook/test";
+import { expect, waitFor, within } from "storybook/test";
 import {
   APP_LOCALIZATION_RESOURCES,
   APP_TRANSLATION_NAMESPACE,
@@ -13,6 +13,7 @@ import {
 import { APP_LOCALES, type AppLocale } from "@/app/ui/localization/app-locales";
 import { AppPreferencesContext } from "@/app/ui/preferences/contexts/AppPreferencesContext";
 import { DEFAULT_APP_PREFERENCES, type AppPreferences } from "@/app/ui/preferences/models/AppPreferences";
+import { measureUnexpectedLayoutShift } from "@/app/storybook/loadingGeometry";
 import { AppPageHome } from "../AppPageHome";
 import { AppPageHomeView } from "../AppPageHomeView";
 
@@ -66,6 +67,7 @@ const storyI18n = Object.fromEntries(
 ) as Record<AppLocale, ReturnType<typeof createInstance>>;
 
 type OverviewScenarioProps = {
+  darkMode: boolean;
   loading: boolean;
   locale: AppLocale;
   pageWidth: AppPreferences["pageWidth"];
@@ -73,31 +75,54 @@ type OverviewScenarioProps = {
 
 const overviewIcons = [<Inventory2Outlined />, <CheckCircleOutlined />, <OfflineBoltOutlined />] as const;
 
-function OverviewScenario({ loading, locale, pageWidth }: OverviewScenarioProps) {
+function OverviewScenario({ darkMode, loading, locale, pageWidth }: OverviewScenarioProps) {
   const preferences = React.useMemo(
     () => ({
-      preferences: { ...DEFAULT_APP_PREFERENCES, locale, pageWidth },
+      preferences: { ...DEFAULT_APP_PREFERENCES, darkMode, locale, pageWidth },
       resetPreferences: () => undefined,
       updatePreference: () => undefined,
     }),
-    [locale, pageWidth],
+    [darkMode, locale, pageWidth],
   );
 
   return (
-    <I18nextProvider i18n={storyI18n[locale]}>
-      <AppPreferencesContext.Provider value={preferences}>
-        <AppPageHomeView icons={overviewIcons} loading={loading} />
-      </AppPreferencesContext.Provider>
-    </I18nextProvider>
+    <Box
+      data-dark={darkMode ? "" : undefined}
+      data-light={darkMode ? undefined : ""}
+      data-overview-theme={darkMode ? "dark" : "light"}
+      sx={{ display: "contents" }}
+    >
+      <I18nextProvider i18n={storyI18n[locale]}>
+        <AppPreferencesContext.Provider value={preferences}>
+          <AppPageHomeView icons={overviewIcons} loading={loading} />
+        </AppPreferencesContext.Provider>
+      </I18nextProvider>
+    </Box>
   );
 }
 
 export const CroatianLoaded: Story = {
-  render: () => <OverviewScenario loading={false} locale="hr" pageWidth="xl" />,
+  render: () => <OverviewScenario darkMode loading={false} locale="hr" pageWidth="xl" />,
 };
 
 export const CroatianLoading: Story = {
-  render: () => <OverviewScenario loading locale="hr" pageWidth="xl" />,
+  render: () => <OverviewScenario darkMode loading locale="hr" pageWidth="xl" />,
+};
+
+export const ReducedMotionContract: Story = {
+  render: () => <AppPageHomeView loading />,
+  play: async ({ canvasElement }) => {
+    await waitFor(() => expect(canvasElement.querySelector(".MuiSkeleton-root")).not.toBeNull());
+    const skeleton = canvasElement.querySelector(".MuiSkeleton-root");
+    if (!(skeleton instanceof HTMLElement)) throw new Error("Missing Overview skeleton leaf.");
+
+    const animationName = getComputedStyle(skeleton).animationName;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      expect(animationName).toBe("none");
+    } else {
+      expect(animationName).not.toBe("none");
+    }
+  },
 };
 
 const alignmentSelectors = [
@@ -145,10 +170,13 @@ export const AlignmentContract: Story = {
     const canvas = within(canvasElement);
     const loaded = measureAlignmentAnchors(canvasElement);
 
-    await userEvent.click(canvas.getByTestId("toggle-overview-loading"));
-    await waitFor(() =>
-      expect(canvasElement.querySelector('[data-app-overview-loading-phase="visible"]')).not.toBeNull(),
-    );
+    const layoutShift = await measureUnexpectedLayoutShift(async () => {
+      canvas.getByTestId("toggle-overview-loading").click();
+      await waitFor(() =>
+        expect(canvasElement.querySelector('[data-app-overview-loading-phase="visible"]')).not.toBeNull(),
+      );
+    });
+    expect(layoutShift).toBeLessThanOrEqual(0.001);
 
     const loading = measureAlignmentAnchors(canvasElement);
     loading.forEach((measurement, index) => {
@@ -163,7 +191,9 @@ export const AlignmentContract: Story = {
 };
 
 const alignmentScenarios = APP_LOCALES.flatMap(locale =>
-  (["md", "lg", "xl", "full"] as const).map(pageWidth => ({ locale, pageWidth })),
+  (["md", "lg", "xl", "full"] as const).flatMap(pageWidth =>
+    ([false, true] as const).map(darkMode => ({ darkMode, locale, pageWidth })),
+  ),
 );
 const overviewHeadingByLocale: Record<AppLocale, string> = { en: "Overview", hr: "Pregled" };
 
@@ -188,8 +218,16 @@ function AlignmentMatrixFixture() {
       >
         Next scenario
       </Button>
-      <Box data-overview-alignment-scenario={`${scenario.locale}-${scenario.pageWidth}`} sx={{ display: "contents" }}>
-        <OverviewScenario loading={loading} locale={scenario.locale} pageWidth={scenario.pageWidth} />
+      <Box
+        data-overview-alignment-scenario={`${scenario.locale}-${scenario.pageWidth}-${scenario.darkMode ? "dark" : "light"}`}
+        sx={{ display: "contents" }}
+      >
+        <OverviewScenario
+          darkMode={scenario.darkMode}
+          loading={loading}
+          locale={scenario.locale}
+          pageWidth={scenario.pageWidth}
+        />
       </Box>
     </>
   );
@@ -201,11 +239,17 @@ export const AlignmentMatrix: Story = {
     const canvas = within(canvasElement);
 
     for (const scenario of alignmentScenarios) {
-      const scenarioName = `${scenario.locale}-${scenario.pageWidth}`;
+      const themeName = scenario.darkMode ? "dark" : "light";
+      const scenarioName = `${scenario.locale}-${scenario.pageWidth}-${themeName}`;
       await waitFor(() =>
         expect(canvasElement.querySelector(`[data-overview-alignment-scenario="${scenarioName}"]`)).not.toBeNull(),
       );
       expect(canvas.getByRole("heading", { level: 1, name: overviewHeadingByLocale[scenario.locale] })).toBeVisible();
+      await waitFor(() =>
+        expect(canvasElement.querySelector(`[data-overview-theme="${themeName}"]`)).toHaveAttribute(
+          `data-${themeName}`,
+        ),
+      );
       if (scenario.pageWidth === "full") {
         expect(canvasElement.querySelector('[class*="MuiContainer-maxWidth"]')).toBeNull();
       } else {
@@ -214,10 +258,13 @@ export const AlignmentMatrix: Story = {
       }
       const loaded = measureAlignmentAnchors(canvasElement);
 
-      await userEvent.click(canvas.getByTestId("toggle-overview-matrix-loading"));
-      await waitFor(() =>
-        expect(canvasElement.querySelector('[data-app-overview-loading-phase="visible"]')).not.toBeNull(),
-      );
+      const layoutShift = await measureUnexpectedLayoutShift(async () => {
+        canvas.getByTestId("toggle-overview-matrix-loading").click();
+        await waitFor(() =>
+          expect(canvasElement.querySelector('[data-app-overview-loading-phase="visible"]')).not.toBeNull(),
+        );
+      });
+      expect(layoutShift).toBeLessThanOrEqual(0.001);
 
       const loading = measureAlignmentAnchors(canvasElement);
       loading.forEach((measurement, index) => {
@@ -229,11 +276,11 @@ export const AlignmentMatrix: Story = {
         expect(measurement.height).toBeCloseTo(expected.height, 1);
       });
 
-      await userEvent.click(canvas.getByTestId("toggle-overview-matrix-loading"));
+      canvas.getByTestId("toggle-overview-matrix-loading").click();
       await waitFor(() => expect(canvasElement.querySelector('[data-app-overview-state="loaded"]')).not.toBeNull());
 
       if (scenario !== alignmentScenarios.at(-1)) {
-        await userEvent.click(canvas.getByTestId("next-overview-matrix-scenario"));
+        canvas.getByTestId("next-overview-matrix-scenario").click();
       }
     }
   },

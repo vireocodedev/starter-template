@@ -25,6 +25,19 @@ export default mergeConfig(
             },
           },
         },
+        {
+          extends: true,
+          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, ".storybook") })],
+          test: {
+            name: "storybook-reduced-motion",
+            browser: {
+              enabled: true,
+              headless: true,
+              provider: playwright({ contextOptions: { reducedMotion: "reduce" } }),
+              instances: [{ browser: "chromium", name: "desktop-reduced", viewport: { height: 900, width: 1440 } }],
+            },
+          },
+        },
       ],
     },
   }),
