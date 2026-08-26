@@ -66,6 +66,7 @@ const entityQueryFiltersEn = {
     close: "Close filters",
     loading: "Loading filter fields",
     loadError: "Filter fields could not be loaded.",
+    staleError: "Filter fields could not be refreshed. Showing the most recent saved definition.",
     retry: "Retry",
     clear: "Clear",
     cancel: "Cancel",

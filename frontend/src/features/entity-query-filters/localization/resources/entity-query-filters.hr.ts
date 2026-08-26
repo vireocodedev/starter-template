@@ -69,6 +69,7 @@ const entityQueryFiltersHr = {
     close: "Zatvori filtre",
     loading: "Učitavanje polja filtra",
     loadError: "Polja filtra nije moguće učitati.",
+    staleError: "Polja filtra nije moguće osvježiti. Prikazuje se posljednja spremljena definicija.",
     retry: "Pokušaj ponovno",
     clear: "Očisti",
     cancel: "Odustani",
