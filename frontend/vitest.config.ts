@@ -80,7 +80,7 @@ export default defineConfig({
       "@mui/material",
       "@mui/icons-material",
       "@mui/x-date-pickers",
-      "@vireocodedev/starter-ui",
+      "@vireocodedev/ui",
       "react-router",
       "sonner",
     ],
@@ -107,7 +107,7 @@ export default defineConfig({
     // Node's resolver rejects as directory imports.
     server: {
       deps: {
-        inline: ["@vireocodedev/starter-ui", "@vireocodedev/starter-shell"],
+        inline: ["@vireocodedev/ui", "@vireocodedev/shell"],
       },
     },
     include: [

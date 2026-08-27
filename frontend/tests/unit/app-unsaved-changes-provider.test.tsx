@@ -3,7 +3,7 @@ import {
   VireoConfirmationProvider,
   useUnsavedChangesRegistration,
   useUnsavedChangesRequestDiscard,
-} from "@vireocodedev/starter-ui";
+} from "@vireocodedev/ui";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AppUnsavedChangesProvider } from "@/app/shell/providers/AppUnsavedChangesProvider";

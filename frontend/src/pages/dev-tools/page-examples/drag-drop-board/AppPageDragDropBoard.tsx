@@ -4,7 +4,7 @@ import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
 import { AppPageLayout } from "@/app/shell/layout/AppPageLayout";
 import { DragIndicatorRounded } from "@mui/icons-material";
 import { Chip, Paper, Stack, Typography } from "@mui/material";
-import { VireoDndProvider, VireoDraggableItem, VireoDropZone } from "@vireocodedev/starter-ui/hello-pangea-dnd";
+import { VireoDndProvider, VireoDraggableItem, VireoDropZone } from "@vireocodedev/ui/hello-pangea-dnd";
 import React from "react";
 import { useTranslation } from "react-i18next";
 

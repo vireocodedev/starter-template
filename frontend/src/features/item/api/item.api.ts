@@ -1,4 +1,4 @@
-import type { PageableParams, PageableResponse } from "@vireocodedev/starter-infrastructure";
+import type { PageableParams, PageableResponse } from "@vireocodedev/infrastructure";
 import type { Item } from "../models/Item";
 import type { ItemFilters } from "../models/ItemFilters";
 

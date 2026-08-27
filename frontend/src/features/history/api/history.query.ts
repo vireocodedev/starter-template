@@ -1,10 +1,5 @@
 import { historyApi } from "./history.api.online";
-import type {
-  HistoryEntityKind,
-  HistoryRecord,
-  HistorySnapshot,
-  HistoryTimestamp,
-} from "@vireocodedev/starter-history";
+import type { HistoryEntityKind, HistoryRecord, HistorySnapshot, HistoryTimestamp } from "@vireocodedev/history";
 import { queryOptions } from "@tanstack/react-query";
 import type { z } from "zod";
 

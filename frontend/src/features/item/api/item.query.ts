@@ -1,7 +1,7 @@
 import { itemApi } from "./item.api.online";
 import type { ItemFilters } from "./item.api";
-import { createVireoPagedSearchQueries } from "@vireocodedev/starter-ui/tanstack-query";
-import type { PageableResponse } from "@vireocodedev/starter-infrastructure";
+import { createVireoPagedSearchQueries } from "@vireocodedev/ui/tanstack-query";
+import type { PageableResponse } from "@vireocodedev/infrastructure";
 import type { Item } from "../models/Item";
 
 const ITEM_SEARCH_QUERY_POLICY = {

@@ -1,6 +1,6 @@
 import React from "react";
-import { createAuthRedirectState } from "@vireocodedev/starter-shell";
-import { toast } from "@vireocodedev/starter-ui/sonner";
+import { createAuthRedirectState } from "@vireocodedev/shell";
+import { toast } from "@vireocodedev/ui/sonner";
 import { useLocation, useNavigate } from "react-router";
 import { APP_PAGES } from "@/app/app.pages";
 import { appSessionExpiry } from "@/app/data/network/services/appSessionExpiry";

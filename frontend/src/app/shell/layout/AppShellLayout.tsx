@@ -31,7 +31,7 @@ import {
   VireoMobileBottomNavigation,
   useVireoOnlineStatus,
   type VireoApplicationNavigationMode,
-} from "@vireocodedev/starter-ui";
+} from "@vireocodedev/ui";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { APP_NAVIGATION_PAGES, APP_PAGES, preloadAppPage, type AppNavigationIcon } from "@/app/app.pages";
 import { AppShellNavigationContext } from "@/app/shell/contexts/AppShellNavigationContext";

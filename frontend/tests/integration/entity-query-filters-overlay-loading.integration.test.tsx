@@ -1,7 +1,7 @@
 import { AppStorybookProvider } from "@/app/storybook/AppStorybookProvider";
 import { EntityQueryFiltersOverlay } from "@/features/entity-query-filters/components/EntityQueryFiltersOverlay";
 import { useQuery } from "@tanstack/react-query";
-import type { QueryEngineEntityDefinition } from "@vireocodedev/starter-queryengine";
+import type { QueryEngineEntityDefinition } from "@vireocodedev/query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 

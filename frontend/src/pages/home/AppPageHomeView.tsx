@@ -1,6 +1,6 @@
 import type React from "react";
 import { Box, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
-import { VireoLoadingRegion, VireoSkeleton } from "@vireocodedev/starter-ui";
+import { VireoLoadingRegion, VireoSkeleton } from "@vireocodedev/ui";
 import { useTranslation } from "react-i18next";
 import { HOME_TRANSLATION_NAMESPACE } from "@/app/app.localization";
 import { AppSkeletonText } from "@/app/shell/components/AppSkeletonText";

@@ -3,7 +3,7 @@ import {
   QueryEngineRelationOptionSchema,
   type QueryEngineOperator,
   type QueryEngineRelationOption,
-} from "@vireocodedev/starter-queryengine";
+} from "@vireocodedev/query";
 import { z } from "zod";
 import type { TFunction } from "i18next";
 import { AppQueryEntityKeySchema, type AppQueryEntityKey } from "./AppQueryEntityKey";

@@ -4,15 +4,15 @@ The template's ordinary install, development, test, Storybook, and production-bu
 
 ## Published package line
 
-| Package                                | Supported line |
-| -------------------------------------- | -------------- |
-| `@vireocodedev/starter-ui`             | `^7.0.0`       |
-| `@vireocodedev/starter-queryengine`    | `^5.0.0`       |
-| `@vireocodedev/starter-shell`          | `^4.0.0`       |
-| `@vireocodedev/starter-history`        | `^3.0.0`       |
-| `@vireocodedev/starter-infrastructure` | `^3.0.0`       |
-| `@vireocodedev/starter-localization`   | `^3.0.0`       |
-| Vireo Starter JVM modules              | `0.2.x`        |
+| Package                        | Supported line |
+| ------------------------------ | -------------- |
+| `@vireocodedev/ui`             | `^0.2.1`       |
+| `@vireocodedev/query`          | `^0.2.1`       |
+| `@vireocodedev/shell`          | `^0.2.1`       |
+| `@vireocodedev/history`        | `^0.2.1`       |
+| `@vireocodedev/infrastructure` | `^0.2.1`       |
+| `@vireocodedev/localization`   | `^0.2.1`       |
+| Vireo Starter JVM modules      | `0.2.0`        |
 
 The lockfiles are the reproducibility boundary. Updating a supported package range still requires reviewing and committing the resulting lockfile changes and passing the authoritative verification command.
 

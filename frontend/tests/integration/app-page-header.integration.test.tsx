@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { AddRounded } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material";
-import { VireoPageLayoutProvider, createVireoPageLayout } from "@vireocodedev/starter-ui";
+import { VireoPageLayoutProvider, createVireoPageLayout } from "@vireocodedev/ui";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it, vi } from "vitest";
 import { AppShellNavigationContext } from "@/app/shell/contexts/AppShellNavigationContext";

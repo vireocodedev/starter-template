@@ -1,4 +1,4 @@
-import { createSessionExpiryChannel } from "@vireocodedev/starter-infrastructure";
+import { createSessionExpiryChannel } from "@vireocodedev/infrastructure";
 
 /** Coordinates deduplicated session-expiry handling between HTTP and React routing. */
 export const appSessionExpiry = createSessionExpiryChannel({

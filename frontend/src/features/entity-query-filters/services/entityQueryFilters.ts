@@ -1,4 +1,4 @@
-import type { QueryEngineFieldDefinition, QueryEngineOperator } from "@vireocodedev/starter-queryengine";
+import type { QueryEngineFieldDefinition, QueryEngineOperator } from "@vireocodedev/query";
 import {
   buildValidatedQueryFilterDocumentSchema,
   type QueryFilterDocument,

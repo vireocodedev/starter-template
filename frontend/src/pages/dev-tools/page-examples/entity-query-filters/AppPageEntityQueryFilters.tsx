@@ -1,7 +1,7 @@
 import React from "react";
 import { FilterAltOutlined } from "@mui/icons-material";
 import { Badge, Button, Paper, Stack, Typography } from "@mui/material";
-import { PageOverlay } from "@vireocodedev/starter-ui";
+import { PageOverlay } from "@vireocodedev/ui";
 import { APP_PAGES } from "@/app/app.pages";
 import { APP_QUERY_ENTITY } from "@/app/data/query/models/AppQueryEntityKey";
 import { countQueryFilterRules, type QueryFilterDocument } from "@/app/data/query/models/QueryFilterDocument";

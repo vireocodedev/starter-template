@@ -2,7 +2,7 @@ import { AppStorybookProvider } from "@/app/storybook/AppStorybookProvider";
 import { useDebouncedSearchText, type EntityQueryFilterPresentation } from "@/features/entity-query-filters/public";
 import type { Item } from "@/features/item/public";
 import { AppPageItemsFrame, AppPageItemsListView, type AppPageItemsListState } from "@/pages/items/AppPageItems";
-import type { VireoResponsiveTableFilters } from "@vireocodedev/starter-ui";
+import type { VireoResponsiveTableFilters } from "@vireocodedev/ui";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";

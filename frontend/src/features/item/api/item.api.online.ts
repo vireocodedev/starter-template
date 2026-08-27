@@ -2,7 +2,7 @@ import { AppAxiosHttpClient, postAppPagedSearch } from "@/app/data/network/clien
 import { withId } from "@/app/data/network/services/object-mappers";
 import type { ItemApi, ItemFilters, ItemRequestOptions } from "./item.api";
 import { Item } from "../models/Item";
-import type { PageableParams } from "@vireocodedev/starter-infrastructure";
+import type { PageableParams } from "@vireocodedev/infrastructure";
 import { z } from "zod";
 import { APP_QUERY_ENTITY } from "@/app/data/query/models/AppQueryEntityKey";
 import { serializeQueryFilterDocument } from "@/app/data/query/models/QueryFilterDocument";

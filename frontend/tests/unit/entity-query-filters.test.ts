@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { QueryEngineEntityDefinition } from "@vireocodedev/starter-queryengine";
+import type { QueryEngineEntityDefinition } from "@vireocodedev/query";
 import {
   createQueryFilterCandidates,
   createQueryFilterRule,

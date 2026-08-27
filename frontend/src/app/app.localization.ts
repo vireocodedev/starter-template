@@ -3,7 +3,7 @@ import {
   STARTER_TRANSLATION_NAMESPACES,
   type StarterNamespaceResources,
   type WidenLeaves,
-} from "@vireocodedev/starter-localization";
+} from "@vireocodedev/localization";
 import { APP_LOCALES, type AppLocale } from "@/app/ui/localization/app-locales";
 import en from "@/app/ui/localization/resources/app.en";
 import hr from "@/app/ui/localization/resources/app.hr";

@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { VireoConfirmationProvider, useUnsavedChangesRegistration } from "@vireocodedev/starter-ui";
+import { VireoConfirmationProvider, useUnsavedChangesRegistration } from "@vireocodedev/ui";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { AppPwaProvider } from "@/app/shell/providers/AppPwaProvider";

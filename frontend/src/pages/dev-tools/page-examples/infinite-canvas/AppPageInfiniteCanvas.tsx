@@ -9,7 +9,7 @@ import {
   VireoInfiniteCanvasBody,
   VireoInfiniteCanvasOverlay,
   useVireoInfiniteCanvas,
-} from "@vireocodedev/starter-ui";
+} from "@vireocodedev/ui";
 import { useTranslation } from "react-i18next";
 
 function CanvasControls() {

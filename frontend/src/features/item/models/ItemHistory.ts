@@ -1,5 +1,5 @@
 import { Item } from "./Item";
-import { createHistoryDefinition, createHistoryRecordSchema } from "@vireocodedev/starter-history";
+import { createHistoryDefinition, createHistoryRecordSchema } from "@vireocodedev/history";
 import { z } from "zod";
 import type { TFunction } from "i18next";
 import type { ITEM_TRANSLATION_NAMESPACE } from "@/app/app.localization";

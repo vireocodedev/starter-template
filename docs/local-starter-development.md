@@ -13,10 +13,10 @@ vireocode/
 
 ## Normal published-package development
 
-Published frontend packages come from GitHub Packages. Export a token with `read:packages` before installing dependencies:
+Published frontend packages come from the public npm registry and install
+anonymously:
 
 ```bash
-export NODE_AUTH_TOKEN=<github-token>
 cd starter-template/frontend
 corepack npm ci
 ```
@@ -100,7 +100,7 @@ For Starter UI:
 
 ```bash
 cd starter
-corepack npm run build --workspace @vireocodedev/starter-ui
+corepack npm run build --workspace @vireocodedev/ui
 ```
 
 For changes across several Starter packages:

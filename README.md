@@ -11,7 +11,9 @@ A production-shaped React PWA and Spring Boot application for starting a Vireo p
 
 Copy [`.env.example`](.env.example) to `.env` and export the runtime values before starting the backend. Copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env.local` when the frontend defaults are not suitable.
 
-The JVM libraries resolve anonymously from Maven Central. Frontend package access remains isolated to npm through `NODE_AUTH_TOKEN`; never commit that token or expose it through a `VITE_*` variable.
+The JVM libraries resolve anonymously from Maven Central, and the public frontend
+packages resolve anonymously from npm. No package-registry credential is
+required.
 
 ## Run the application
 

@@ -2,7 +2,7 @@ import React from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router";
-import { PageOverlayControllerProvider, VireoConfirmationProvider } from "@vireocodedev/starter-ui";
+import { PageOverlayControllerProvider, VireoConfirmationProvider } from "@vireocodedev/ui";
 import { AppShellNavigationContext } from "@/app/shell/contexts/AppShellNavigationContext";
 import { AppUnsavedChangesProvider } from "@/app/shell/providers/AppUnsavedChangesProvider";
 import { AppLocalizationProvider } from "@/app/ui/localization/app-localization-provider";

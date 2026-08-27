@@ -7,7 +7,7 @@ import {
   VireoResponsiveOverlayFrame,
   useUnsavedChangesRegistration,
   useUnsavedChangesRequestDiscard,
-} from "@vireocodedev/starter-ui";
+} from "@vireocodedev/ui";
 import { QueryEngineQuery } from "@/app/data/query/api/queryEngine.api";
 import type { AppQueryEntityKey } from "@/app/data/query/models/AppQueryEntityKey";
 import type { QueryFilterDocument } from "@/app/data/query/models/QueryFilterDocument";

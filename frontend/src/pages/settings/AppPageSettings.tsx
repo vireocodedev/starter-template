@@ -13,7 +13,7 @@ import {
   TableRowsOutlined,
 } from "@mui/icons-material";
 import { Box, Button, InputAdornment, MenuItem, Select, Switch, TextField } from "@mui/material";
-import { VireoPreferencePanel, type VireoPreferenceSectionDefinition } from "@vireocodedev/starter-ui";
+import { VireoPreferencePanel, type VireoPreferenceSectionDefinition } from "@vireocodedev/ui";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { SETTINGS_TRANSLATION_NAMESPACE } from "@/app/app.localization";

@@ -10,7 +10,7 @@ import {
   VireoOverlayHeader,
   VireoResponsiveOverlayFrame,
   type VireoHistoryEntryLabels,
-} from "@vireocodedev/starter-ui";
+} from "@vireocodedev/ui";
 import { useItemTranslation } from "../../localization/use-item-translation";
 import React from "react";
 import { APP_THEME_TOKENS } from "@/app/ui/theme/config/theme.tokens";

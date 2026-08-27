@@ -4,11 +4,37 @@ import { fileURLToPath } from "node:url";
 
 const frontendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const packageJson = JSON.parse(fs.readFileSync(path.join(frontendRoot, "package.json"), "utf8"));
+const packageLock = JSON.parse(fs.readFileSync(path.join(frontendRoot, "package-lock.json"), "utf8"));
 
 const problems = [];
+const expectedStarterDependencies = new Set([
+  "@vireocodedev/history",
+  "@vireocodedev/infrastructure",
+  "@vireocodedev/localization",
+  "@vireocodedev/query",
+  "@vireocodedev/shell",
+  "@vireocodedev/ui",
+]);
 const starterDependencies = Object.entries(packageJson.dependencies ?? {}).filter(([name]) =>
-  name.startsWith("@vireocodedev/starter-"),
+  expectedStarterDependencies.has(name),
 );
+
+for (const name of expectedStarterDependencies) {
+  if (!(name in (packageJson.dependencies ?? {}))) problems.push(`Missing published Starter dependency ${name}.`);
+
+  const lockEntry = packageLock.packages?.[`node_modules/${name}`];
+  if (!lockEntry) {
+    problems.push(`Missing lockfile entry for ${name}.`);
+  } else if (!lockEntry.resolved?.startsWith("https://registry.npmjs.org/")) {
+    problems.push(`${name} must resolve anonymously from the public npm registry, received ${lockEntry.resolved}.`);
+  }
+}
+
+for (const packagePath of Object.keys(packageLock.packages ?? {})) {
+  if (packagePath.startsWith("node_modules/@vireocodedev/starter-")) {
+    problems.push(`Legacy private Starter package remains in the lockfile: ${packagePath}.`);
+  }
+}
 
 for (const [name, version] of starterDependencies) {
   if (/^(?:file|link|workspace):/.test(version) || version.includes("../starter")) {

@@ -9,7 +9,7 @@ import {
   ViewWeekOutlined,
 } from "@mui/icons-material";
 import { Button } from "@mui/material";
-import { VireoPreferencePanel, type VireoPreferenceSectionDefinition } from "@vireocodedev/starter-ui";
+import { VireoPreferencePanel, type VireoPreferenceSectionDefinition } from "@vireocodedev/ui";
 import { Link } from "react-router";
 import { APP_PAGES } from "@/app/app.pages";
 import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";

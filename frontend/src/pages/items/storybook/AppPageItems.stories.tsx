@@ -1,7 +1,7 @@
 import { useDebouncedSearchText, type EntityQueryFilterPresentation } from "@/features/entity-query-filters/public";
 import type { Item } from "@/features/item/public";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import type { VireoResponsiveTableFilters } from "@vireocodedev/starter-ui";
+import type { VireoResponsiveTableFilters } from "@vireocodedev/ui";
 import { Button } from "@mui/material";
 import React from "react";
 import { expect, fn, waitFor, within } from "storybook/test";

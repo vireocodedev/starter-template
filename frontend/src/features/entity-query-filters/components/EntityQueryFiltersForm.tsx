@@ -1,6 +1,6 @@
 import { AddRounded, DeleteOutlineRounded } from "@mui/icons-material";
 import { Alert, Box, Button, IconButton, MenuItem, Select, Stack, Typography } from "@mui/material";
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
+import { VireoLabelBox } from "@vireocodedev/ui";
 import type { AppQueryEntityKey } from "@/app/data/query/models/AppQueryEntityKey";
 import type { QueryFilterCandidate, QueryFilterRuleDraft } from "../models/EntityQueryFilters";
 import {

@@ -3,7 +3,7 @@ import type {
   QueryEngineFieldType,
   QueryEngineOperator,
   QueryEngineRelationOption,
-} from "@vireocodedev/starter-queryengine";
+} from "@vireocodedev/query";
 import type { AppQueryEntityKey } from "@/app/data/query/models/AppQueryEntityKey";
 import type { QueryFilterDocument, QueryFilterRow } from "@/app/data/query/models/QueryFilterDocument";
 

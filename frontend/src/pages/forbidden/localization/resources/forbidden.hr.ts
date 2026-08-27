@@ -1,4 +1,4 @@
-import type { WidenLeaves } from "@vireocodedev/starter-localization";
+import type { WidenLeaves } from "@vireocodedev/localization";
 import type en from "./forbidden.en";
 const hr = {
   header: { title: "Pristup odbijen", description: "Nemate dopuštenje za pregled ove stranice." },
