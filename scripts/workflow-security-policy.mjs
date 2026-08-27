@@ -58,6 +58,19 @@ for (const action of Object.keys(policy.actions)) {
     problems.push(`Action policy contains unused entry ${action}`);
 }
 
+const secretScan = readFileSync(
+  join(repositoryRoot, "scripts", "secret-scan.sh"),
+  "utf8",
+);
+for (const [image, expected] of Object.entries(policy.containerImages ?? {})) {
+  const pinnedReference = `${image}@${expected.digest}`;
+  if (!secretScan.includes(pinnedReference)) {
+    problems.push(
+      `Secret scanner must pin ${image} ${expected.version} to ${expected.digest}`,
+    );
+  }
+}
+
 if (problems.length > 0) {
   console.error("Workflow security policy failed:\n");
   for (const problem of problems) console.error(`- ${problem}`);
@@ -65,5 +78,5 @@ if (problems.length > 0) {
 }
 
 console.log(
-  `Workflow security policy passed: ${workflowFiles.length} workflows, ${observed.size} pinned actions.`,
+  `Workflow security policy passed: ${workflowFiles.length} workflows, ${observed.size} pinned actions, ${Object.keys(policy.containerImages ?? {}).length} pinned scanner images.`,
 );
