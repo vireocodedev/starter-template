@@ -160,6 +160,18 @@ const localStarterUiInternalAliases = USE_LOCAL_STARTER
   : [];
 
 export default defineConfig({
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: "mui", test: /node_modules\/@mui\//u },
+            { name: "react", test: /node_modules\/(?:react|react-dom|react-router)\//u },
+          ],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     ...(!IS_STORYBOOK
