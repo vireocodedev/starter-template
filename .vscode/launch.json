@@ -20,7 +20,7 @@
       "type": "node-terminal",
       "name": "Frontend (published Starter)",
       "request": "launch",
-      "command": "npm run dev",
+      "command": "corepack npm run dev",
       "cwd": "${workspaceFolder}/frontend"
     }
   ],
