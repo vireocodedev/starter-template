@@ -4,9 +4,9 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.vireocode.starter.queryengine.QueryEntityKey;
-import com.vireocode.starter.queryengine.QueryEntityTypeResolver;
-import com.vireocode.starter.queryengine.savedfilter.SavedFilter;
+import com.vireocode.vireo.queryengine.QueryEntityKey;
+import com.vireocode.vireo.queryengine.QueryEntityTypeResolver;
+import com.vireocode.vireo.queryengine.savedfilter.SavedFilter;
 import com.vireocode.startertemplate.app.item.Item;
 
 @Component

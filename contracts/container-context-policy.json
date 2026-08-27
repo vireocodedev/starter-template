@@ -1,0 +1,39 @@
+{
+  "contexts": {
+    "backend": {
+      "root": ".",
+      "maximumBytes": 78643200,
+      "requiredFiles": [
+        ".dockerignore",
+        "Dockerfile",
+        "deploy/backend-healthcheck.sh",
+        "build/libs/app.jar"
+      ],
+      "requiredTrees": [],
+      "dockerignore": [
+        "*",
+        "!Dockerfile",
+        "!deploy/",
+        "deploy/*",
+        "!deploy/backend-healthcheck.sh",
+        "!build/",
+        "build/*",
+        "!build/libs/",
+        "build/libs/*",
+        "!build/libs/app.jar"
+      ],
+      "baseImage": "eclipse-temurin:21-jre-noble@sha256:96975602e131485862eb8cd32927face8a06d7591a5e865944b634a701d9df72"
+    },
+    "frontend": {
+      "root": "frontend",
+      "maximumBytes": 10485760,
+      "requiredFiles": [".dockerignore", "Dockerfile", "nginx.conf"],
+      "requiredTrees": ["dist"],
+      "dockerignore": ["*", "!Dockerfile", "!nginx.conf", "!dist/", "!dist/**"],
+      "baseImage": "nginxinc/nginx-unprivileged:stable-alpine@sha256:93722936b82ec8a1178d48448e619226680d2de3706a1640800e186cd5fa7fd3"
+    }
+  },
+  "composeImages": {
+    "postgres": "postgres:18-alpine@sha256:d3e1620b530c944afa6e887d22eb899824da68e19c52024bf98f5220c88a65b2"
+  }
+}

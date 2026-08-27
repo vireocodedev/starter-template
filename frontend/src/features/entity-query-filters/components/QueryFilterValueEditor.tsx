@@ -1,8 +1,8 @@
 import React from "react";
 import { Alert, Autocomplete, Button, MenuItem, Select, Stack, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import type { QueryEngineRelationOption } from "@vireocodedev/starter-queryengine";
-import { VireoLabelBox, VireoLoadingRegion } from "@vireocodedev/starter-ui";
+import type { QueryEngineRelationOption } from "@vireocodedev/query";
+import { VireoLabelBox, VireoLoadingRegion } from "@vireocodedev/ui";
 import { queryEngineApi } from "@/app/data/query/api/queryEngine.api";
 import type { AppQueryEntityKey } from "@/app/data/query/models/AppQueryEntityKey";
 import type { QueryFilterCandidate, QueryFilterRuleDraft } from "../models/EntityQueryFilters";

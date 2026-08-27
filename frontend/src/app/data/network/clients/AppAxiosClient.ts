@@ -6,7 +6,7 @@ import {
   type PagedSearchRequest,
   type PageableResponse,
   type SearchableFilters,
-} from "@vireocodedev/starter-infrastructure";
+} from "@vireocodedev/infrastructure";
 import axios from "axios";
 import { appSessionExpiry } from "@/app/data/network/services/appSessionExpiry";
 import { appConfig } from "@/app/config/app-config";

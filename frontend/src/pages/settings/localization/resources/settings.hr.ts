@@ -1,4 +1,4 @@
-import type { WidenLeaves } from "@vireocodedev/starter-localization";
+import type { WidenLeaves } from "@vireocodedev/localization";
 import type en from "./settings.en";
 const hr = {
   header: { title: "Postavke", description: "Prilagodite ponašanje i prikaz podataka u ovom radnom prostoru." },

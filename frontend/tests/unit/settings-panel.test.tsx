@@ -6,7 +6,7 @@ import {
   VireoPreferencePanel,
   vireoPreferencePanelClasses,
   type VireoPreferenceSectionDefinition,
-} from "@vireocodedev/starter-ui";
+} from "@vireocodedev/ui";
 import { describe, expect, it } from "vitest";
 
 const sections: VireoPreferenceSectionDefinition[] = [

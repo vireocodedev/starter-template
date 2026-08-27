@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
-import { PageOverlayControllerProvider, VireoConfirmationProvider } from "@vireocodedev/starter-ui";
-import { VireoTemporalLocalizationProvider } from "@vireocodedev/starter-ui/localization";
+import { PageOverlayControllerProvider, VireoConfirmationProvider } from "@vireocodedev/ui";
+import { VireoTemporalLocalizationProvider } from "@vireocodedev/ui/localization";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { describe, expect, it, vi } from "vitest";
 import { APP_PAGES } from "@/app/app.pages";

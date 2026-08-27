@@ -1,6 +1,6 @@
 import React from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
-import { PageOverlayOutlet, VireoPage, VireoPageBody } from "@vireocodedev/starter-ui";
+import { PageOverlayOutlet, VireoPage, VireoPageBody } from "@vireocodedev/ui";
 import { useLocation } from "react-router";
 import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences";
 

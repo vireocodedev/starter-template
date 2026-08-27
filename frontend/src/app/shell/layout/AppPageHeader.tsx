@@ -1,7 +1,7 @@
 import { useAppShellNavigation } from "@/app/shell/hooks/useAppShellNavigation";
 import { ArrowBackRounded, MenuRounded } from "@mui/icons-material";
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
-import { VireoActionPreviewButton, VireoPageHeader } from "@vireocodedev/starter-ui";
+import { VireoActionPreviewButton, VireoPageHeader } from "@vireocodedev/ui";
 import type React from "react";
 import { useNavigate } from "react-router";
 import { useAppTranslation } from "@/app/ui/localization/use-app-translation";

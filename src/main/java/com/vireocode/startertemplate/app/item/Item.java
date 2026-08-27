@@ -1,9 +1,9 @@
 package com.vireocode.startertemplate.app.item;
 
-import com.vireocode.starter.base.BaseEntity;
-import com.vireocode.starter.queryengine.Filterable;
-import com.vireocode.starter.queryengine.FilterableMetadata;
-import com.vireocode.starter.queryengine.QueryOperator;
+import com.vireocode.vireo.base.BaseEntity;
+import com.vireocode.vireo.queryengine.Filterable;
+import com.vireocode.vireo.queryengine.FilterableMetadata;
+import com.vireocode.vireo.queryengine.QueryOperator;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -4,7 +4,7 @@ import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
 import { AppPageLayout } from "@/app/shell/layout/AppPageLayout";
 import { Alert, Button, ButtonGroup, Card, CardContent, Stack, Typography } from "@mui/material";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { VireoQueryBoundary } from "@vireocodedev/starter-ui/tanstack-query";
+import { VireoQueryBoundary } from "@vireocodedev/ui/tanstack-query";
 import React from "react";
 import { useTranslation } from "react-i18next";
 

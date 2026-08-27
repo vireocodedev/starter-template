@@ -1,8 +1,8 @@
 import { ItemQuery } from "../api/item.query";
 import type { ItemFilters } from "../api/item.api";
 import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import type { PageableParams, PageableResponse } from "@vireocodedev/starter-infrastructure";
-import { useVireoPageLayout } from "@vireocodedev/starter-ui";
+import type { PageableParams, PageableResponse } from "@vireocodedev/infrastructure";
+import { useVireoPageLayout } from "@vireocodedev/ui";
 import type { Item } from "../models/Item";
 
 export function useItemSearchQuery(pagination: PageableParams, filters: ItemFilters) {

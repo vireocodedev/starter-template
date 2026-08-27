@@ -5,7 +5,7 @@ import {
   useVireoConfirmation,
   type UnsavedChangesContextValue,
   type UnsavedChangesDiscardRequest,
-} from "@vireocodedev/starter-ui";
+} from "@vireocodedev/ui";
 import { useAppTranslation } from "@/app/ui/localization/use-app-translation";
 
 /** Connects Vireo's dirty-state registry to the application's confirmation surface. */

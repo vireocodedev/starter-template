@@ -5,8 +5,8 @@ import {
   VireoConfirmationProvider,
   VireoProviderComposer,
   type VireoProviderWrapper,
-} from "@vireocodedev/starter-ui";
-import { VireoToaster } from "@vireocodedev/starter-ui/sonner";
+} from "@vireocodedev/ui";
+import { VireoToaster } from "@vireocodedev/ui/sonner";
 import { AppPreferencesProvider } from "@/app/ui/preferences/providers/AppPreferencesProvider";
 import { AppLocalizationProvider } from "@/app/ui/localization/app-localization-provider";
 import { AppThemeProvider } from "@/app/ui/theme/AppThemeProvider";

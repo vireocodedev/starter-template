@@ -1,4 +1,4 @@
-import type { HistoryResources, PlatformResources, QueryEngineResources } from "@vireocodedev/starter-localization";
+import type { HistoryResources, PlatformResources, QueryEngineResources } from "@vireocodedev/localization";
 import type {
   AppTranslationResources,
   BasicFormTranslationResources,

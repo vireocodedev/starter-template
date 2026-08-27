@@ -1,7 +1,7 @@
 import { ItemQueryKeys } from "../api/item.query";
 import type { ItemFilters } from "../models/ItemFilters";
 import type { Item } from "../models/Item";
-import type { PageableParams, PageableResponse } from "@vireocodedev/starter-infrastructure";
+import type { PageableParams, PageableResponse } from "@vireocodedev/infrastructure";
 import type { InfiniteData, QueryClient, QueryKey } from "@tanstack/react-query";
 
 export type ItemSearchQuerySnapshot = readonly (readonly [QueryKey, unknown])[];

@@ -7,7 +7,7 @@ import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
 import { AppPageLayout } from "@/app/shell/layout/AppPageLayout";
 import { useAppTranslation } from "@/app/ui/localization/use-app-translation";
 import { Avatar, Box, CircularProgress, Stack, Typography } from "@mui/material";
-import { VireoLoadingRegion } from "@vireocodedev/starter-ui";
+import { VireoLoadingRegion } from "@vireocodedev/ui";
 import { useTranslation } from "react-i18next";
 
 function AppApplicationProgressFallback({ label }: { label: string }) {

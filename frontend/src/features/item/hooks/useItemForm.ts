@@ -1,5 +1,5 @@
 import { revalidateLogic } from "@tanstack/react-form";
-import { useVireoForm } from "@vireocodedev/starter-ui/forms";
+import { useVireoForm } from "@vireocodedev/ui/forms";
 import { buildValidatedItemSchema, getDefaultItem, type Item } from "../models/Item";
 import { useItemTranslation } from "../localization/use-item-translation";
 

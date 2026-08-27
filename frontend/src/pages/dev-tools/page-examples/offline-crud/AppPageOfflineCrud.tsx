@@ -16,7 +16,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useVireoOnlineStatus } from "@vireocodedev/starter-ui";
+import { useVireoOnlineStatus } from "@vireocodedev/ui";
 import React from "react";
 import { useTranslation } from "react-i18next";
 

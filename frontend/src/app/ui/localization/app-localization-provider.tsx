@@ -1,6 +1,6 @@
 import React, { type PropsWithChildren } from "react";
 import { I18nextProvider } from "react-i18next";
-import { VireoTemporalLocalizationProvider } from "@vireocodedev/starter-ui/localization";
+import { VireoTemporalLocalizationProvider } from "@vireocodedev/ui/localization";
 import { appI18n } from "@/app/ui/localization/app-i18n";
 import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences";
 

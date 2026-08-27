@@ -5,8 +5,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
-import com.vireocode.starter.base.BaseMapper;
-import com.vireocode.starter.base.JsonNullableMapper;
+import com.vireocode.vireo.base.BaseMapper;
+import com.vireocode.vireo.base.JsonNullableMapper;
 
 @Mapper(uses = JsonNullableMapper.class, unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring")
 public interface ItemMapper extends BaseMapper<Item, ItemDTO> {

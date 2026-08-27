@@ -10,23 +10,24 @@ fi
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repository_root"
 
-frontend_verify_command="cd frontend && npm run verify"
+frontend_verify_command="cd frontend && corepack npm run verify"
 if $silent; then
   frontend_verify_command+=" -- silent"
 fi
 
 steps=(
-  "Frontend contract|${frontend_verify_command}"
-  "Browser smoke tests|cd frontend && npm run test:e2e"
-  "JVM build|./gradlew build"
+  "frontend-contract|Frontend contract|${frontend_verify_command}"
+  "browser-smoke|Browser smoke tests|cd frontend && corepack npm run test:e2e"
+  "jvm-build|JVM build|./gradlew build"
+  "container-context|Container context contract|node scripts/container-context-policy.mjs"
 )
 
 total=${#steps[@]}
 started_at=$(date +%s%3N)
+timing_arguments=()
 
 for index in "${!steps[@]}"; do
-  label=${steps[$index]%%|*}
-  command=${steps[$index]#*|}
+  IFS='|' read -r step_id label command <<<"${steps[$index]}"
   step_number=$((index + 1))
   output_file=$(mktemp)
   step_started_at=$(date +%s%3N)
@@ -49,10 +50,15 @@ for index in "${!steps[@]}"; do
   fi
 
   step_finished_at=$(date +%s%3N)
-  printf 'PASS: %s (%d ms)\n\n' "$label" "$((step_finished_at - step_started_at))"
+  step_duration=$((step_finished_at - step_started_at))
+  timing_arguments+=("${step_id}=${step_duration}")
+  printf 'PASS: %s (%d ms)\n\n' "$label" "$step_duration"
   rm -f "$output_file"
 done
 
 finished_at=$(date +%s%3N)
+total_duration=$((finished_at - started_at))
 printf 'Template verification passed: %d/%d steps (%d ms total).\n' \
-  "$total" "$total" "$((finished_at - started_at))"
+  "$total" "$total" "$total_duration"
+
+node scripts/verification-budget-policy.mjs "${timing_arguments[@]}" "total=${total_duration}"

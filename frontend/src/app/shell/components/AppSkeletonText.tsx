@@ -1,6 +1,6 @@
 import type React from "react";
 import { Box } from "@mui/material";
-import { VireoSkeleton } from "@vireocodedev/starter-ui";
+import { VireoSkeleton } from "@vireocodedev/ui";
 
 export type AppSkeletonTextProps = {
   children: React.ReactNode;

@@ -3,7 +3,7 @@ package com.vireocode.startertemplate.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.vireocode.starter.auth.StarterHttpSecurityCustomizer;
+import com.vireocode.vireo.auth.StarterHttpSecurityCustomizer;
 
 @Configuration
 public class HealthEndpointSecurityConfig {

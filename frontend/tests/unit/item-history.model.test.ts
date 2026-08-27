@@ -1,6 +1,6 @@
 import { createItemHistoryDefinition, ItemHistoryRecordSchema } from "@/features/item/models/ItemHistory";
 import { appI18n } from "@/app/ui/localization/app-i18n";
-import { createHistoryNodes } from "@vireocodedev/starter-history";
+import { createHistoryNodes } from "@vireocodedev/history";
 import { describe, expect, it } from "vitest";
 
 describe("Item history contracts", () => {

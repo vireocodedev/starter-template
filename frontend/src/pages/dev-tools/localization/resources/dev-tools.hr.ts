@@ -1,4 +1,4 @@
-import type { WidenLeaves } from "@vireocodedev/starter-localization";
+import type { WidenLeaves } from "@vireocodedev/localization";
 import type en from "./dev-tools.en";
 const hr = {
   header: { title: "Razvojni alati", description: "Istražite usmjerene primjere aplikacijskih obrazaca predloška." },

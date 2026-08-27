@@ -4,7 +4,7 @@ import { AppShellNavigationContext } from "@/app/shell/contexts/AppShellNavigati
 import { AppPreferencesContext } from "@/app/ui/preferences/contexts/AppPreferencesContext";
 import { DEFAULT_APP_PREFERENCES } from "@/app/ui/preferences/models/AppPreferences";
 import { createTheme, ThemeProvider } from "@mui/material";
-import { PageOverlayControllerProvider } from "@vireocodedev/starter-ui";
+import { PageOverlayControllerProvider } from "@vireocodedev/ui";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it, vi } from "vitest";

@@ -2,8 +2,8 @@ import type { ItemFormApi } from "../../hooks/useItemForm";
 import { useItemTranslation } from "../../localization/use-item-translation";
 import { ItemStatus } from "../../models/Item";
 import { Button } from "@mui/material";
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
-import { usePlatformTranslation } from "@vireocodedev/starter-ui/react-i18next";
+import { VireoLabelBox } from "@vireocodedev/ui";
+import { usePlatformTranslation } from "@vireocodedev/ui/react-i18next";
 
 export type ItemFormProps = {
   form: ItemFormApi;

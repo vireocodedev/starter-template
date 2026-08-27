@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
-import { PageOverlayControllerProvider } from "@vireocodedev/starter-ui";
+import { PageOverlayControllerProvider } from "@vireocodedev/ui";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { describe, expect, it, vi } from "vitest";
 import { APP_PAGES } from "@/app/app.pages";

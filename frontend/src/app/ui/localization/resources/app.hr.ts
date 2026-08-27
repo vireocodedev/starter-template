@@ -1,4 +1,4 @@
-import type { WidenLeaves } from "@vireocodedev/starter-localization";
+import type { WidenLeaves } from "@vireocodedev/localization";
 import type en from "./app.en";
 
 const hr = {

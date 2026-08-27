@@ -1,6 +1,6 @@
 import React from "react";
 import { Alert, Button, Snackbar, Stack } from "@mui/material";
-import { useUnsavedChangesRequestDiscard } from "@vireocodedev/starter-ui";
+import { useUnsavedChangesRequestDiscard } from "@vireocodedev/ui";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { useAppTranslation } from "@/app/ui/localization/use-app-translation";
 

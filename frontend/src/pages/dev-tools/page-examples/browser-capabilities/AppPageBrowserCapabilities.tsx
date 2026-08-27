@@ -4,7 +4,7 @@ import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
 import { AppPageLayout } from "@/app/shell/layout/AppPageLayout";
 import { DownloadRounded, FullscreenExitRounded, FullscreenRounded } from "@mui/icons-material";
 import { Alert, Button, Paper, Stack, TextField, Typography } from "@mui/material";
-import { useVireoDebouncedCallback, useVireoFullscreen, useVireoOnlineStatus } from "@vireocodedev/starter-ui";
+import { useVireoDebouncedCallback, useVireoFullscreen, useVireoOnlineStatus } from "@vireocodedev/ui";
 import React from "react";
 import { useTranslation } from "react-i18next";
 

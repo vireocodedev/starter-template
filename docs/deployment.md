@@ -4,27 +4,48 @@ The backend and frontend are independent build and deployment units. Gradle buil
 
 ## Build the artifacts
 
-The build needs read access to the Vireo GitHub Packages registries. Configure the credentials described in [Getting started](./getting-started.md), then run:
+The backend resolves Vireo libraries anonymously from Maven Central. Configure frontend npm access as described in [Getting started](./getting-started.md), then run:
 
 ```bash
 ./gradlew clean bootJar
 cd frontend
-npm ci
-npm run build
+corepack npm ci
+corepack npm run build
 ```
 
 The backend artifact is `build/libs/app.jar`, and the frontend artifact is `frontend/dist`. The deterministic JAR name is intentional: the checked-in backend Dockerfile never guesses between a Spring Boot archive and a plain Java archive.
 
-## Build and run the backend container
+Both Docker contexts are enforced allowlists. The backend admits only its
+`.dockerignore`, Dockerfile, and application JAR under a 75 MiB budget. The frontend
+admits only its `.dockerignore`, Dockerfile, Nginx configuration, and `dist` tree
+under a 10 MiB budget. This prevents source trees, caches, reports, and dependencies
+from being sent to the Docker daemon. Both runtime base images and the Compose
+PostgreSQL image are pinned by digest. The backend health probe uses only tools from
+the pinned JRE image, so its build performs no network package installation.
+
+## Run the production-like deployment
 
 ```bash
-docker build -t starter-template:local .
 POSTGRES_PASSWORD=change-me SESSION_COOKIE_SECURE=false docker compose up
 ```
 
 `SESSION_COOKIE_SECURE=false` is only for an HTTP-only local container check. Keep the production default (`true`) behind HTTPS.
 
-The image runs as an unprivileged user. Compose waits for PostgreSQL and probes `/actuator/health/readiness`; only Actuator health is publicly reachable. Deploy `frontend/dist` through the application's static host or edge platform and route `/api` to the backend origin. Do not expose the database port or the Actuator endpoint beyond the network boundaries that need them.
+Open <http://localhost:3000>. Compose builds two independent runtime images, waits for
+PostgreSQL and backend readiness, then starts an unprivileged Nginx frontend. The
+frontend serves the PWA with history fallback and proxies `/api` over the internal
+Compose network. Neither PostgreSQL nor the backend port is published to the host.
+
+For the same disposable production-like health/static/proxy check used by CI, run:
+
+```bash
+./scripts/verify-deployment.sh
+```
+
+Both images run as unprivileged users. Do not expose the database port or Actuator
+beyond the network boundaries that need them. A different static host or edge
+platform may deploy `frontend/dist` directly if it preserves the same history
+fallback, service-worker cache behavior, HTTPS, and `/api` routing contract.
 
 ## Required production configuration
 

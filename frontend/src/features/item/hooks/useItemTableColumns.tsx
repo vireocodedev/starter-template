@@ -1,7 +1,7 @@
 import type { Item } from "../models/Item";
 import { DeleteOutlined, EditOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
-import type { VireoResponsiveTableColumn } from "@vireocodedev/starter-ui";
+import type { VireoResponsiveTableColumn } from "@vireocodedev/ui";
 import React from "react";
 import { useItemTranslation } from "../localization/use-item-translation";
 

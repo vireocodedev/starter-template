@@ -5,7 +5,7 @@ import type {
   QueryFilterRuleDraft,
 } from "@/features/entity-query-filters/models/EntityQueryFilters";
 import { useQuery } from "@tanstack/react-query";
-import type { QueryEngineRelationOption } from "@vireocodedev/starter-queryengine";
+import type { QueryEngineRelationOption } from "@vireocodedev/query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 

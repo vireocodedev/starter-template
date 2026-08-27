@@ -1,7 +1,7 @@
 import { Alert, Button } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
-import { useVireoForm } from "@vireocodedev/starter-ui/forms";
+import { VireoLabelBox } from "@vireocodedev/ui";
+import { useVireoForm } from "@vireocodedev/ui/forms";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";

@@ -12,7 +12,7 @@ import { AppAuthContext } from "@/app/shell/contexts/AppAuthContext";
 const navigationPropsSpy = vi.hoisted(() => vi.fn());
 const onlineStatusSpy = vi.hoisted(() => vi.fn(() => true));
 
-vi.mock("@vireocodedev/starter-ui", () => ({
+vi.mock("@vireocodedev/ui", () => ({
   useVireoOnlineStatus: onlineStatusSpy,
   VireoApplicationNavigation: ({
     children,

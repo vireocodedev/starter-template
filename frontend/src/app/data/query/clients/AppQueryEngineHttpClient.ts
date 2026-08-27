@@ -1,4 +1,4 @@
-import type { QueryEngineHttpClient, QueryEngineRequestOptions } from "@vireocodedev/starter-queryengine";
+import type { QueryEngineHttpClient, QueryEngineRequestOptions } from "@vireocodedev/query";
 import { appAxios } from "@/app/data/network/clients/AppAxiosClient";
 
 export class AppQueryEngineHttpClient implements QueryEngineHttpClient {

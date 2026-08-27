@@ -1,4 +1,4 @@
-import { VireoResponsiveFormOverlay } from "@vireocodedev/starter-ui";
+import { VireoResponsiveFormOverlay } from "@vireocodedev/ui";
 import { ItemForm, ItemFormActions } from "../forms/ItemForm";
 import { useItemCreateMutation } from "../../hooks/useItemCreateMutation";
 import { useItemUpdateMutation } from "../../hooks/useItemUpdateMutation";

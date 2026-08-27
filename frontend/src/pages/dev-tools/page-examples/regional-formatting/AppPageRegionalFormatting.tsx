@@ -5,8 +5,8 @@ import { AppPageLayout } from "@/app/shell/layout/AppPageLayout";
 import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences";
 import { CheckRounded } from "@mui/icons-material";
 import { Alert, Button, Chip, Paper, Stack, Typography } from "@mui/material";
-import { formatIntlNumber } from "@vireocodedev/starter-localization";
-import { VireoCountryFlag } from "@vireocodedev/starter-ui";
+import { formatIntlNumber } from "@vireocodedev/localization";
+import { VireoCountryFlag } from "@vireocodedev/ui";
 import { useTranslation } from "react-i18next";
 
 const SAMPLE_DATE = new Date("2026-08-25T12:30:00Z");

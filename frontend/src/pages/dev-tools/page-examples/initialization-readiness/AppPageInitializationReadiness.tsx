@@ -4,7 +4,7 @@ import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
 import { AppPageLayout } from "@/app/shell/layout/AppPageLayout";
 import { CheckCircleRounded, ReplayRounded } from "@mui/icons-material";
 import { Alert, Button, CircularProgress, Paper, Stack, Typography } from "@mui/material";
-import { VireoInitializationBoundary } from "@vireocodedev/starter-ui";
+import { VireoInitializationBoundary } from "@vireocodedev/ui";
 import React from "react";
 import { useTranslation } from "react-i18next";
 

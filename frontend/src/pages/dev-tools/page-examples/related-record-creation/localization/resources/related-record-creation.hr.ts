@@ -1,4 +1,4 @@
-import type { WidenLeaves } from "@vireocodedev/starter-localization";
+import type { WidenLeaves } from "@vireocodedev/localization";
 import type en from "./related-record-creation.en";
 const hr = {
   header: {

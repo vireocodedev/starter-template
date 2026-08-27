@@ -48,7 +48,7 @@ import {
   type OverlayRenderers,
   type VireoResponsiveTableFilters,
   type VireoResponsiveTableLabels,
-} from "@vireocodedev/starter-ui";
+} from "@vireocodedev/ui";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { ITEMS_TRANSLATION_NAMESPACE } from "@/app/app.localization";

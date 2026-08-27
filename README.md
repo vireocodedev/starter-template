@@ -4,14 +4,16 @@ A production-shaped React PWA and Spring Boot application for starting a Vireo p
 
 ## Prerequisites
 
-- Java 21
-- Node.js 24.15 or newer and npm 12
+- Java 21 (Java 25 is exercised as a compatibility runtime)
+- Node.js 24.15–24.x through Corepack npm 12.0.2; CI uses Node 24.18.1
 - PostgreSQL 16 or newer for a production-like local environment (H2 is also supported for quick development)
-- GitHub Packages read access for the published Vireo Starter artifacts
+- npm registry access for the published Vireo Starter frontend packages
 
-Copy [`.env.example`](.env.example) to `.env` and export the values before running Gradle. Copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env.local` when the frontend defaults are not suitable.
+Copy [`.env.example`](.env.example) to `.env` and export the runtime values before starting the backend. Copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env.local` when the frontend defaults are not suitable.
 
-GitHub Packages requires a token with `read:packages` in `GITHUB_TOKEN` (JVM) and `NODE_AUTH_TOKEN` (npm). The token is only consumed by the package clients and must never be committed. For CI, configure a classic personal access token as `VIREO_PACKAGES_TOKEN` in both the repository's Actions secrets and Dependabot secrets. The separate token is required because GitHub's Maven/Gradle registry is repository-scoped, so this repository's built-in `GITHUB_TOKEN` cannot download the private JVM artifacts published by `vireocodedev/starter`.
+The JVM libraries resolve anonymously from Maven Central, and the public frontend
+packages resolve anonymously from npm. No package-registry credential is
+required.
 
 ## Run the application
 
@@ -22,8 +24,8 @@ set -a && source .env && set +a
 
 # Terminal 2: React PWA
 cd frontend
-npm ci
-npm run dev
+corepack npm ci
+corepack npm run dev
 ```
 
 Open <http://localhost:3000>. API documentation is available at <http://localhost:8080/swagger-ui.html> only in the `dev` profile.
@@ -38,6 +40,10 @@ VS Code users can instead open the repository and launch **Full stack (published
 
 The authoritative local gate validates architecture, formatting, lint, TypeScript, unit/integration tests, Storybook, the production frontend bundle, browser smoke tests, and the JVM build. Individual frontend commands remain available from `frontend/package.json`.
 
+Run `./scripts/verify-deployment.sh` for the disposable production-like Compose
+check. It builds the independent frontend/backend images, starts PostgreSQL, and
+verifies the PWA shell, API proxy, and backend readiness through the deployed network.
+
 ## Customize the template
 
 Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md). Rename the product, replace the sample Item capability, remove Dev tools before production, configure real authentication/bootstrap behavior, and provide deployment secrets through the environment.
@@ -48,6 +54,8 @@ Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md
 - [Customizing the template](docs/customizing-the-template.md)
 - [Deployment](docs/deployment.md)
 - [Starter compatibility and bundle policy](docs/starter-compatibility.md)
+- [Platform support evidence](docs/platform-support-evidence.md)
+- [Verification performance budget](docs/verification-performance.md)
 - [Developing against local Starter libraries](docs/local-starter-development.md)
 - [Entity query-filter standard](docs/entity-query-filters.md)
 - [Frontend architecture contract](frontend/docs/architecture/README.md)

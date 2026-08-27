@@ -1,8 +1,8 @@
 import React from "react";
 import { Alert, Box, Divider, Stack, Typography } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
-import { useVireoMultiStepForm } from "@vireocodedev/starter-ui/forms";
+import { VireoLabelBox } from "@vireocodedev/ui";
+import { useVireoMultiStepForm } from "@vireocodedev/ui/forms";
 import { useTranslation } from "react-i18next";
 import { MULTI_STEP_FORM_TRANSLATION_NAMESPACE } from "@/app/app.localization";
 import {

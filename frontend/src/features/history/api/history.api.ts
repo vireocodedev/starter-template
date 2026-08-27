@@ -1,9 +1,4 @@
-import type {
-  HistoryEntityKind,
-  HistoryRecord,
-  HistorySnapshot,
-  HistoryTimestamp,
-} from "@vireocodedev/starter-history";
+import type { HistoryEntityKind, HistoryRecord, HistorySnapshot, HistoryTimestamp } from "@vireocodedev/history";
 import type { z } from "zod";
 
 export interface HistoryApi {

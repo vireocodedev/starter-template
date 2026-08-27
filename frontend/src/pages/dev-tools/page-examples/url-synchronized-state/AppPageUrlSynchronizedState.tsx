@@ -3,7 +3,7 @@ import { DEV_TOOLS_EXAMPLES_TRANSLATION_NAMESPACE } from "@/app/app.localization
 import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
 import { AppPageLayout } from "@/app/shell/layout/AppPageLayout";
 import { FormControlLabel, Paper, Stack, Switch, Typography } from "@mui/material";
-import { VireoTabs, useVireoSearchParamState, vireoSearchParamCodecs } from "@vireocodedev/starter-ui";
+import { VireoTabs, useVireoSearchParamState, vireoSearchParamCodecs } from "@vireocodedev/ui";
 import { useTranslation } from "react-i18next";
 
 export function AppPageUrlSynchronizedState() {

@@ -1,4 +1,4 @@
-import type { WidenLeaves } from "@vireocodedev/starter-localization";
+import type { WidenLeaves } from "@vireocodedev/localization";
 import type entityQueryFiltersEn from "./entity-query-filters.en";
 
 const entityQueryFiltersHr = {

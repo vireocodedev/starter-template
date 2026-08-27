@@ -1,4 +1,4 @@
-import type { WidenLeaves } from "@vireocodedev/starter-localization";
+import type { WidenLeaves } from "@vireocodedev/localization";
 import type en from "./not-found.en";
 const hr = {
   header: { title: "Stranica nije pronađena", description: "Tražena stranica ne postoji ili više nije dostupna." },

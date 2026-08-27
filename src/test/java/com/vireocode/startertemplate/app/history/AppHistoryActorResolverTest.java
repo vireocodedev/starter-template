@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.vireocode.starter.auth.StarterUser;
-import com.vireocode.starter.auth.StarterUserRepository;
+import com.vireocode.vireo.auth.StarterUser;
+import com.vireocode.vireo.auth.StarterUserRepository;
 
 class AppHistoryActorResolverTest {
 
