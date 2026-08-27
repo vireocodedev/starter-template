@@ -12,6 +12,9 @@ const requiredFiles = [
   "GOVERNANCE.md",
   "CODE_OF_CONDUCT.md",
   "docs/starter-compatibility.md",
+  "docs/getting-started.md",
+  "docs/customizing-the-template.md",
+  "docs/deployment.md",
   ".github/CODEOWNERS",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/feature_request.yml",
@@ -37,6 +40,12 @@ requireText("README.md", [
   "SUPPORT.md",
   "GOVERNANCE.md",
   "docs/starter-compatibility.md",
+  "docs/getting-started.md",
+  "docs/customizing-the-template.md",
+  "docs/deployment.md",
+  "docs/EVALUATION.md",
+  "docs/PUBLIC_API.md",
+  "docs/TEMPORAL_VALUES.md",
 ]);
 requireText("SUPPORT.md", ["SECURITY.md", "CODE_OF_CONDUCT.md"]);
 requireText("GOVERNANCE.md", [
@@ -83,6 +92,42 @@ requireText(".github/ISSUE_TEMPLATE/config.yml", [
   "contact_links:",
 ]);
 
+const executableDocumentationClaims = [
+  {
+    documentation: "README.md",
+    documentedCommand: "corepack npm ci",
+    evidence: ".github/workflows/ci.yml",
+    evidenceCommand: "corepack npm ci",
+  },
+  {
+    documentation: "README.md",
+    documentedCommand: "./scripts/verify.sh",
+    evidence: ".github/workflows/ci.yml",
+    evidenceCommand: "./scripts/verify.sh silent",
+  },
+  {
+    documentation: "README.md",
+    documentedCommand: "./scripts/verify-deployment.sh",
+    evidence: ".github/workflows/ci.yml",
+    evidenceCommand: "./scripts/verify-deployment.sh",
+  },
+];
+
+for (const claim of executableDocumentationClaims) {
+  const documentation = readFileSync(join(root, claim.documentation), "utf8");
+  const evidence = readFileSync(join(root, claim.evidence), "utf8");
+  if (!documentation.includes(claim.documentedCommand)) {
+    problems.push(
+      `${claim.documentation} must document executable command ${claim.documentedCommand}`,
+    );
+  }
+  if (!evidence.includes(claim.evidenceCommand)) {
+    problems.push(
+      `${claim.evidence} must execute documented command ${claim.evidenceCommand}`,
+    );
+  }
+}
+
 const markdownFiles = [];
 function collectMarkdown(directory) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
@@ -127,4 +172,7 @@ if (problems.length > 0) {
 
 console.log(
   `Public contract policy passed: ${requiredFiles.length} surfaces, ${starterDependencies.length} Starter dependencies, and ${markdownFiles.length} Markdown files checked.`,
+);
+console.log(
+  `${executableDocumentationClaims.length} documented commands are bound to hosted execution evidence.`,
 );

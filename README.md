@@ -8,6 +8,21 @@ libraries and explicit integration seams; the application owns domain rules,
 authorization policy, sensitive-data decisions, offline eligibility, and conflict
 resolution. A full-stack entity generator does not yet exist.
 
+## Evaluate before adopting
+
+The first-success path is intentionally small: start both processes, sign in with the
+development-only `demo` account, and complete one Item create/edit/filter/delete
+cycle. That proves the published frontend packages, JVM modules, authentication,
+database migration, query contract, and responsive UI are connected.
+
+Choose this Template when you want ordinary React and Spring Boot application code
+with reviewed integration boundaries. Do not choose it on the assumption that it is
+a hosted platform, a finished production system, an automatic CRUD generator, or a
+solution for arbitrary offline conflict resolution. Read the framework's
+[evaluation and limitations](https://github.com/vireocodedev/starter/blob/main/docs/EVALUATION.md)
+and [public API map](https://github.com/vireocodedev/starter/blob/main/docs/PUBLIC_API.md)
+before committing to individual packages.
+
 ## Prerequisites
 
 - Java 21 (Java 25 is exercised as a compatibility runtime)
@@ -35,6 +50,9 @@ corepack npm run dev
 ```
 
 Open <http://localhost:3000>. API documentation is available at <http://localhost:8080/swagger-ui.html> only in the `dev` profile.
+
+Sign in with `demo` / `demo123`, then create, edit, filter, and delete an Item. This
+development account is test data, not an authentication pattern for deployment.
 
 VS Code users can instead open the repository and launch **Full stack (published Starter)** from Run and Debug after installing dependencies. The committed launch configuration uses the same H2 development database and starts both application processes.
 
@@ -69,6 +87,8 @@ Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md
 - [Loading-state and skeleton standard](frontend/docs/LOADING_STATES.md)
 - [Loading-state and skeleton audit](frontend/docs/LOADING_STATE_AUDIT.md)
 - [Vireo Starter documentation](https://vireocodedev.github.io/starter/?path=/docs/documentation-overview--docs)
+- [Vireo public API entry points](https://github.com/vireocodedev/starter/blob/main/docs/PUBLIC_API.md)
+- [Canonical temporal values](https://github.com/vireocodedev/starter/blob/main/docs/TEMPORAL_VALUES.md)
 
 ## Community and project policy
 
