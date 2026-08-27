@@ -46,15 +46,15 @@ The Phase 7 baseline is:
 
 ## Route-code loading inventory
 
-Every route in `APP_PAGE_REGISTRY` declares `eager` or `lazy` rendering plus an explicit `retain`, `progress`, `skeleton`, or `none` presentation policy. Overview is eager; the remaining 21 routes retain lazy boundaries.
+Every route in `APP_PAGE_REGISTRY` declares `eager` or `lazy` rendering plus an explicit `retain`, `progress`, `skeleton`, or `none` presentation policy. Overview is eager; the remaining routes retain lazy boundaries.
 
-| Effective route group                 | Route IDs                                                                           | Current fallback                                                                                           | Geometry                       | Rating  | Priority |
-| ------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------ | ------- | -------- |
-| Application bootstrap and login chunk | `login`, plus authentication recovery before route selection                        | Branded application progress with separate labels, one shared boundary, and delayed visible feedback.      | C, progress-only               | Aligned | —        |
-| Eager Overview                        | `home`                                                                              | Synchronous page composition; no route-code fallback or skeleton appears.                                  | No wait                        | Aligned | —        |
-| Progress-only authenticated routes    | `items`, `settings`, `devTools`, every `devTools*` example, `forbidden`, `notFound` | Real shell, page layout, width preference, and localized static header with bounded progress-only content. | C; stable frame/header anchors | Aligned | —        |
+| Effective route group                 | Route IDs                                                    | Current fallback                                                                                           | Geometry                       | Rating  | Priority |
+| ------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- | ------------------------------ | ------- | -------- |
+| Application bootstrap and login chunk | `login`, plus authentication recovery before route selection | Branded application progress with separate labels, one shared boundary, and delayed visible feedback.      | C, progress-only               | Aligned | —        |
+| Eager Overview                        | `home`                                                       | Synchronous page composition; no route-code fallback or skeleton appears.                                  | No wait                        | Aligned | —        |
+| Progress-only authenticated routes    | `items`, `settings`, `forbidden`, `notFound`                 | Real shell, page layout, width preference, and localized static header with bounded progress-only content. | C; stable frame/header anchors | Aligned | —        |
 
-The progress-only group contains 20 routes. Its fallback preserves the application shell, `AppPageLayout`, the user's page-width preference, localized static header content, and known back navigation. It deliberately does not speculate about destination actions, tables, forms, cards, canvases, or vertical geometry.
+The progress-only group preserves the application shell, `AppPageLayout`, the user's page-width preference, localized static header content, and known back navigation. It deliberately does not speculate about destination actions, tables, forms, cards, canvases, or vertical geometry.
 
 ### Required route-policy direction
 
@@ -81,8 +81,6 @@ Overview is eager because its exact skeleton already imported the full page stru
 | Entity-filter definition overlay | Initial/refresh data; `boundary`          | Uses one Level C reserved region initially, retains a usable form during refresh/error, and exposes local retry.                    | C initial; A frame | Aligned        | —        | Query-filter feature       |
 | Relation value editor            | Widget query; `content-preserving`        | Keeps the autocomplete and selected values, distinguishes loading/empty/error, and supports retained-data retry.                    | A control frame    | Aligned        | —        | Query-filter feature       |
 | Login submission                 | Mutation; `busy-action`                   | Keeps the login card and fields, prevents duplicate submission, and restores the action with local error feedback.                  | A                  | Aligned        | —        | Login page + Starter UI    |
-| Async data-state example         | Initial data/error; `boundary`            | Demonstrates Suspense success, empty, and error through the standardized delayed `VireoQueryBoundary`.                              | C by default       | Aligned        | —        | Dev tools + Starter UI     |
-| Initialization-readiness example | Initialization; `boundary`                | Keeps the page and card, replaces the card body with step progress, and delegates lifecycle to the standardized boundary.           | B                  | Aligned        | —        | Dev tools + Starter UI     |
 | Remaining page content           | `static`                                  | No independent data-loading surface was found; only route-code loading applies.                                                     | Not applicable     | Not applicable | —        | Owning route               |
 
 ## Detailed findings

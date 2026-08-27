@@ -2,16 +2,18 @@ services:
   postgres:
     image: postgres:18-alpine@sha256:d3e1620b530c944afa6e887d22eb899824da68e19c52024bf98f5220c88a65b2
     environment:
-      POSTGRES_DB: starter_template
-      POSTGRES_USER: starter_template
+      POSTGRES_DB: ${POSTGRES_DB:-starter_template}
+      POSTGRES_USER: ${POSTGRES_USER:-starter_template}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U starter_template -d starter_template"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 12
     volumes:
       - postgres-data:/var/lib/postgresql
+    ports:
+      - "5432:5432"
 
   app:
     build: .
@@ -20,8 +22,8 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/starter_template
-      SPRING_DATASOURCE_USERNAME: starter_template
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-starter_template}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-starter_template}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
     healthcheck:

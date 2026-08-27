@@ -146,7 +146,7 @@ describe("AppShellLayout", () => {
 
     expect(navigationPropsSpy).toHaveBeenLastCalledWith(expect.objectContaining({ locked: false, resizable: true }));
     expect(screen.getByRole("button", { name: "Expand navigation" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "Dev tools" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Items" })).toBeVisible();
     expect(screen.queryByText("V")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Open account menu" }));

@@ -9,7 +9,6 @@ const en = {
     OVERVIEW: "Overview",
     ITEMS: "Items",
     SETTINGS: "Settings",
-    DEV_TOOLS: "Dev tools",
     EXPAND: "Expand navigation",
     COMPACT: "Compact navigation",
     CLOSE: "Close navigation",

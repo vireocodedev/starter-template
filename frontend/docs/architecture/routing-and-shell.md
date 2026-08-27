@@ -11,7 +11,7 @@ Routes are lazy by default. Eager rendering is reserved for a small, synchronous
 | `eager`  | The route is synchronous, frequently reached, and its composition is already required by the entry shell or a fallback.                               |
 | `lazy`   | The route owns feature code, is access-specific or infrequent, or benefits materially from a separate chunk. Intent prefetch warms navigation routes. |
 
-Overview is eager. Its former skeleton imported the complete page composition synchronously, leaving only a tiny icon wrapper in the lazy chunk; removing that request is simpler and faster. Items, Settings, Login, Dev tools, examples, and exceptional routes remain lazy because their feature/access boundaries still provide useful code separation. This decision is explicit registry metadata and can be revisited with bundle evidence.
+Overview is eager. Its former skeleton imported the complete page composition synchronously, leaving only a tiny icon wrapper in the lazy chunk; removing that request is simpler and faster. Items, Settings, Login, and exceptional routes remain lazy because their feature/access boundaries still provide useful code separation. This decision is explicit registry metadata and can be revisited with bundle evidence.
 
 ## Route-loading policy
 

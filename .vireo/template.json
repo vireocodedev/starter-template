@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "template": "vireocodedev/starter-template",
+  "projectName": "starter-template",
+  "javaPackage": "com.vireocode.startertemplate",
+  "database": "h2",
+  "packageManager": "npm"
+}

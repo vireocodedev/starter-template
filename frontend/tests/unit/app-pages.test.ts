@@ -40,7 +40,6 @@ describe("application page registry", () => {
     expect(APP_PAGE_REGISTRY.home.render).toBe("eager");
     expect(APP_PAGE_REGISTRY.items.render).toBe("lazy");
     expect(APP_PAGE_REGISTRY.settings.render).toBe("lazy");
-    expect(APP_PAGE_REGISTRY.devTools.render).toBe("lazy");
     expect(APP_PAGE_REGISTRY.login.render).toBe("lazy");
   });
 

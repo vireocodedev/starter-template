@@ -5,7 +5,6 @@ import {
   ChevronRightRounded,
   CloseRounded,
   DashboardOutlined,
-  DeveloperModeOutlined,
   Inventory2Outlined,
   LogoutOutlined,
   SettingsOutlined,
@@ -43,7 +42,6 @@ const navigationIcons: Record<AppNavigationIcon, React.ReactNode> = {
   OVERVIEW: <DashboardOutlined />,
   ITEMS: <Inventory2Outlined />,
   SETTINGS: <SettingsOutlined />,
-  DEV_TOOLS: <DeveloperModeOutlined />,
 };
 export function AppShellLayout() {
   const { t } = useAppTranslation();

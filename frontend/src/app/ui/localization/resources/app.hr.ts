@@ -12,7 +12,6 @@ const hr = {
     OVERVIEW: "Pregled",
     ITEMS: "Stavke",
     SETTINGS: "Postavke",
-    DEV_TOOLS: "Razvojni alati",
     EXPAND: "Proširi navigaciju",
     COMPACT: "Sažmi navigaciju",
     CLOSE: "Zatvori navigaciju",

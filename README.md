@@ -30,7 +30,7 @@ before committing to individual packages.
 - PostgreSQL 17 or 18 for a production-like local environment (H2 is also supported for quick development)
 - Anonymous access to the public npm registry
 
-Copy [`.env.example`](.env.example) to `.env` and export the runtime values before starting the backend. Copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env.local` when the frontend defaults are not suitable.
+The default H2 database needs no service or environment setup. Copy [`.env.example`](.env.example) to `.env` only when overriding it. Copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env.local` when the frontend defaults are not suitable.
 
 The JVM libraries resolve anonymously from Maven Central, and the public frontend
 packages resolve anonymously from npm. No package-registry credential is
@@ -39,15 +39,12 @@ required.
 ## Run the application
 
 ```bash
-# Terminal 1: Spring Boot API (dev profile seeds demo/demo123 and admin/admin123)
-set -a && source .env && set +a
-./gradlew bootRun
-
-# Terminal 2: React PWA
-cd frontend
-corepack npm ci
+corepack npm run setup
+corepack npm run doctor
 corepack npm run dev
 ```
+
+The root workflow starts the Spring Boot API and React PWA together. A generated PostgreSQL project also starts its Compose database. Press Ctrl-C once to stop the application processes.
 
 Open <http://localhost:3000>. API documentation is available at <http://localhost:8080/swagger-ui.html> only in the `dev` profile.
 
@@ -70,11 +67,13 @@ verifies the PWA shell, API proxy, and backend readiness through the deployed ne
 
 ## Customize the template
 
-Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md). Rename the product, replace the sample Item capability, remove Dev tools before production, configure real authentication/bootstrap behavior, and provide deployment secrets through the environment.
+Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md). Rename the product, replace the sample Item capability, configure real authentication/bootstrap behavior, and provide deployment secrets through the environment.
 
 ## Developer documentation
 
 - [Getting started and configuration](docs/getting-started.md)
+- [30-minute vertical slice](docs/tutorials/30-minute-vertical-slice.md)
+- [Doctor diagnostics and remedies](docs/troubleshooting.md)
 - [Customizing the template](docs/customizing-the-template.md)
 - [Deployment](docs/deployment.md)
 - [Starter compatibility and bundle policy](docs/starter-compatibility.md)
