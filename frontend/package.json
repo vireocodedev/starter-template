@@ -56,7 +56,7 @@
     "storybook:local-starter": "STORYBOOK=true USE_LOCAL_STARTER_SOURCE=true storybook dev -p 6007",
     "build-storybook": "STORYBOOK=true storybook build",
     "build-storybook:local-starter": "STORYBOOK=true USE_LOCAL_STARTER=true storybook build",
-    "toolchain:check": "node ../scripts/toolchain-policy.mjs",
+    "toolchain:check": "node ../scripts/toolchain-policy.mjs && node ../scripts/platform-support-policy.mjs",
     "verify": "bash scripts/verify.sh",
     "verify:local-starter": "bash scripts/verify.sh local-starter",
     "preview": "vite preview --port 3000"

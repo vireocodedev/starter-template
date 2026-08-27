@@ -1,0 +1,220 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": "2026-08-27.1",
+  "reviewedAt": "2026-08-27",
+  "canonicalHost": { "os": "ubuntu-24.04", "architecture": "x64", "runnerClass": "github-hosted" },
+  "freshnessHours": { "merge": 48, "scheduled": 192, "manual": 840 },
+  "toolchains": {
+    "node": { "exact": "24.18.1", "range": ">=24.15.0 <25" },
+    "npm": { "exact": "12.0.2" },
+    "java": { "compile": "21", "compatibleRuntime": "25" },
+    "gradle": "9.7.1",
+    "springBoot": "4.1.1",
+    "react": ">=19.2 <20",
+    "mui": ">=9 <10",
+    "typescript": ">=6 <7",
+    "vite": ">=8 <9",
+    "postgresql": ["17", "18"]
+  },
+  "rows": [
+    {
+      "id": "node-npm",
+      "surface": "Node.js and npm",
+      "target": "Node >=24.15 <25; npm 12.0.2",
+      "status": "supported",
+      "evidence": {
+        "requirement": "required",
+        "cadence": "merge",
+        "lanes": [
+          { "repository": "starter", "workflow": "ci.yml", "job": "build" },
+          { "repository": "starter-template", "workflow": "ci.yml", "job": "verify" }
+        ]
+      }
+    },
+    {
+      "id": "java-boot-gradle",
+      "surface": "Java, Spring Boot, and Gradle",
+      "target": "Java 21; Boot 4.1.1; checked-in Gradle 9.7.1 wrapper",
+      "status": "supported",
+      "evidence": {
+        "requirement": "required",
+        "cadence": "merge",
+        "lanes": [
+          { "repository": "starter", "workflow": "ci.yml", "job": "jvm" },
+          { "repository": "starter-template", "workflow": "ci.yml", "job": "verify" }
+        ]
+      }
+    },
+    {
+      "id": "frontend-stack",
+      "surface": "React, MUI, TypeScript, and Vite",
+      "target": "React 19.2; MUI 9; TypeScript 6; Vite 8",
+      "status": "supported",
+      "evidence": {
+        "requirement": "required",
+        "cadence": "merge",
+        "lanes": [
+          { "repository": "starter", "workflow": "ci.yml", "job": "build" },
+          { "repository": "starter-template", "workflow": "ci.yml", "job": "verify" }
+        ]
+      }
+    },
+    {
+      "id": "chromium-tab",
+      "surface": "Chromium browser tab",
+      "target": "Playwright Chromium desktop and mobile profiles",
+      "status": "supported",
+      "evidence": {
+        "requirement": "required",
+        "cadence": "merge",
+        "lanes": [{ "repository": "starter-template", "workflow": "ci.yml", "job": "verify" }]
+      }
+    },
+    {
+      "id": "postgresql",
+      "surface": "PostgreSQL",
+      "target": "Major 17 and 18",
+      "status": "supported",
+      "evidence": {
+        "requirement": "required",
+        "cadence": "scheduled",
+        "lanes": [
+          { "repository": "starter", "workflow": "support-evidence.yml", "job": "postgres" },
+          { "repository": "starter-template", "workflow": "support-evidence.yml", "job": "postgres" }
+        ]
+      }
+    },
+    {
+      "id": "h2-development",
+      "surface": "H2",
+      "target": "Development and automated-test profiles only",
+      "status": "supported",
+      "evidence": {
+        "requirement": "required",
+        "cadence": "merge",
+        "lanes": [{ "repository": "starter-template", "workflow": "ci.yml", "job": "verify" }]
+      }
+    },
+    {
+      "id": "ubuntu-24-x64",
+      "surface": "Canonical build operating system",
+      "target": "Ubuntu 24.04 x86-64",
+      "status": "supported",
+      "evidence": {
+        "requirement": "required",
+        "cadence": "merge",
+        "lanes": [
+          { "repository": "starter", "workflow": "ci.yml", "job": "build" },
+          { "repository": "starter-template", "workflow": "ci.yml", "job": "verify" }
+        ]
+      }
+    },
+    {
+      "id": "public-artifact-consumers",
+      "surface": "Credential-free package consumers",
+      "target": "Public npm packages and Maven BOM/modules from empty consumer caches",
+      "status": "supported",
+      "evidence": {
+        "requirement": "required",
+        "cadence": "scheduled",
+        "lanes": [{ "repository": "starter", "workflow": "support-evidence.yml", "job": "public-consumers" }]
+      }
+    },
+    {
+      "id": "linux-x64-deployment",
+      "surface": "Reference deployment",
+      "target": "Independent frontend/backend OCI images with PostgreSQL 18 on Linux x86-64",
+      "status": "supported",
+      "evidence": {
+        "requirement": "required",
+        "cadence": "merge",
+        "lanes": [{ "repository": "starter-template", "workflow": "ci.yml", "job": "verify" }]
+      }
+    },
+    {
+      "id": "java-25-runtime",
+      "surface": "Java 25 runtime",
+      "target": "Java 21 bytecode executed on Temurin 25",
+      "status": "compatible",
+      "evidence": {
+        "requirement": "advisory",
+        "cadence": "scheduled",
+        "lanes": [
+          { "repository": "starter", "workflow": "support-evidence.yml", "job": "java-25" },
+          { "repository": "starter-template", "workflow": "support-evidence.yml", "job": "java-25" }
+        ]
+      }
+    },
+    {
+      "id": "firefox-webkit-engines",
+      "surface": "Firefox and WebKit engines",
+      "target": "Current Playwright Firefox and WebKit",
+      "status": "compatible",
+      "evidence": {
+        "requirement": "advisory",
+        "cadence": "scheduled",
+        "lanes": [{ "repository": "starter-template", "workflow": "support-evidence.yml", "job": "browsers" }]
+      }
+    },
+    {
+      "id": "advanced-browser-storage",
+      "surface": "OPFS and advanced browser persistence",
+      "target": "Feature-detected opt-in paths",
+      "status": "experimental",
+      "evidence": {
+        "requirement": "advisory",
+        "cadence": "merge",
+        "lanes": [{ "repository": "starter-template", "workflow": "ci.yml", "job": "verify" }]
+      }
+    },
+    {
+      "id": "installed-pwa",
+      "surface": "Installed PWA",
+      "target": "Install, update, offline, and recovery lifecycle",
+      "status": "experimental",
+      "evidence": { "requirement": "manual", "cadence": "manual", "lanes": [] }
+    },
+    {
+      "id": "ubuntu-26",
+      "surface": "Ubuntu 26.04 developer host",
+      "target": "Ubuntu 26.04 x86-64",
+      "status": "untested",
+      "evidence": { "requirement": "none", "cadence": "manual", "lanes": [] }
+    },
+    {
+      "id": "macos-apple-silicon",
+      "surface": "macOS developer host",
+      "target": "Current and previous macOS on Apple silicon",
+      "status": "untested",
+      "evidence": { "requirement": "manual", "cadence": "manual", "lanes": [] }
+    },
+    {
+      "id": "windows-11-wsl2",
+      "surface": "Windows developer host",
+      "target": "Windows 11 with WSL2 and admitted Ubuntu",
+      "status": "untested",
+      "evidence": { "requirement": "manual", "cadence": "manual", "lanes": [] }
+    },
+    {
+      "id": "branded-browsers",
+      "surface": "Branded desktop browsers",
+      "target": "Chrome, Edge, Firefox, and Safari release windows",
+      "status": "untested",
+      "evidence": { "requirement": "manual", "cadence": "manual", "lanes": [] }
+    },
+    {
+      "id": "physical-mobile",
+      "surface": "Physical mobile browsers",
+      "target": "Representative Android, iPhone, and iPad devices",
+      "status": "untested",
+      "evidence": { "requirement": "manual", "cadence": "manual", "lanes": [] }
+    },
+    {
+      "id": "linux-arm64",
+      "surface": "Linux ARM64 deployment",
+      "target": "Frontend and backend OCI images on ARM64",
+      "status": "untested",
+      "evidence": { "requirement": "none", "cadence": "manual", "lanes": [] }
+    }
+  ]
+}

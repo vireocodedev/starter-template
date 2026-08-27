@@ -1,12 +1,59 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const declaredPackageManager = JSON.parse(
+const frontendManifest = JSON.parse(
   readFileSync(resolve(repositoryRoot, "frontend", "package.json"), "utf8"),
-).packageManager;
+);
+const declaredPackageManager = frontendManifest.packageManager;
+const platformPolicy = JSON.parse(
+  readFileSync(
+    resolve(repositoryRoot, "contracts", "platform-support-policy.json"),
+    "utf8",
+  ),
+);
+const gradleProperties = readFileSync(
+  resolve(repositoryRoot, "gradle.properties"),
+  "utf8",
+);
+const starterJvmVersion = gradleProperties.match(
+  /^starterVersion=(.+)$/mu,
+)?.[1];
+const playwrightManifestPath = resolve(
+  repositoryRoot,
+  "frontend",
+  "node_modules",
+  "@playwright",
+  "test",
+  "package.json",
+);
+const playwrightBrowsersPath = resolve(
+  repositoryRoot,
+  "frontend",
+  "node_modules",
+  "playwright-core",
+  "browsers.json",
+);
+const playwrightVersion = existsSync(playwrightManifestPath)
+  ? JSON.parse(readFileSync(playwrightManifestPath, "utf8")).version
+  : undefined;
+const playwrightBrowsers = existsSync(playwrightBrowsersPath)
+  ? Object.fromEntries(
+      JSON.parse(readFileSync(playwrightBrowsersPath, "utf8"))
+        .browsers.filter((browser) =>
+          ["chromium", "firefox", "webkit"].includes(browser.name),
+        )
+        .map((browser) => [
+          browser.name,
+          {
+            browserVersion: browser.browserVersion,
+            revision: browser.revision,
+          },
+        ]),
+    )
+  : undefined;
 const [scenario, result, outputArgument] = process.argv.slice(2);
 
 if (!scenario || !result || !outputArgument || process.argv.length !== 5) {
@@ -44,6 +91,7 @@ const details = Object.fromEntries(
 );
 const evidence = {
   schemaVersion: 1,
+  platformPolicyVersion: platformPolicy.policyVersion,
   scenario,
   result,
   recordedAt: new Date().toISOString(),
@@ -66,6 +114,16 @@ const evidence = {
       version("corepack", ["npm", "--version"]) ||
       `${declaredPackageManager} via Corepack`,
     java: version("java", ["--version"]),
+    playwright: playwrightVersion,
+    playwrightBrowsers,
+  },
+  artifacts: {
+    npm: Object.fromEntries(
+      Object.entries(frontendManifest.dependencies).filter(([name]) =>
+        name.startsWith("@vireocodedev/"),
+      ),
+    ),
+    jvm: starterJvmVersion,
   },
   details,
 };

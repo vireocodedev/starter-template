@@ -1,11 +1,70 @@
 {
-  "schemaVersion": 1,
-  "stagesMs": {
-    "public-contract": 10000,
-    "frontend-contract": 240000,
-    "browser-smoke": 150000,
-    "jvm-build": 120000,
-    "container-context": 10000
+  "schemaVersion": 2,
+  "canonicalHost": {
+    "os": "ubuntu-24.04",
+    "architecture": "x64",
+    "runnerClass": "github-hosted"
   },
-  "totalMs": 420000
+  "measurement": {
+    "duration": "single-run wall clock in milliseconds",
+    "peakRss": "GNU time maximum resident set size in KiB for each stage process tree",
+    "cacheState": "clean checkout and npm ci; ordinary Gradle and npm caches may be restored by the hosted runner",
+    "baselineMethod": "initial verified reference; review the median of the latest five successful canonical-host runs",
+    "reviewWindowRuns": 5
+  },
+  "stages": {
+    "public-contract": {
+      "label": "Public contract policy",
+      "baselineMs": 100,
+      "warningMs": 5000,
+      "failureMs": 10000,
+      "baselineRssKiB": 80000,
+      "warningRssKiB": 262144,
+      "failureRssKiB": 524288
+    },
+    "frontend-contract": {
+      "label": "Frontend contract",
+      "baselineMs": 105000,
+      "warningMs": 180000,
+      "failureMs": 240000,
+      "baselineRssKiB": 4215276,
+      "warningRssKiB": 6291456,
+      "failureRssKiB": 8388608
+    },
+    "browser-smoke": {
+      "label": "Browser smoke tests",
+      "baselineMs": 25000,
+      "warningMs": 110000,
+      "failureMs": 150000,
+      "baselineRssKiB": 1800000,
+      "warningRssKiB": 3145728,
+      "failureRssKiB": 4194304
+    },
+    "jvm-build": {
+      "label": "JVM build",
+      "baselineMs": 1000,
+      "warningMs": 90000,
+      "failureMs": 120000,
+      "baselineRssKiB": 1100000,
+      "warningRssKiB": 1572864,
+      "failureRssKiB": 2097152
+    },
+    "container-context": {
+      "label": "Container context contract",
+      "baselineMs": 100,
+      "warningMs": 5000,
+      "failureMs": 10000,
+      "baselineRssKiB": 80000,
+      "warningRssKiB": 262144,
+      "failureRssKiB": 524288
+    }
+  },
+  "total": {
+    "baselineMs": 130000,
+    "warningMs": 300000,
+    "failureMs": 420000,
+    "baselineRssKiB": 4215276,
+    "warningRssKiB": 6291456,
+    "failureRssKiB": 8388608
+  }
 }

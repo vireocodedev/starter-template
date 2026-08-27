@@ -58,7 +58,7 @@ jobs:
           name: verification-timing-${{ github.run_id }}-${{ github.run_attempt }}
           path: .verification-evidence/latest.json
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 90
 
       - name: Validate deployment descriptor
         env:

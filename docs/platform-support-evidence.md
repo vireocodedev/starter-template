@@ -5,6 +5,41 @@ Node 24.18.1/npm 12.0.2, H2, and desktop/mobile Chromium. The scheduled and manu
 dispatchable `Support evidence` workflow samples compatibility outside that canonical
 lane without making ordinary pull requests depend on a large matrix.
 
+The identical machine-readable snapshot in
+[`contracts/platform-support-policy.json`](../contracts/platform-support-policy.json)
+is checked against the Template toolchain, documentation, and local workflow jobs.
+The scheduled `platform-policy-sync` lane also compares it with Starter's public
+canonical policy so cross-repository drift cannot remain invisible.
+
+## Current enforced matrix
+
+| Policy row | Current status | Evidence requirement | Cadence |
+| ---------- | -------------- | -------------------- | ------- |
+| `node-npm` | supported | required | merge |
+| `java-boot-gradle` | supported | required | merge |
+| `frontend-stack` | supported | required | merge |
+| `chromium-tab` | supported | required | merge |
+| `postgresql` | supported | required | scheduled |
+| `h2-development` | supported | required | merge |
+| `ubuntu-24-x64` | supported | required | merge |
+| `public-artifact-consumers` | supported | required | scheduled |
+| `linux-x64-deployment` | supported | required | merge |
+| `java-25-runtime` | compatible | advisory | scheduled |
+| `firefox-webkit-engines` | compatible | advisory | scheduled |
+| `advanced-browser-storage` | experimental | advisory | merge |
+| `installed-pwa` | experimental | manual | manual |
+| `ubuntu-26` | untested | none | manual |
+| `macos-apple-silicon` | untested | manual | manual |
+| `windows-11-wsl2` | untested | manual | manual |
+| `branded-browsers` | untested | manual | manual |
+| `physical-mobile` | untested | manual | manual |
+| `linux-arm64` | untested | none | manual |
+
+`supported` means required automated evidence exists at the stated cadence.
+`compatible` is advisory recurring evidence, `experimental` is opt-in, and
+`untested` makes no compatibility promise. Manual rows are promotion requirements,
+not evidence that has already been collected.
+
 ## Recurring lanes
 
 | Lane                 | Contract exercised                                                                                                   |

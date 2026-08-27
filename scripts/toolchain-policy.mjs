@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const policy = readJson("contracts/toolchain-policy.json");
+const platformPolicy = readJson("contracts/platform-support-policy.json");
 const frontendManifest = readJson("frontend/package.json");
 const frontendLock = readJson("frontend/package-lock.json");
 const build = readFile("build.gradle");
@@ -28,6 +29,34 @@ function expectText(label, source, expected) {
   if (!source.includes(expected))
     problems.push(`${label}: missing ${expected}`);
 }
+
+expectEqual(
+  "platform Node exact",
+  policy.node,
+  platformPolicy.toolchains.node.exact,
+);
+expectEqual(
+  "platform Node range",
+  policy.nodeRange,
+  platformPolicy.toolchains.node.range,
+);
+expectEqual("platform npm", policy.npm, platformPolicy.toolchains.npm.exact);
+expectEqual(
+  "platform Java",
+  policy.java,
+  platformPolicy.toolchains.java.compile,
+);
+expectEqual("platform Gradle", policy.gradle, platformPolicy.toolchains.gradle);
+expectEqual(
+  "platform Spring Boot",
+  policy.springBoot,
+  platformPolicy.toolchains.springBoot,
+);
+expectEqual(
+  "platform canonical runner",
+  policy.canonicalRunner,
+  platformPolicy.canonicalHost.os,
+);
 
 expectEqual(
   "frontend engines.node",
