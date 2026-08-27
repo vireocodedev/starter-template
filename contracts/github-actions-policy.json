@@ -8,7 +8,7 @@
     "github/codeql-action/analyze": "cdf488f595d80d6e07e03d4674febd5ab45fa938",
     "github/codeql-action/autobuild": "cdf488f595d80d6e07e03d4674febd5ab45fa938",
     "github/codeql-action/init": "cdf488f595d80d6e07e03d4674febd5ab45fa938",
-    "gradle/actions/setup-gradle": "748248ddd2a24f49513d8f472f81c3a07d4d50e1"
+    "gradle/actions/setup-gradle": "9c971963bec38e04b3d30dcc455b5382be2fdbfb"
   },
   "containerImages": {
     "ghcr.io/gitleaks/gitleaks": {
