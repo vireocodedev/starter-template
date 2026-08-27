@@ -16,6 +16,7 @@ if $silent; then
 fi
 
 steps=(
+  "public-contract|Public contract policy|node scripts/public-contract-policy.mjs"
   "frontend-contract|Frontend contract|${frontend_verify_command}"
   "browser-smoke|Browser smoke tests|cd frontend && corepack npm run test:e2e"
   "jvm-build|JVM build|./gradlew build"

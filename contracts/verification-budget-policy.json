@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "stagesMs": {
+    "public-contract": 10000,
     "frontend-contract": 240000,
     "browser-smoke": 150000,
     "jvm-build": 120000,
