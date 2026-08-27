@@ -45,9 +45,9 @@ const en = {
       open: "Open Async data states",
     },
     offlineCrud: {
-      title: "Offline-first CRUD",
-      description: "Queue optimistic local writes and replay them after connectivity returns.",
-      open: "Open Offline-first CRUD",
+      title: "Offline state simulation",
+      description: "Explore local optimistic and queued UI states without implying server synchronization.",
+      open: "Open offline state simulation",
     },
     realtime: {
       title: "Realtime updates",

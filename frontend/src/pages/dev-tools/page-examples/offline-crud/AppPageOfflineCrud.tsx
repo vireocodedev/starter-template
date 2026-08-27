@@ -54,30 +54,31 @@ export function AppPageOfflineCrud() {
       }
     >
       <Stack spacing={2} sx={{ maxWidth: 760 }}>
+        <Alert severity="info">{t("offlineCrud.limitation")}</Alert>
         <Alert
           severity={online ? "success" : "warning"}
           icon={online ? <CloudDoneOutlined /> : <CloudOffOutlined />}
           action={
             <Button color="inherit" onClick={() => setSimulateOffline(value => !value)}>
-              {simulateOffline ? "Use browser status" : "Simulate offline"}
+              {simulateOffline ? t("offlineCrud.actions.useBrowserStatus") : t("offlineCrud.actions.simulateOffline")}
             </Button>
           }
         >
-          {online ? "Online — writes synchronize immediately." : "Offline — writes are stored locally and queued."}
+          {online ? t("offlineCrud.status.online") : t("offlineCrud.status.offline")}
         </Alert>
         <Paper variant="outlined" sx={{ p: 2 }}>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
             <TextField
               value={name}
               onChange={event => setName(event.target.value)}
-              label="Record name"
+              label={t("offlineCrud.recordName")}
               sx={{ flex: 1 }}
             />
             <Button variant="contained" startIcon={<AddRounded />} onClick={create}>
-              Create
+              {t("offlineCrud.actions.create")}
             </Button>
             <Button disabled={!online || pendingCount === 0} onClick={replay}>
-              Replay {pendingCount || ""}
+              {t("offlineCrud.actions.replay", { count: pendingCount })}
             </Button>
           </Stack>
           <List>
@@ -87,7 +88,7 @@ export function AppPageOfflineCrud() {
                 divider
                 secondaryAction={
                   <IconButton
-                    aria-label="Delete record"
+                    aria-label={t("offlineCrud.actions.delete")}
                     onClick={() => setItems(current => current.filter(candidate => candidate.id !== item.id))}
                   >
                     <DeleteOutlined />
@@ -96,17 +97,19 @@ export function AppPageOfflineCrud() {
               >
                 <ListItemText
                   primary={item.name}
-                  secondary={item.sync === "QUEUED" ? "Optimistic local record" : "Server-aligned record"}
+                  secondary={
+                    item.sync === "QUEUED" ? t("offlineCrud.record.optimistic") : t("offlineCrud.record.aligned")
+                  }
                 />
                 <Chip
                   size="small"
                   color={item.sync === "QUEUED" ? "warning" : "success"}
-                  label={item.sync.toLowerCase()}
+                  label={item.sync === "QUEUED" ? t("offlineCrud.record.queued") : t("offlineCrud.record.synced")}
                 />
               </ListItem>
             ))}
           </List>
-          {items.length === 0 && <Typography color="text.secondary">No local records.</Typography>}
+          {items.length === 0 && <Typography color="text.secondary">{t("offlineCrud.empty")}</Typography>}
         </Paper>
       </Stack>
     </AppPageLayout>

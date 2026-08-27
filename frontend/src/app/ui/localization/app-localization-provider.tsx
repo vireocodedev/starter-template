@@ -1,4 +1,5 @@
 import React, { type PropsWithChildren } from "react";
+import "dayjs/locale/hr";
 import { I18nextProvider } from "react-i18next";
 import { VireoTemporalLocalizationProvider } from "@vireocodedev/ui/localization";
 import { appI18n } from "@/app/ui/localization/app-i18n";

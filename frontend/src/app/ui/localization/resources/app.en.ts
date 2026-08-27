@@ -19,6 +19,7 @@ const en = {
   account: { OPEN_MENU: "Open account menu", SIGN_OUT: "Sign out" },
   actions: { BACK: "Back" },
   loading: { application: "Loading application", page: "Loading page" },
+  session: { expired: "Your session expired. Sign in again." },
   pwa: {
     later: "Later",
     offline: "You are offline. Server-backed data may be unavailable.",

@@ -47,9 +47,9 @@ const hr = {
       open: "Otvori asinkrona stanja",
     },
     offlineCrud: {
-      title: "Izvanmrežni CRUD",
-      description: "Red čekanja optimističnih lokalnih zapisa ponovno se izvodi nakon povratka veze.",
-      open: "Otvori izvanmrežni CRUD",
+      title: "Simulacija izvanmrežnog stanja",
+      description: "Istražite lokalna optimistična stanja i red čekanja bez tvrdnje o sinkronizaciji s poslužiteljem.",
+      open: "Otvori simulaciju izvanmrežnog stanja",
     },
     realtime: {
       title: "Ažuriranja u stvarnom vremenu",

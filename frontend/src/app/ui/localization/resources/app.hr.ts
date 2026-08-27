@@ -22,6 +22,7 @@ const hr = {
   account: { OPEN_MENU: "Otvori izbornik računa", SIGN_OUT: "Odjava" },
   actions: { BACK: "Natrag" },
   loading: { application: "Učitavanje aplikacije", page: "Učitavanje stranice" },
+  session: { expired: "Vaša je sesija istekla. Ponovno se prijavite." },
   pwa: {
     later: "Kasnije",
     offline: "Izvan mreže ste. Podaci s poslužitelja možda nisu dostupni.",

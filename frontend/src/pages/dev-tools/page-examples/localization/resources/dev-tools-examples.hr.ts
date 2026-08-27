@@ -32,7 +32,32 @@ export default {
     },
   },
   offlineCrud: {
-    header: { title: "Izvanmrežni CRUD", description: "Optimistični lokalni zapisi i naredbe čekaju povratak veze." },
+    header: {
+      title: "Simulacija izvanmrežnog stanja",
+      description:
+        "Pregledajte optimistična lokalna stanja i red čekanja bez tvrdnje o sinkronizaciji s poslužiteljem.",
+    },
+    limitation:
+      "Ovaj razvojni primjer koristi samo localStorage. Ponovno izvođenje mijenja lokalni prikaz; ne kontaktira poslužitelj, ne sprema ključ idempotentnosti i ne rješava sukobe.",
+    status: {
+      online: "Mrežna simulacija — novi zapisi koriste prikaz stanja usklađenog s poslužiteljem.",
+      offline: "Izvanmrežna simulacija — novi zapisi koriste prikaz stanja na čekanju.",
+    },
+    actions: {
+      useBrowserStatus: "Koristi stanje preglednika",
+      simulateOffline: "Simuliraj izvanmrežno stanje",
+      create: "Izradi",
+      replay: "Ponovno prikaži stanje {{count}}",
+      delete: "Izbriši zapis",
+    },
+    recordName: "Naziv zapisa",
+    record: {
+      optimistic: "Optimistični lokalni zapis",
+      aligned: "Prikaz stanja usklađenog s poslužiteljem",
+      queued: "na čekanju",
+      synced: "prikazano kao sinkronizirano",
+    },
+    empty: "Nema lokalnih zapisa.",
   },
   realtime: {
     header: {

@@ -30,9 +30,30 @@ export default {
   },
   offlineCrud: {
     header: {
-      title: "Offline-first CRUD",
-      description: "Optimistic local records and queued commands replay when connectivity returns.",
+      title: "Offline state simulation",
+      description: "Inspect optimistic local and queued presentation states without a server synchronization claim.",
     },
+    limitation:
+      "This developer example uses localStorage only. Replay changes local display state; it does not contact a server, persist an idempotency key, or resolve a conflict.",
+    status: {
+      online: "Online simulation — new records use the server-aligned display state.",
+      offline: "Offline simulation — new records use the queued display state.",
+    },
+    actions: {
+      useBrowserStatus: "Use browser status",
+      simulateOffline: "Simulate offline",
+      create: "Create",
+      replay: "Replay state {{count}}",
+      delete: "Delete record",
+    },
+    recordName: "Record name",
+    record: {
+      optimistic: "Optimistic local record",
+      aligned: "Server-aligned display state",
+      queued: "queued",
+      synced: "displayed as synced",
+    },
+    empty: "No local records.",
   },
   realtime: {
     header: {
