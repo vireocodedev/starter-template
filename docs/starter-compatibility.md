@@ -1,4 +1,4 @@
-# Starter compatibility and bundle policy
+# Starter compatibility, upgrades, and bundle policy
 
 The template's ordinary install, development, test, Storybook, and production-build commands consume released Vireo Starter packages from their public registries. Local Starter source and distribution aliases are explicit development modes and must never become an implicit production dependency.
 
@@ -15,6 +15,38 @@ The template's ordinary install, development, test, Storybook, and production-bu
 | Vireo Starter JVM modules      | `0.2.0`        |
 
 The lockfiles are the reproducibility boundary. Updating a supported package range still requires reviewing and committing the resulting lockfile changes and passing the authoritative verification command.
+
+The npm and JVM version numbers are independent and do not need to match. This
+repository revision, its declared ranges, `starterVersion`, and committed lockfiles
+form the compatibility manifest for the exact combination demonstrated here. The
+upstream [Vireo compatibility policy](https://github.com/vireocodedev/starter/blob/main/docs/COMPATIBILITY.md)
+defines artifact SemVer, public-contract boundaries, deprecation windows, and
+release-line support.
+
+Only the latest Template release and `main` receive fixes and security updates.
+Older tags remain reference points, but no backports are promised. A dependency
+range permits compatible releases under SemVer; it does not claim that every
+possible transitive combination has been tested.
+
+## Application upgrade contract
+
+A cloned application is not kept current automatically. There is no `vireo upgrade`
+command, and the Template's file layout is not a stable library API. Application
+owners selectively merge or port upstream changes and remain responsible for domain
+code, database migrations, configuration, generated code, and deployment order.
+
+For an upgrade:
+
+1. Compare the current Template revision with the intended tag or commit.
+2. Read affected Vireo changelogs and upstream migration or deprecation notes.
+3. Update npm ranges, `starterVersion`, and both lockfiles deliberately.
+4. Apply application-owned configuration, schema, data, or source migrations.
+5. Run `./scripts/verify.sh`, then verify the deployment and rollback sequence in an
+   application-owned environment.
+
+A cross-stack change that cannot tolerate mixed frontend/backend versions requires
+an explicit deployment order. Do not infer wire, schema, or generated-code
+compatibility merely because both halves build independently.
 
 Toolchain and workflow policy are checked inside the authoritative frontend gate.
 Recurring Java, browser, and PostgreSQL compatibility evidence is described in

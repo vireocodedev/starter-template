@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/vireocodedev/starter-template/security/advisories/new
+    about: Report suspected vulnerabilities privately; never use a public issue.
+  - name: Vireo package issue
+    url: https://github.com/vireocodedev/starter/issues/new/choose
+    about: Report a reusable npm or JVM package defect in the framework repository.

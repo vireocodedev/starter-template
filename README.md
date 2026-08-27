@@ -69,3 +69,11 @@ Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md
 - [Loading-state and skeleton standard](frontend/docs/LOADING_STATES.md)
 - [Loading-state and skeleton audit](frontend/docs/LOADING_STATE_AUDIT.md)
 - [Vireo Starter documentation](https://vireocodedev.github.io/starter/?path=/docs/documentation-overview--docs)
+
+## Community and project policy
+
+- [Support and issue routing](SUPPORT.md)
+- [Governance and decision authority](GOVERNANCE.md)
+- [Compatibility and application upgrades](docs/starter-compatibility.md)
+- [Contributing](CONTRIBUTING.md)
+- [Security reporting](SECURITY.md)

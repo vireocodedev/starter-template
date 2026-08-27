@@ -1,0 +1,57 @@
+name: Bug report
+description: Report a reproducible defect in the unmodified Template
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report vulnerabilities here. Follow SECURITY.md for private reporting.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and this is not a security report.
+          required: true
+        - label: I reproduced this on the unmodified Template or isolated the relevant difference.
+          required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Template revision
+      description: Provide the tag or full commit SHA.
+    validations:
+      required: true
+  - type: input
+    id: starter-versions
+    attributes:
+      label: Starter artifact versions
+      description: Include relevant npm package versions and the JVM starterVersion.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide exact steps or a minimal repository using public dependencies.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, Node/npm, browser, Java, database, and relevant configuration.
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add sanitized logs or screenshots without credentials or private data.
