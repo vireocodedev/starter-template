@@ -4,7 +4,7 @@ The backend and frontend are independent build and deployment units. Gradle buil
 
 ## Build the artifacts
 
-The build needs read access to the Vireo GitHub Packages registries. Configure the credentials described in [Getting started](./getting-started.md), then run:
+The backend resolves Vireo libraries anonymously from Maven Central. Configure frontend npm access as described in [Getting started](./getting-started.md), then run:
 
 ```bash
 ./gradlew clean bootJar

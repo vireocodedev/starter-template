@@ -7,9 +7,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import com.vireocode.starter.auth.StarterUserRepository;
-import com.vireocode.starter.history.HistoryActor;
-import com.vireocode.starter.history.HistoryActorResolver;
+import com.vireocode.vireo.auth.StarterUserRepository;
+import com.vireocode.vireo.history.HistoryActor;
+import com.vireocode.vireo.history.HistoryActorResolver;
 
 /** Resolves history actors from this application's authenticated user store. */
 @Component

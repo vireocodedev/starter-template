@@ -4,8 +4,8 @@
 
 Normal development consumes released `@vireocodedev/starter-*` packages and the released JVM BOM. This is the same dependency boundary used by production builds.
 
-1. Create a GitHub token with `read:packages`.
-2. Export `GITHUB_ACTOR`, `GITHUB_TOKEN`, and `NODE_AUTH_TOKEN`.
+1. Configure `NODE_AUTH_TOKEN` for the published frontend packages.
+2. Use the credential-free Maven Central defaults for the JVM libraries.
 3. Copy `.env.example` to `.env` and choose H2 or PostgreSQL.
 4. Run `corepack npm ci` in `frontend`.
 5. Start `./gradlew bootRun` and `corepack npm run dev` in separate terminals.
@@ -16,13 +16,12 @@ The `dev` Spring profile is the only profile that seeds the documented demo acco
 
 ## Configuration ownership
 
-| Setting                         | Owner                        | Default                                |
-| ------------------------------- | ---------------------------- | -------------------------------------- |
-| `SPRING_DATASOURCE_*`           | JVM runtime                  | Required                               |
-| `GITHUB_ACTOR` / `GITHUB_TOKEN` | Gradle dependency resolution | Required when artifacts are not cached |
-| `NODE_AUTH_TOKEN`               | npm dependency resolution    | Required when packages are not cached  |
-| `VITE_API_BASE_URL`             | Browser build                | `/api`                                 |
-| `VITE_APP_NAME`                 | Browser build                | `Vireo Starter`                        |
+| Setting               | Owner                     | Default                               |
+| --------------------- | ------------------------- | ------------------------------------- |
+| `SPRING_DATASOURCE_*` | JVM runtime               | Required                              |
+| `NODE_AUTH_TOKEN`     | npm dependency resolution | Required when packages are not cached |
+| `VITE_API_BASE_URL`   | Browser build             | `/api`                                |
+| `VITE_APP_NAME`       | Browser build             | `Vireo Starter`                       |
 
 Vite values are public build-time configuration. Do not put secrets in variables prefixed with `VITE_`.
 
@@ -39,24 +38,15 @@ Grant access to the npm packages consumed by the frontend:
 - `starter-shell`
 - `starter-ui`
 
-GitHub's Maven/Gradle registry is different: its packages are repository-scoped and do not expose the same cross-repository Actions-access grant. The template therefore needs a classic personal access token whose owner can read `vireocodedev/starter` and whose token has `read:packages` access.
+No Actions or Dependabot secret is needed for Gradle. Maven Central anonymously resolves:
 
-Store that token under the same name in both places:
+- `com.vireocode:vireo-auth`
+- `com.vireocode:vireo-bom`
+- `com.vireocode:vireo-core`
+- `com.vireocode:vireo-history`
+- `com.vireocode:vireo-query`
 
-1. **Settings → Secrets and variables → Actions → New repository secret**: `VIREO_PACKAGES_TOKEN`.
-2. **Settings → Secrets and variables → Dependabot → New repository secret**: `VIREO_PACKAGES_TOKEN`.
-
-The second copy is required because workflows triggered by Dependabot cannot read ordinary Actions secrets. Never commit the token or expose it through a `VITE_*` variable.
-
-The token resolves these JVM packages through Gradle:
-
-- `com.vireocode.vireo-starter-auth`
-- `com.vireocode.vireo-starter-bom`
-- `com.vireocode.vireo-starter-core`
-- `com.vireocode.vireo-starter-history`
-- `com.vireocode.vireo-starter-queryengine`
-
-The verification and CodeQL workflows fail fast with a targeted configuration error when this token is missing, instead of reporting the private JVM artifacts as nonexistent.
+If the frontend registry requires a separate token for Dependabot, store only that npm credential as `VIREO_PACKAGES_TOKEN` in Dependabot secrets. Never commit it or expose it through a `VITE_*` variable.
 
 ## Local Starter development
 

@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vireocode.starter.queryengine.QueryFilterRequest;
-import com.vireocode.starter.web.RestUtils;
-import com.vireocode.starter.web.SearchablePageable;
+import com.vireocode.vireo.queryengine.QueryFilterRequest;
+import com.vireocode.vireo.web.RestUtils;
+import com.vireocode.vireo.web.SearchablePageable;
 import com.vireocode.startertemplate.app.auth.AppSecurityExpressions;
 
 import jakarta.validation.Valid;

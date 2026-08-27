@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.vireocode.starter.base.BaseService;
-import com.vireocode.starter.base.EntityConfig;
+import com.vireocode.vireo.base.BaseService;
+import com.vireocode.vireo.base.EntityConfig;
 import com.vireocode.startertemplate.app.history.AppHistoryEntityType;
 
 @Service

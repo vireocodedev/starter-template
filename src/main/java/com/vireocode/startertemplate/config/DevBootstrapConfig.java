@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.vireocode.starter.auth.StarterUser;
-import com.vireocode.starter.auth.StarterUserRepository;
+import com.vireocode.vireo.auth.StarterUser;
+import com.vireocode.vireo.auth.StarterUserRepository;
 import com.vireocode.startertemplate.app.auth.AppUserRole;
 import com.vireocode.startertemplate.app.item.Item;
 import com.vireocode.startertemplate.app.item.ItemRepository;

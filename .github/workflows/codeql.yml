@@ -20,9 +20,6 @@ jobs:
       packages: read
       security-events: write
     env:
-      GITHUB_ACTOR: ${{ github.actor }}
-      VIREO_PACKAGES_TOKEN: ${{ secrets.VIREO_PACKAGES_TOKEN }}
-      GITHUB_TOKEN: ${{ secrets.VIREO_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
       NODE_AUTH_TOKEN: ${{ secrets.VIREO_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
 
     steps:
@@ -40,9 +37,6 @@ jobs:
           node-version: 24.18.1
           registry-url: https://npm.pkg.github.com
           scope: "@vireocodedev"
-
-      - name: Validate private JVM package credentials
-        run: ./scripts/require-ci-package-token.sh
 
       - run: corepack npm ci
         working-directory: frontend

@@ -1,6 +1,6 @@
 package com.vireocode.startertemplate.app.query;
 
-import com.vireocode.starter.queryengine.QueryEntityKey;
+import com.vireocode.vireo.queryengine.QueryEntityKey;
 
 public enum AppQueryEntityKey implements QueryEntityKey {
     ITEM,

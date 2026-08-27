@@ -1,6 +1,6 @@
 # Starter compatibility and bundle policy
 
-The template's ordinary install, development, test, Storybook, and production-build commands consume released Vireo Starter packages from GitHub Packages. Local Starter source and distribution aliases are explicit development modes and must never become an implicit production dependency.
+The template's ordinary install, development, test, Storybook, and production-build commands consume released Vireo Starter packages from their public registries. Local Starter source and distribution aliases are explicit development modes and must never become an implicit production dependency.
 
 ## Published package line
 

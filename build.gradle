@@ -28,30 +28,15 @@ repositories {
         mavenLocal()
     }
 
-    def gprUser = System.getenv('GITHUB_ACTOR') ?: findProperty('gpr.user')
-    def gprKey = System.getenv('VIREO_PACKAGES_TOKEN') ?:
-        System.getenv('GITHUB_TOKEN') ?:
-        findProperty('gpr.key')
-    if (gprUser && gprKey) {
-        maven {
-            name = 'GitHubPackages'
-            url = uri('https://maven.pkg.github.com/vireocodedev/starter')
-            credentials {
-                username = gprUser
-                password = gprKey
-            }
-        }
-    }
-
     mavenCentral()
 }
 
 dependencies {
-    implementation platform("com.vireocode:vireo-starter-bom:${starterVersion}")
-    implementation 'com.vireocode:vireo-starter-core'
-    implementation 'com.vireocode:vireo-starter-auth'
-    implementation 'com.vireocode:vireo-starter-queryengine'
-    implementation 'com.vireocode:vireo-starter-history'
+    implementation platform("com.vireocode:vireo-bom:${starterVersion}")
+    implementation 'com.vireocode:vireo-core'
+    implementation 'com.vireocode:vireo-auth'
+    implementation 'com.vireocode:vireo-query'
+    implementation 'com.vireocode:vireo-history'
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-flyway'

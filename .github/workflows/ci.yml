@@ -19,9 +19,6 @@ jobs:
       contents: read
       packages: read
     env:
-      GITHUB_ACTOR: ${{ github.actor }}
-      VIREO_PACKAGES_TOKEN: ${{ secrets.VIREO_PACKAGES_TOKEN }}
-      GITHUB_TOKEN: ${{ secrets.VIREO_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
       NODE_AUTH_TOKEN: ${{ secrets.VIREO_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
 
     steps:
@@ -42,9 +39,6 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
           registry-url: https://npm.pkg.github.com
           scope: "@vireocodedev"
-
-      - name: Validate private JVM package credentials
-        run: ./scripts/require-ci-package-token.sh
 
       - name: Install frontend dependencies
         working-directory: frontend
