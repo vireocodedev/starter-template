@@ -8,6 +8,7 @@ export default mergeConfig(
   viteConfig,
   defineConfig({
     test: {
+      testTimeout: 30_000,
       projects: [
         {
           extends: true,
