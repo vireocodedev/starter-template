@@ -2,7 +2,9 @@
 
 ## Toolchain and packages
 
-Use Java 21, Node.js 24.15–24.x, and Corepack npm 12.0.2. Configure frontend npm access as described in the root README, then run `corepack npm ci` in `frontend`. Gradle resolves Vireo JVM artifacts anonymously from Maven Central.
+Use Java 21, Node.js 24.15–24.x, and Corepack npm 12.0.2. Run
+`corepack npm ci` in `frontend`; it resolves the public Vireo packages anonymously
+from npm. Gradle resolves Vireo JVM artifacts anonymously from Maven Central.
 
 ## Development gate
 

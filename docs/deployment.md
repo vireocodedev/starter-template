@@ -4,7 +4,8 @@ The backend and frontend are independent build and deployment units. Gradle buil
 
 ## Build the artifacts
 
-The backend resolves Vireo libraries anonymously from Maven Central. Configure frontend npm access as described in [Getting started](./getting-started.md), then run:
+The backend resolves Vireo libraries anonymously from Maven Central and the
+frontend resolves them anonymously from npm. Then run:
 
 ```bash
 ./gradlew clean bootJar

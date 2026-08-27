@@ -2,12 +2,18 @@
 
 A production-shaped React PWA and Spring Boot application for starting a Vireo product. It demonstrates an authenticated, localized, responsive CRUD workflow while keeping reusable contracts in [Vireo Starter](https://github.com/vireocodedev/starter) and product behavior in this repository.
 
+This is a public `0.x` Template, not a production-readiness claim or generated
+application. Clone it and replace the handwritten Item slice. Vireo provides
+libraries and explicit integration seams; the application owns domain rules,
+authorization policy, sensitive-data decisions, offline eligibility, and conflict
+resolution. A full-stack entity generator does not yet exist.
+
 ## Prerequisites
 
 - Java 21 (Java 25 is exercised as a compatibility runtime)
 - Node.js 24.15–24.x through Corepack npm 12.0.2; CI uses Node 24.18.1
-- PostgreSQL 16 or newer for a production-like local environment (H2 is also supported for quick development)
-- npm registry access for the published Vireo Starter frontend packages
+- PostgreSQL 17 or 18 for a production-like local environment (H2 is also supported for quick development)
+- Anonymous access to the public npm registry
 
 Copy [`.env.example`](.env.example) to `.env` and export the runtime values before starting the backend. Copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env.local` when the frontend defaults are not suitable.
 
