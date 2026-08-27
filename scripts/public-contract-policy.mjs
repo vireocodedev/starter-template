@@ -98,9 +98,9 @@ requireText(".github/ISSUE_TEMPLATE/config.yml", [
 const executableDocumentationClaims = [
   {
     documentation: "README.md",
-    documentedCommand: "corepack npm ci",
+    documentedCommand: "corepack npm run setup",
     evidence: ".github/workflows/ci.yml",
-    evidenceCommand: "corepack npm ci",
+    evidenceCommand: "corepack npm run setup",
   },
   {
     documentation: "README.md",

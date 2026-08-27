@@ -41,8 +41,7 @@ jobs:
           scope: "@vireocodedev"
 
       - name: Install frontend dependencies
-        working-directory: frontend
-        run: corepack npm ci
+        run: corepack npm run setup
 
       - name: Install Chromium
         working-directory: frontend
