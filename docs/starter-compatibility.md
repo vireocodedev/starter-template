@@ -30,18 +30,21 @@ possible transitive combination has been tested.
 
 ## Application upgrade contract
 
-A cloned application is not kept current automatically. There is no `vireo upgrade`
-command, and the Template's file layout is not a stable library API. Application
-owners selectively merge or port upstream changes and remain responsible for domain
-code, database migrations, configuration, generated code, and deployment order.
+A cloned application is not kept current automatically. `vireo upgrade` provides a
+version-aware migration only for explicitly supported release-pair surfaces; the
+Template's file layout is not a stable library API. Application owners selectively
+merge or port upstream changes and remain responsible for domain code, database
+migrations, configuration, generated code, and deployment order. See the
+[project-upgrade contract](project-upgrades.md).
 
 For an upgrade:
 
-1. Compare the current Template revision with the intended tag or commit.
-2. Read affected Vireo changelogs and upstream migration or deprecation notes.
-3. Update npm ranges, `starterVersion`, and both lockfiles deliberately.
-4. Apply application-owned configuration, schema, data, or source migrations.
-5. Run `./scripts/verify.sh`, then verify the deployment and rollback sequence in an
+1. Run the target CLI's upgrade dry run and resolve every refusal.
+2. Compare the current Template revision with the intended tag or commit.
+3. Read affected Vireo changelogs and upstream migration or deprecation notes.
+4. Update npm ranges, `starterVersion`, and both lockfiles deliberately.
+5. Apply application-owned configuration, schema, data, or source migrations.
+6. Run `./scripts/verify.sh`, then verify the deployment and rollback sequence in an
    application-owned environment.
 
 A cross-stack change that cannot tolerate mixed frontend/backend versions requires

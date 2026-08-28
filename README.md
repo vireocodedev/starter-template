@@ -93,6 +93,7 @@ corepack npm run generate:check
 - [Database backup, restore, and major upgrades](docs/database-recovery.md)
 - [Incident response](docs/incident-response.md)
 - [Starter compatibility and bundle policy](docs/starter-compatibility.md)
+- [Version-aware project upgrades](docs/project-upgrades.md)
 - [Platform support evidence](docs/platform-support-evidence.md)
 - [Verification performance budget](docs/verification-performance.md)
 - [Developing against local Starter libraries](docs/local-starter-development.md)
