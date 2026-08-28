@@ -141,7 +141,7 @@ for (const file of sourceFiles) {
       continue;
     }
 
-    const isPublicImport = importedSuffix === "/public";
+    const isPublicImport = importedSuffix === "/public" || importedSuffix.endsWith("/public");
     const isLocalizationRegistryImport =
       relativeFile === "app/app.localization.ts" && importedSuffix.startsWith("/localization/resources/");
 

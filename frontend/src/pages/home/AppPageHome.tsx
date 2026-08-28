@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { APP_PAGES } from "@/app/app.pages";
-import { ItemQuery } from "@/features/item/public";
+import { ItemQuery } from "@/features/item/api/public";
 import { AppPageHomeView } from "./AppPageHomeView";
 
 export function AppPageHome() {

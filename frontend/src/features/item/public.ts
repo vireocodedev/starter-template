@@ -5,5 +5,3 @@ export { useItemSearchQuery } from "./hooks/useItemSearchQuery";
 export { usePendingItemUpdateId } from "./hooks/useItemMutationFeedback";
 export { useItemTableColumns } from "./hooks/useItemTableColumns";
 export { Item, ItemStatus, buildValidatedItemSchema, getDefaultItem } from "./models/Item";
-export { ItemQuery } from "./api/item.query";
-export type { ItemFilters } from "./models/ItemFilters";

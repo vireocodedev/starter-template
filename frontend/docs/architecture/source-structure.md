@@ -31,7 +31,7 @@ A feature uses only the directories it needs:
 ```text
 features/<feature>/
 ├── public.ts
-├── api/
+├── api/                    may expose a scoped public.ts when bundle evidence requires it
 ├── assets/
 ├── components/
 ├── contexts/
