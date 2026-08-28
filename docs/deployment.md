@@ -86,3 +86,5 @@ Before producing the image, run the same merge gate as CI:
 ```
 
 After deployment, verify readiness and then exercise login plus one authenticated API request through the public origin.
+
+For a disposable evaluation environment, use the isolated [flagship demo operations contract](flagship-demo.md). It adds deterministic public seed data, a scoped reset procedure, and an external synthetic journey without weakening the normal production profile.

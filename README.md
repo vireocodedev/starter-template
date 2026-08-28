@@ -87,6 +87,7 @@ corepack npm run generate:check
 - [Generated capabilities](docs/generated-capabilities.md)
 - [Offline behavior and limits](docs/offline.md)
 - [Deployment](docs/deployment.md)
+- [Flagship demo operations](docs/flagship-demo.md)
 - [Security threat model](docs/security-threat-model.md)
 - [Production security hardening](docs/security-hardening.md)
 - [Operations and observability](docs/operations.md)

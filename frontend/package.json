@@ -50,6 +50,7 @@
     "e2e:prepare-backend": "../gradlew -p .. bootJar --console=plain",
     "pretest:e2e": "corepack npm run e2e:prepare-backend",
     "test:e2e": "playwright test",
+    "test:demo": "playwright test --config=playwright.demo.config.ts",
     "pretest:pwa": "corepack npm run build",
     "test:pwa": "playwright test --config=playwright.pwa.config.ts",
     "performance:audit": "node scripts/lighthouse-budget.mjs",

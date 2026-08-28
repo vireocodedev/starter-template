@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "publicUrl": null,
+  "availabilityClaim": "none-until-activated",
+  "dataClassification": "public-synthetic-only",
+  "credentials": {
+    "username": "demo",
+    "password": "demo123",
+    "scope": "isolated-demo-only"
+  },
+  "healthPaths": ["/healthz", "/actuator/health/readiness"],
+  "reset": {
+    "strategy": "destroy-dedicated-volume-and-redeploy",
+    "maximumIntervalHours": 24,
+    "command": "VIREO_DEMO_RESET_CONFIRM=reset-vireo-demo ./scripts/reset-flagship-demo.sh"
+  },
+  "monitor": {
+    "workflow": ".github/workflows/flagship-demo.yml",
+    "command": "corepack npm --prefix frontend run test:demo"
+  }
+}

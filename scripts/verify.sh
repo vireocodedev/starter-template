@@ -17,6 +17,7 @@ fi
 
 steps=(
   "public-contract|Public contract policy|node scripts/public-contract-policy.mjs"
+  "flagship-demo|Flagship demo contract|node scripts/flagship-demo-policy.mjs"
   "frontend-contract|Frontend contract|${frontend_verify_command}"
   "browser-smoke|Browser smoke tests|cd frontend && corepack npm run test:e2e"
   "jvm-build|JVM build|./gradlew build"
