@@ -6,6 +6,7 @@ const en = {
     offline: "Connection offline",
   },
   navigation: {
+    PRIMARY: "Primary navigation",
     OVERVIEW: "Overview",
     ITEMS: "Items",
     SETTINGS: "Settings",

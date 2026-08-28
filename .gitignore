@@ -20,5 +20,6 @@ frontend/storybook-static/
 frontend/test-results/
 .support-evidence/
 .verification-evidence/
+.performance-evidence/
 *.iml
 .DS_Store

@@ -13,27 +13,27 @@ canonical policy so cross-repository drift cannot remain invisible.
 
 ## Current enforced matrix
 
-| Policy row | Current status | Evidence requirement | Cadence |
-| ---------- | -------------- | -------------------- | ------- |
-| `node-npm` | supported | required | merge |
-| `java-boot-gradle` | supported | required | merge |
-| `frontend-stack` | supported | required | merge |
-| `chromium-tab` | supported | required | merge |
-| `postgresql` | supported | required | scheduled |
-| `h2-development` | supported | required | merge |
-| `ubuntu-24-x64` | supported | required | merge |
-| `public-artifact-consumers` | supported | required | scheduled |
-| `linux-x64-deployment` | supported | required | merge |
-| `java-25-runtime` | compatible | advisory | scheduled |
-| `firefox-webkit-engines` | compatible | advisory | scheduled |
-| `advanced-browser-storage` | experimental | advisory | merge |
-| `installed-pwa` | experimental | manual | manual |
-| `ubuntu-26` | untested | none | manual |
-| `macos-apple-silicon` | untested | manual | manual |
-| `windows-11-wsl2` | untested | manual | manual |
-| `branded-browsers` | untested | manual | manual |
-| `physical-mobile` | untested | manual | manual |
-| `linux-arm64` | untested | none | manual |
+| Policy row                  | Current status | Evidence requirement | Cadence   |
+| --------------------------- | -------------- | -------------------- | --------- |
+| `node-npm`                  | supported      | required             | merge     |
+| `java-boot-gradle`          | supported      | required             | merge     |
+| `frontend-stack`            | supported      | required             | merge     |
+| `chromium-tab`              | supported      | required             | merge     |
+| `postgresql`                | supported      | required             | scheduled |
+| `h2-development`            | supported      | required             | merge     |
+| `ubuntu-24-x64`             | supported      | required             | merge     |
+| `public-artifact-consumers` | supported      | required             | scheduled |
+| `linux-x64-deployment`      | supported      | required             | merge     |
+| `java-25-runtime`           | compatible     | advisory             | scheduled |
+| `firefox-webkit-engines`    | compatible     | advisory             | scheduled |
+| `advanced-browser-storage`  | experimental   | advisory             | merge     |
+| `installed-pwa`             | experimental   | advisory             | merge     |
+| `ubuntu-26`                 | untested       | none                 | manual    |
+| `macos-apple-silicon`       | untested       | manual               | manual    |
+| `windows-11-wsl2`           | untested       | manual               | manual    |
+| `branded-browsers`          | untested       | manual               | manual    |
+| `physical-mobile`           | untested       | manual               | manual    |
+| `linux-arm64`               | untested       | none                 | manual    |
 
 `supported` means required automated evidence exists at the stated cadence.
 `compatible` is advisory recurring evidence, `experimental` is opt-in, and
@@ -55,9 +55,11 @@ when the compatibility command fails.
 
 These jobs provide recurring compatibility evidence; they do not by themselves prove
 the complete public support promise. Playwright's bundled engines sample Firefox and
-WebKit rather than proving two branded Firefox releases or Safari on macOS. Physical
-mobile devices, installed-PWA behavior, Ubuntu 26.04, macOS, and Windows/WSL remain
-separate hosted/manual evidence requirements.
+WebKit rather than proving two branded Firefox releases or Safari on macOS.
+Production Chromium verifies manifest metadata, service-worker registration,
+offline shell launch, NetworkOnly API behavior, and the absence of API entries in
+service-worker caches. Physical installation/update behavior, branded browsers,
+Ubuntu 26.04, macOS, and Windows/WSL remain separate manual evidence requirements.
 
 ## Local focused checks
 
@@ -78,3 +80,15 @@ VIREO_E2E_BROWSER=webkit corepack npm run test:e2e
 To exercise an externally managed database, export the normal Spring datasource
 variables and set `VIREO_E2E_EXTERNAL_DATABASE=true`. The Playwright server then
 inherits that configuration instead of forcing its disposable H2 URL.
+
+After building the production frontend, run the browser/PWA and Lighthouse evidence
+locally with:
+
+```bash
+corepack npm run test:pwa
+corepack npm run performance:audit
+```
+
+The [manual platform checklist](manual-platform-checklist.md) is required for
+branded Safari/Edge/Firefox, physical Android/iOS installation, and assistive
+technology evidence.

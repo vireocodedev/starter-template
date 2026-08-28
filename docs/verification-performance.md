@@ -20,6 +20,32 @@ CI retains each run's `.verification-evidence/latest.json` for 90 days.
 Measurements from heterogeneous developer hosts remain diagnostic and cannot change
 the canonical baseline.
 
+## Production browser budgets
+
+`cd frontend && corepack npm run performance:audit` runs Lighthouse's default
+mobile emulation against the production `/login` bundle. CI retains the structured
+`.performance-evidence/lighthouse.json` artifact for 90 days. The merge gate
+enforces:
+
+| Metric                    |           Budget |
+| ------------------------- | ---------------: |
+| Lighthouse performance    |    at least 0.75 |
+| Lighthouse accessibility  |     exactly 1.00 |
+| Lighthouse best practices |    at least 0.90 |
+| First Contentful Paint    | at most 4,000 ms |
+| Largest Contentful Paint  | at most 5,000 ms |
+| Total Blocking Time       |   at most 500 ms |
+| Cumulative Layout Shift   |     at most 0.10 |
+
+The existing production build also limits the largest JavaScript chunk to 700 KiB
+and total JavaScript to 2,400 KiB before compression. These are regression budgets
+for the unmodified canonical Template, not field-performance or application-page
+promises. Network proximity, deployment compression/CDN behavior, application data,
+third-party code, and device capability remain application/deployment variables.
+
+Physical low-end and real-user field measurements remain open manual evidence in
+the [platform checklist](manual-platform-checklist.md).
+
 ## Thresholds
 
 | Stage             | Duration warning | Duration failure | RSS warning | RSS failure |

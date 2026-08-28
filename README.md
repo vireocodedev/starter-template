@@ -98,6 +98,8 @@ corepack npm run generate:check
 - [Command interface visual language](frontend/docs/VISUAL_LANGUAGE.md)
 - [Loading-state and skeleton standard](frontend/docs/LOADING_STATES.md)
 - [Loading-state and skeleton audit](frontend/docs/LOADING_STATE_AUDIT.md)
+- [Accessibility statement and verification](docs/accessibility.md)
+- [Manual accessibility and platform checklist](docs/manual-platform-checklist.md)
 - [Vireo Starter documentation](https://vireocodedev.github.io/starter/docs/)
 - [Vireo public API entry points](https://github.com/vireocodedev/starter/blob/main/docs/PUBLIC_API.md)
 - [Canonical temporal values](https://github.com/vireocodedev/starter/blob/main/docs/TEMPORAL_VALUES.md)

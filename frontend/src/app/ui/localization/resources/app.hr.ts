@@ -9,6 +9,7 @@ const hr = {
     offline: "Veza je prekinuta",
   },
   navigation: {
+    PRIMARY: "Glavna navigacija",
     OVERVIEW: "Pregled",
     ITEMS: "Stavke",
     SETTINGS: "Postavke",

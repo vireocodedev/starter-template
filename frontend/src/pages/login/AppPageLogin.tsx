@@ -45,6 +45,7 @@ export function AppPageLogin() {
 
   return (
     <Box
+      component="main"
       sx={{
         alignItems: "center",
         bgcolor: "surface.sunken",
@@ -123,7 +124,10 @@ export function AppPageLogin() {
               <form.Field name="username">
                 {field => (
                   <VireoLabelBox label={t("fields.username")} required>
-                    <field.TextField label={null} slotProps={{ htmlInput: { autoComplete: "username" } }} />
+                    <field.TextField
+                      label={null}
+                      slotProps={{ htmlInput: { "aria-label": t("fields.username"), autoComplete: "username" } }}
+                    />
                   </VireoLabelBox>
                 )}
               </form.Field>
@@ -133,7 +137,9 @@ export function AppPageLogin() {
                     <field.TextField
                       label={null}
                       type="password"
-                      slotProps={{ htmlInput: { autoComplete: "current-password" } }}
+                      slotProps={{
+                        htmlInput: { "aria-label": t("fields.password"), autoComplete: "current-password" },
+                      }}
                     />
                   </VireoLabelBox>
                 )}

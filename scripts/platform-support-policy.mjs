@@ -28,6 +28,21 @@ const allowedStatuses = new Set([
 const allowedRequirements = new Set(["required", "advisory", "manual", "none"]);
 const allowedCadences = new Set(["merge", "scheduled", "manual"]);
 const problems = [];
+const compareArgumentIndex = process.argv.indexOf("--compare");
+
+if (compareArgumentIndex >= 0) {
+  const canonicalPath = process.argv[compareArgumentIndex + 1];
+  if (!canonicalPath) {
+    problems.push("--compare requires a canonical policy path");
+  } else {
+    const canonicalPolicy = JSON.parse(readFileSync(canonicalPath, "utf8"));
+    if (JSON.stringify(canonicalPolicy) !== JSON.stringify(policy)) {
+      problems.push(
+        `local policy does not semantically match ${canonicalPath}`,
+      );
+    }
+  }
+}
 
 function requireEqual(label, actual, expected) {
   if (actual !== expected)

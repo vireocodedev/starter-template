@@ -27,7 +27,7 @@ jobs:
           curl --fail --silent --show-error \
             https://raw.githubusercontent.com/vireocodedev/starter/main/contracts/platform-support-policy.json \
             --output "$RUNNER_TEMP/platform-support-policy.json"
-          cmp contracts/platform-support-policy.json "$RUNNER_TEMP/platform-support-policy.json"
+          node scripts/platform-support-policy.mjs --compare "$RUNNER_TEMP/platform-support-policy.json"
       - name: Record evidence
         if: always()
         env:

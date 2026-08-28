@@ -221,7 +221,11 @@ export function AppShellLayout() {
                 )}
               </Box>
               <Divider />
-              <List sx={{ flex: 1, px: compact ? 0.75 : 1.25, py: 1.5 }}>
+              <List
+                aria-label={t("navigation.PRIMARY")}
+                component="nav"
+                sx={{ flex: 1, px: compact ? 0.75 : 1.25, py: 1.5 }}
+              >
                 {navigation.map(item => (
                   <VireoApplicationNavigationItem
                     key={item.path}
