@@ -21,5 +21,6 @@ frontend/test-results/
 .support-evidence/
 .verification-evidence/
 .performance-evidence/
+operations/evidence/
 *.iml
 .DS_Store
