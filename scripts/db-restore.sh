@@ -66,4 +66,3 @@ created=true
 created=false
 trap - EXIT
 printf 'Restored into new database: %s\n' "$target_database"
-

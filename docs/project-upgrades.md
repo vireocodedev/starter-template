@@ -50,4 +50,3 @@ that mixed state was explicitly supported and rehearsed. Follow the
 
 The CLI's compatibility result is evidence about its declared release pair, not a
 production approval for application-owned code or data.
-

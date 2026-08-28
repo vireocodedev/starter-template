@@ -51,4 +51,3 @@ fi
 mv "$partial_path" "$backup_path"
 trap - EXIT
 printf 'Created logical backup: %s\n' "$backup_path"
-

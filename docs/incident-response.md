@@ -46,4 +46,3 @@ timeline, detection gap, contributing technical/organizational factors, what wor
 and corrective actions with due dates. Update tests, alerts, runbooks, threat model,
 and recovery rehearsal when the event exposed a missing control. Verify corrective
 actions rather than closing them on documentation alone.
-

@@ -60,4 +60,3 @@ that the previous revision remains recoverable for the agreed window.
 Exercise [database recovery](database-recovery.md) and the
 [incident-response procedure](incident-response.md) on a schedule. Record the date,
 revision, operators, timings, failures, corrective actions, and next due date.
-

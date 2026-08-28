@@ -83,4 +83,3 @@ operator decisions for the incident record.
 
 Primary PostgreSQL references: [SQL dump and restore](https://www.postgresql.org/docs/17/backup-dump.html)
 and [upgrading a PostgreSQL cluster](https://www.postgresql.org/docs/17/upgrading.html).
-
