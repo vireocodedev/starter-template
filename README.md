@@ -26,9 +26,9 @@ database migration, query contract, and responsive UI are connected.
 Choose this Template when you want ordinary React and Spring Boot application code
 with reviewed integration boundaries. Do not choose it on the assumption that it is
 a hosted platform, a finished production system, an automatic CRUD generator, or a
-solution for arbitrary offline conflict resolution. Read the framework's
-[evaluation and limitations](https://github.com/vireocodedev/starter/blob/main/docs/EVALUATION.md)
-and [public API map](https://github.com/vireocodedev/starter/blob/main/docs/PUBLIC_API.md)
+solution for arbitrary offline conflict resolution. Read the framework's canonical
+[getting-started and ownership documentation](https://vireocode.com/docs/)
+and [frontend/Spring package guides](https://vireocode.com/reference/)
 before committing to individual packages.
 
 ## Prerequisites
@@ -89,6 +89,19 @@ corepack npm run generate:check
 
 ## Developer documentation
 
+The canonical user guides now live on [vireocode.com](https://vireocode.com/docs/).
+The repository copies below retain Template-specific operational detail, contributor
+context, and offline access; when guidance differs, the matching Vireo version on the
+main website is authoritative.
+
+- [Main Vireo documentation](https://vireocode.com/docs/)
+- [Getting started](https://vireocode.com/docs/getting-started/)
+- [30-minute vertical slice](https://vireocode.com/docs/guides/30-minute-vertical-slice/)
+- [Components and Storybook](https://vireocode.com/docs/components/)
+- [Deployment](https://vireocode.com/docs/deployment/)
+- [Troubleshooting](https://vireocode.com/docs/troubleshooting/)
+- [Versions and exact references](https://vireocode.com/versions/)
+
 - [Getting started and configuration](docs/getting-started.md)
 - [30-minute vertical slice](docs/tutorials/30-minute-vertical-slice.md)
 - [10-minute flagship evaluation](docs/tutorials/evaluate-flagship.md)
@@ -117,7 +130,7 @@ corepack npm run generate:check
 - [Loading-state and skeleton audit](frontend/docs/LOADING_STATE_AUDIT.md)
 - [Accessibility statement and verification](docs/accessibility.md)
 - [Manual accessibility and platform checklist](docs/manual-platform-checklist.md)
-- [Vireo Starter documentation](https://vireocodedev.github.io/starter/docs/)
+- [Interactive Storybook and exact references](https://vireocode.com/reference/)
 - [Vireo public API entry points](https://github.com/vireocodedev/starter/blob/main/docs/PUBLIC_API.md)
 - [Canonical temporal values](https://github.com/vireocodedev/starter/blob/main/docs/TEMPORAL_VALUES.md)
 
