@@ -1,6 +1,9 @@
 # Flagship demo operations
 
-The repository contains a deployment-ready public-demo profile, deterministic synthetic data, a destructive reset procedure scoped to a dedicated Compose project, and an hourly synthetic read-only journey. It does **not** currently claim a public URL or uptime: those claims begin only after an external host is connected and evidence is recorded in `contracts/flagship-demo-policy.json`.
+The public flagship is live at <https://demo.vireocode.com> with `demo` / `demo123`.
+It runs the repository's deterministic synthetic-data profile, a destructive reset
+procedure scoped to a dedicated Compose project, and an hourly synthetic read-only
+journey. Availability is best effort with no SLA or guaranteed response time.
 
 ## Safety boundary
 
@@ -40,12 +43,19 @@ This is intentionally destructive. Do not override `VIREO_DEMO_COMPOSE_PROJECT` 
 
 ## Availability evidence
 
-After a host exists:
+The repository is configured with:
 
-1. Set the repository variable `VIREO_DEMO_BASE_URL` to its HTTPS origin.
-2. Set `VIREO_DEMO_USERNAME=demo` as a repository variable and `VIREO_DEMO_PASSWORD=demo123` as an Actions secret.
-3. Run the **Flagship demo** workflow manually and require a green read-only journey.
-4. Replace `publicUrl: null` in the policy with the verified URL and change `availabilityClaim` only when a measured claim and response owner exist.
-5. Configure the host's scheduler to run the reset command within the 24-hour maximum interval.
+1. `VIREO_DEMO_BASE_URL=https://demo.vireocode.com` and
+   `VIREO_DEMO_USERNAME=demo` repository variables.
+2. `VIREO_DEMO_PASSWORD` as an Actions secret.
+3. An hourly **Flagship demo** workflow that checks both health boundaries and the
+   authenticated read-only journey.
+4. A persistent host timer that resets the isolated volume every 24 hours.
+5. Retained pre-reset, reset, and post-reset evidence tied to the deployed revision
+   in `contracts/flagship-demo-policy.json`.
 
-The hourly journey verifies the public shell, authentication, live overview data, navigation, and seeded inventory without modifying shared state. A failure is deployment evidence, not automatically an uptime incident until an owner and service objective are explicitly assigned.
+The hourly journey verifies the public shell, authentication, live overview data,
+navigation, and seeded inventory without modifying shared state. Maintainers own the
+deployment on a best-effort basis. Report a reproducible outage through the
+[Template bug form](https://github.com/vireocodedev/starter-template/issues/new?template=bug_report.yml);
+suspected vulnerabilities always use the private security-advisory path.

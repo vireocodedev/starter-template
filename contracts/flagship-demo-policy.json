@@ -1,8 +1,14 @@
 {
   "schemaVersion": 1,
-  "publicUrl": null,
-  "availabilityClaim": "none-until-activated",
+  "publicUrl": "https://demo.vireocode.com",
+  "availabilityClaim": "best-effort-no-sla",
   "dataClassification": "public-synthetic-only",
+  "operations": {
+    "deploymentRevision": "aa7d17bb065626e9eac41b80e701b5b8a19552d8",
+    "activatedAt": "2026-08-28T09:20:09Z",
+    "owner": "Vireo repository maintainers",
+    "incidentPath": "https://github.com/vireocodedev/starter-template/issues/new?template=bug_report.yml"
+  },
   "credentials": {
     "username": "demo",
     "password": "demo123",
@@ -12,10 +18,17 @@
   "reset": {
     "strategy": "destroy-dedicated-volume-and-redeploy",
     "maximumIntervalHours": 24,
-    "command": "VIREO_DEMO_RESET_CONFIRM=reset-vireo-demo ./scripts/reset-flagship-demo.sh"
+    "command": "VIREO_DEMO_RESET_CONFIRM=reset-vireo-demo ./scripts/reset-flagship-demo.sh",
+    "lastRehearsedAt": "2026-08-28T09:21:51Z",
+    "evidenceLocation": "/opt/apps/vireo-flagship-demo/operations/evidence/reset-20260828T092151Z.log"
   },
   "monitor": {
     "workflow": ".github/workflows/flagship-demo.yml",
-    "command": "corepack npm --prefix frontend run test:demo"
+    "command": "corepack npm --prefix frontend run test:demo",
+    "schedule": "hourly",
+    "evidenceRuns": [
+      "https://github.com/vireocodedev/starter-template/actions/runs/33158935391",
+      "https://github.com/vireocodedev/starter-template/actions/runs/33159094461"
+    ]
   }
 }

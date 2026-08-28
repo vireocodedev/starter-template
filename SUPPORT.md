@@ -12,6 +12,11 @@ best-effort basis. There is no guaranteed response or resolution time.
 - Follow [SECURITY.md](SECURITY.md) for suspected vulnerabilities. Never disclose
   vulnerability details in a public issue.
 
+The maintainer-operated demo at <https://demo.vireocode.com> is a disposable
+evaluation sandbox, not a hosted-service commitment. Report a reproducible outage
+through the Template bug form. It is handled by repository maintainers on a
+best-effort basis with no response-time or uptime SLA.
+
 Include the Template revision or tag, exact Starter artifact versions, reproduction,
 expected and actual behavior, and environment. Search existing issues first.
 

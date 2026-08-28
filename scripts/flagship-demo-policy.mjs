@@ -35,10 +35,34 @@ if (
 ) {
   problems.push("publicUrl must be null before activation or an HTTPS URL");
 }
-if (policy.availabilityClaim !== "none-until-activated") {
-  problems.push(
-    "availabilityClaim must remain none-until-activated before public URL evidence exists",
-  );
+const activated = policy.publicUrl !== null;
+if (!activated && policy.availabilityClaim !== "none-until-activated") {
+  problems.push("an inactive demo must not make an availability claim");
+}
+if (activated && policy.availabilityClaim !== "best-effort-no-sla") {
+  problems.push("an active demo must state its best-effort, no-SLA boundary");
+}
+if (activated) {
+  if (!/^[0-9a-f]{40}$/.test(policy.operations?.deploymentRevision ?? "")) {
+    problems.push("an active demo must identify its deployed revision");
+  }
+  if (!policy.operations?.activatedAt || !policy.operations?.owner) {
+    problems.push("an active demo must identify its activation time and owner");
+  }
+  if (!String(policy.operations?.incidentPath ?? "").startsWith("https://")) {
+    problems.push("an active demo must publish an HTTPS incident path");
+  }
+  if (!policy.reset?.lastRehearsedAt || !policy.reset?.evidenceLocation) {
+    problems.push("an active demo must retain reset evidence");
+  }
+  if (
+    policy.monitor?.schedule !== "hourly" ||
+    policy.monitor?.evidenceRuns?.length < 2
+  ) {
+    problems.push(
+      "an active demo must retain pre-reset and post-reset monitor evidence",
+    );
+  }
 }
 if (policy.dataClassification !== "public-synthetic-only") {
   problems.push("the demo must accept public synthetic data only");

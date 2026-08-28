@@ -2,6 +2,10 @@
 
 This walkthrough proves the supported golden path without asking you to trust a screenshot.
 
+For a read-only preview, open <https://demo.vireocode.com> and sign in with `demo` /
+`demo123`. The hosted sandbox proves the live presentation and request path; continue
+with the local steps below to evaluate mutation, customization, and verification.
+
 ## 1. Start from public artifacts
 
 ```bash

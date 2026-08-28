@@ -18,13 +18,13 @@ The development profile seeds active, draft, archived, low-stock, and healthy re
 
 ## Proof hierarchy
 
-| What is visible | Implementation evidence | Executable evidence |
-| --- | --- | --- |
-| Live overview metrics and attention queue | `frontend/src/pages/home/AppPageHome.tsx`, `AppPageHomeView.tsx`, and `home-overview.ts` | Unit projection tests plus loaded/loading/empty/error Storybook stories |
-| Responsive searchable Item workflow | `frontend/src/pages/items/AppPageItems.tsx` and `frontend/src/features/item` | Item model/query tests, Storybook state matrix, and Playwright lifecycle journey |
-| Real persisted API | `src/main/java/com/vireocode/startertemplate/app/item` and Flyway migrations | Spring integration tests and production-like Compose smoke |
-| Public sandbox operations | `compose.demo.yaml`, `DemoBootstrapConfig`, and `contracts/flagship-demo-policy.json` | Reset policy gate and scheduled hosted synthetic journey |
-| Replaceable application code | ordinary `pages`, `features`, controller/service/repository, and migration sources | generator ownership checks and the 30-minute vertical-slice tutorial |
+| What is visible                           | Implementation evidence                                                                  | Executable evidence                                                              |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Live overview metrics and attention queue | `frontend/src/pages/home/AppPageHome.tsx`, `AppPageHomeView.tsx`, and `home-overview.ts` | Unit projection tests plus loaded/loading/empty/error Storybook stories          |
+| Responsive searchable Item workflow       | `frontend/src/pages/items/AppPageItems.tsx` and `frontend/src/features/item`             | Item model/query tests, Storybook state matrix, and Playwright lifecycle journey |
+| Real persisted API                        | `src/main/java/com/vireocode/startertemplate/app/item` and Flyway migrations             | Spring integration tests and production-like Compose smoke                       |
+| Public sandbox operations                 | `compose.demo.yaml`, `DemoBootstrapConfig`, and `contracts/flagship-demo-policy.json`    | Reset policy gate and scheduled hosted synthetic journey                         |
+| Replaceable application code              | ordinary `pages`, `features`, controller/service/repository, and migration sources       | generator ownership checks and the 30-minute vertical-slice tutorial             |
 
 See [flagship architecture proof](flagship-architecture.md) for the request path and [evaluation guide](tutorials/evaluate-flagship.md) for a copy-pastable walkthrough.
 
@@ -34,6 +34,6 @@ Record a sanitized result through the framework's [public-beta evaluation form](
 
 - The overview summarizes at most the first 100 Item lines and is a reference projection, not an analytics engine.
 - Offline support is an installable/read shell and explicit mutation policy; arbitrary offline conflict resolution is not supplied.
-- The public demo, once hosted, is disposable synthetic data with no uptime claim until the versioned operations policy says otherwise.
+- The public demo is disposable synthetic data operated on a best-effort basis with no uptime SLA; its versioned operations policy records the deployed revision and evidence.
 - A polished maintainer-built demo is not independent-adopter, demand, production-readiness, or time-saved evidence.
 - Authentication, authorization, data classification, domain rules, and deployment ownership remain application responsibilities.

@@ -11,6 +11,12 @@ the `create-vireo@0.3.0` release line.
 
 ## Evaluate before adopting
 
+Try the maintainer-operated read-only flagship at
+<https://demo.vireocode.com> with `demo` / `demo123`. It contains disposable public
+synthetic data, resets at least daily, and is offered on a best-effort basis with no
+uptime SLA. Continue locally when you want to mutate the Item workflow or evaluate
+the source and generator boundaries.
+
 The first-success path is intentionally small: start both processes, sign in with the
 development-only `demo` account, and complete one Item create/edit/filter/delete
 cycle. That proves the published frontend packages, JVM modules, authentication,
