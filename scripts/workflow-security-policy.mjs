@@ -75,6 +75,8 @@ for (const requiredPolicy of [
   'regexTarget = "line"',
   ["secret", " scans, signed/provenanced releases"].join(""),
   "^docs/security-threat-model\\.md$",
+  "a0657624120da26c2b22cbb634db9063ea070201",
+  "^scripts/workflow-security-policy\\.mjs$",
 ]) {
   if (!gitleaksConfig.includes(requiredPolicy)) {
     problems.push(`Gitleaks policy must include ${requiredPolicy}`);

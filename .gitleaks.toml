@@ -9,3 +9,11 @@ condition = "AND"
 regexTarget = "line"
 regexes = ["secret scans, signed/provenanced releases"]
 paths = ['''^docs/security-threat-model\.md$''']
+
+[[allowlists]]
+description = "Ignore the same prose in the one policy commit that asserted the allowlist"
+condition = "AND"
+commits = ["a0657624120da26c2b22cbb634db9063ea070201"]
+regexTarget = "line"
+regexes = ["secret scans, signed/provenanced releases"]
+paths = ['''^scripts/workflow-security-policy\.mjs$''']
