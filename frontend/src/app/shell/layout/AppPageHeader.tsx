@@ -115,25 +115,6 @@ export function AppPageHeader({
       actions={responsiveActions}
       leading={mobile || backTo || onBack ? leading : undefined}
       slotProps={{ title: { component: "div" } }}
-      sx={{
-        bgcolor: "surface.raised",
-        borderBottom: 1,
-        borderColor: "divider",
-        boxShadow: theme =>
-          `0 6px 20px color-mix(in srgb, ${theme.palette.common.black} 8%, transparent), inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 8%, transparent)`,
-        gap: mobile ? 0.5 : 2,
-        px: mobile ? 1 : 3,
-        position: "relative",
-        "&::after": {
-          bgcolor: "primary.main",
-          bottom: -1,
-          content: '""',
-          height: 3,
-          insetInlineStart: mobile ? 16 : 24,
-          position: "absolute",
-          width: mobile ? 36 : 56,
-        },
-      }}
       title={
         <Box sx={{ alignItems: "stretch", display: "flex", gap: mobile ? 1 : 1.5, minWidth: 0 }}>
           <Box

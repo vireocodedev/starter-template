@@ -17,7 +17,7 @@ export function AppSkeletonText({ children, visible = true }: AppSkeletonTextPro
       <Box
         component="span"
         sx={{
-          border: 0,
+          border: "none",
           clip: "rect(0 0 0 0)",
           height: 1,
           m: -1,

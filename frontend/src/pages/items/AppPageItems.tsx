@@ -63,7 +63,7 @@ type ItemOverlayModes = {
 const ITEM_LIST_STATE_KEY = "items";
 const ITEM_TABLE_LAYERS = { stickyToolbar: 4, stickyRowHeader: 3 } as const;
 const ITEM_TABLE_SX = { flex: 1, height: "100%", minHeight: 0 } as const;
-const ITEM_COMMAND_CONTROL_HEIGHT = { xs: 44, sm: 40 } as const;
+const ITEM_COMMAND_CONTROL_HEIGHT = 56;
 const DEFAULT_TABLE_FILTERS: VireoResponsiveTableFilters = {
   page: 0,
   rowsPerPage: 10,
@@ -177,10 +177,14 @@ export const AppPageItemsListView = React.memo(function AppPageItemsListView({
       layout: "mobile" | "desktop",
     ): Record<
       string,
-      { backgroundColor: string; transition: string; "@media (prefers-reduced-motion: reduce)": { transition: string } }
+      {
+        backgroundColor: string | undefined;
+        transition: string;
+        "@media (prefers-reduced-motion: reduce)": { transition: string };
+      }
     > => {
       const feedback = {
-        backgroundColor: item.id === pendingUpdateId ? "action.selected" : "surface.raised",
+        backgroundColor: item.id === pendingUpdateId ? "action.selected" : undefined,
         transition: `background-color ${APP_THEME_TOKENS.motion.duration.emphasized}ms ${APP_THEME_TOKENS.motion.easing.standard}`,
         "@media (prefers-reduced-motion: reduce)": { transition: "none" },
       };
@@ -194,10 +198,12 @@ export const AppPageItemsListView = React.memo(function AppPageItemsListView({
       <Box
         data-items-toolbar
         sx={{
-          bgcolor: "surface.base",
+          bgcolor: { xs: "surface.screen", sm: "surface.content" },
           borderColor: "divider",
           borderStyle: { xs: "none", sm: "solid" },
           borderWidth: { xs: 0, sm: 1 },
+          borderBottomStyle: "solid",
+          borderBottomWidth: 1,
           borderRadius: { xs: 0, sm: 1 },
           flex: "0 0 auto",
           p: { xs: 2, sm: 1.5 },
@@ -207,7 +213,7 @@ export const AppPageItemsListView = React.memo(function AppPageItemsListView({
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: { sm: "center" } }}>
             <TextField
               fullWidth
-              size="small"
+              size="medium"
               value={search.input}
               onChange={event => search.setInput(event.target.value)}
               onKeyDown={event => {
@@ -230,10 +236,10 @@ export const AppPageItemsListView = React.memo(function AppPageItemsListView({
                   ) : undefined,
                 },
               }}
-              sx={{ maxWidth: 520, "& .MuiInputBase-root": { height: ITEM_COMMAND_CONTROL_HEIGHT } }}
+              sx={{ maxWidth: 520 }}
             />
             <ButtonGroup
-              size="large"
+              size="medium"
               variant="outlined"
               sx={{ display: { xs: "none", sm: "inline-flex" }, height: ITEM_COMMAND_CONTROL_HEIGHT }}
             >
@@ -281,7 +287,7 @@ export const AppPageItemsListView = React.memo(function AppPageItemsListView({
             }}
           >
             <ButtonGroup
-              size="large"
+              size="medium"
               variant="outlined"
               sx={{ gridColumn: 1, height: ITEM_COMMAND_CONTROL_HEIGHT, justifySelf: "start" }}
             >
@@ -354,8 +360,7 @@ export const AppPageItemsListView = React.memo(function AppPageItemsListView({
         loadingLabel={t("table.refreshing")}
         data-items-data-state={dataState}
         sx={{
-          bgcolor: "surface.base",
-          borderBlock: { xs: 1, sm: 0 },
+          bgcolor: { xs: "surface.screen", sm: "surface.content" },
           borderColor: "divider",
           display: "flex",
           flex: 1,

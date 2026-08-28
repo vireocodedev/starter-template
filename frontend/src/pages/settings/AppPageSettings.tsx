@@ -35,7 +35,7 @@ export function AppPageSettings() {
           description: t("language.description"),
           control: (
             <Select
-              size="small"
+              size="medium"
               fullWidth
               value={preferences.locale}
               onChange={event => updatePreference("locale", event.target.value as "en" | "hr")}
@@ -66,7 +66,7 @@ export function AppPageSettings() {
           description: t("tableDensity.description"),
           control: (
             <Select
-              size="small"
+              size="medium"
               fullWidth
               value={preferences.tableSize}
               onChange={event => updatePreference("tableSize", event.target.value as "small" | "medium")}
@@ -90,7 +90,7 @@ export function AppPageSettings() {
           description: t("pageWidth.description"),
           control: (
             <Select
-              size="small"
+              size="medium"
               fullWidth
               value={preferences.pageWidth}
               onChange={event => updatePreference("pageWidth", event.target.value as "md" | "lg" | "xl" | "full")}
@@ -110,7 +110,7 @@ export function AppPageSettings() {
           description: t("desktopSurface.description"),
           control: (
             <Select
-              size="small"
+              size="medium"
               fullWidth
               value={preferences.desktopSurface}
               onChange={event =>
@@ -165,7 +165,7 @@ export function AppPageSettings() {
           title: t("reset.title"),
           description: t("reset.description"),
           control: (
-            <Button variant="outlined" startIcon={<RestartAltRounded />} onClick={resetPreferences}>
+            <Button size="medium" variant="outlined" startIcon={<RestartAltRounded />} onClick={resetPreferences}>
               {t("reset.action")}
             </Button>
           ),
@@ -186,7 +186,7 @@ export function AppPageSettings() {
               value={search}
               onChange={event => setSearch(event.target.value)}
               placeholder={t("search.placeholder")}
-              size="small"
+              size="medium"
               sx={{ width: { xs: "100%", sm: 300 } }}
               slotProps={{
                 input: {
@@ -204,7 +204,14 @@ export function AppPageSettings() {
       }
     >
       {mobile && (
-        <Box sx={{ px: 2, pt: 2 }}>
+        <Box
+          data-settings-compact-command-section
+          sx={{
+            borderBottom: "1px solid var(--mui-palette-divider)",
+            bgcolor: "surface.screen",
+            p: 2,
+          }}
+        >
           <TextField
             fullWidth
             value={search}
@@ -228,12 +235,7 @@ export function AppPageSettings() {
         searchQuery={search}
         emptyState={<>{t("search.empty", { search })}</>}
         defaultExpandedSectionIds={["appearance", "layout"]}
-        sx={{ bgcolor: "surface.base", mt: mobile ? 2 : 0 }}
-        slotProps={{
-          section: { sx: { bgcolor: "surface.base" } },
-          sectionHeader: { sx: { bgcolor: "surface.raised" } },
-          item: { sx: { bgcolor: "surface.sunken" } },
-        }}
+        sx={{ mt: 0 }}
       />
     </AppPageLayout>
   );

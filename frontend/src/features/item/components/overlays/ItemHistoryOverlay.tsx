@@ -89,7 +89,7 @@ export function ItemHistoryOverlay({ item, open, onClose, onExited }: ItemHistor
         closeLabel={t("history.close")}
         onClose={onClose}
       />
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", bgcolor: "surface.sunken", p: 2 }}>
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", bgcolor: "surface.recessed", p: 2 }}>
         <VireoLoadingRegion loading={initialLoading || refreshing} loadingLabel={t("history.loading")}>
           {({ loadingVisible }) => (
             <Box

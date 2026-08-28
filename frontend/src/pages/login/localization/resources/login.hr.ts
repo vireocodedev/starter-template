@@ -8,6 +8,6 @@ const hr = {
   validation: { username: "Unesite korisničko ime.", password: "Unesite lozinku." },
   invalidCredentials: "Korisničko ime ili lozinka nisu ispravni.",
   submit: "Prijava",
-  developmentCredentials: "Razvojni administrator: admin / admin123",
+  developmentCredentials: "Razvojni podaci za prijavu: {{username}} / {{password}}",
 } satisfies WidenLeaves<typeof en>;
 export default hr;

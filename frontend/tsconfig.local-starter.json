@@ -4,6 +4,8 @@
     "incremental": false,
     "paths": {
       "@/*": ["./src/*"],
+      "@mui/material": ["./node_modules/@mui/material/index.d.ts"],
+      "@mui/material/*": ["./node_modules/@mui/material/*"],
       "@vireocodedev/history": ["../../starter/packages/history/dist/index.d.ts"],
       "@vireocodedev/infrastructure": ["../../starter/packages/infrastructure/dist/index.d.ts"],
       "@vireocodedev/infrastructure/network-status": [

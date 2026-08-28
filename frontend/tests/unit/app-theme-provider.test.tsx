@@ -37,7 +37,7 @@ describe("AppThemeProvider", () => {
     );
 
     expect(screen.getByTestId("theme")).toHaveAttribute("data-mode", "dark");
-    expect(screen.getByTestId("theme")).toHaveAttribute("data-background", "#0d100e");
-    expect(document.head.querySelector('meta[name="theme-color"]')).toHaveAttribute("content", "#191e1a");
+    expect(screen.getByTestId("theme")).toHaveAttribute("data-background", "#07111f");
+    expect(document.head.querySelector('meta[name="theme-color"]')).toHaveAttribute("content", "#0a1728");
   });
 });

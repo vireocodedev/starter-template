@@ -44,10 +44,6 @@ export function AppPageLayout({ children, header, paddingOnCompact = true, scrol
     <VireoPage
       measureParent
       sx={{
-        bgcolor: "surface.sunken",
-        backgroundImage: theme =>
-          `linear-gradient(color-mix(in srgb, ${theme.palette.divider} 16%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, ${theme.palette.divider} 16%, transparent) 1px, transparent 1px)`,
-        backgroundSize: "24px 24px",
         flex: 1,
         height: "100%",
         minHeight: 0,

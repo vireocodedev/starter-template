@@ -35,6 +35,8 @@ const allowedFeatureDirectories = new Set([
 const forbiddenDirectoryNames = new Set(["common", "helpers", "shared", "utils"]);
 const loadingCategories = new Set(["boundary", "busy-action", "content-preserving", "skeleton-capable"]);
 const canonicalAsyncStoryPattern = /export\s+const\s+(?:Loading|Refreshing|Empty|Error|AlignmentContract)\b/u;
+const unsafeNumericBorderShorthandPattern =
+  /\bborder(?:Top|Right|Bottom|Left|Block(?:Start|End)?|Inline(?:Start|End)?)?\s*:\s*(?:\d+(?:\.\d+)?|\{[^}]*?\b(?:xs|sm|md|lg|xl)\s*:\s*\d+(?:\.\d+)?)/gu;
 
 async function filesBelow(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -102,6 +104,13 @@ for (const file of sourceFiles) {
   const relativeFile = path.relative(sourceRoot, file);
   const ownFeature = relativeFile.startsWith(`features${path.sep}`) ? relativeFile.split(path.sep)[1] : undefined;
   const source = await readFile(file, "utf8");
+
+  for (const match of source.matchAll(unsafeNumericBorderShorthandPattern)) {
+    const line = source.slice(0, match.index).split("\n").length;
+    errors.push(
+      `${relativeFile}:${line} uses a numeric border shorthand; use border width/style longhands with an explicit semantic border color, or a color-complete CSS shorthand`,
+    );
+  }
 
   if (/from\s+["']@mui\/material["'][\s\S]*\bSkeleton\b/u.test(source)) {
     errors.push(`${relativeFile} imports raw MUI Skeleton; use the Vireo skeleton leaves and loading boundary`);

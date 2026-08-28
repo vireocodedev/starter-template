@@ -6,6 +6,6 @@ const en = {
   validation: { username: "Enter your username.", password: "Enter your password." },
   invalidCredentials: "The username or password is incorrect.",
   submit: "Sign in",
-  developmentCredentials: "Development admin: admin / admin123",
+  developmentCredentials: "Development credentials: {{username}} / {{password}}",
 } as const;
 export default en;

@@ -1,5 +1,6 @@
 import { HomeRounded, LockRounded } from "@mui/icons-material";
-import { Box, Button, Paper, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import { VireoResponsiveCard } from "@vireocodedev/ui";
 import { useNavigate } from "react-router";
 import { APP_PAGES } from "@/app/app.pages";
 import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
@@ -12,13 +13,15 @@ export function AppPageForbidden() {
   const navigate = useNavigate();
 
   return (
-    <AppPageLayout header={<AppPageHeader title={t("header.title")} description={t("header.description")} />}>
-      <Paper
+    <AppPageLayout
+      paddingOnCompact={false}
+      header={<AppPageHeader title={t("header.title")} description={t("header.description")} />}
+    >
+      <VireoResponsiveCard
         variant="outlined"
         sx={{
-          bgcolor: "surface.base",
           display: "grid",
-          minHeight: { xs: 320, sm: 400 },
+          minHeight: { xs: "100%", sm: 400 },
           p: { xs: 3, sm: 5 },
           placeItems: "center",
           textAlign: "center",
@@ -52,7 +55,7 @@ export function AppPageForbidden() {
             {t("return")}
           </Button>
         </Stack>
-      </Paper>
+      </VireoResponsiveCard>
     </AppPageLayout>
   );
 }

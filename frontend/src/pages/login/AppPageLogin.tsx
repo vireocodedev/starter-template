@@ -8,9 +8,15 @@ import { resolvePostLoginPath } from "@vireocodedev/shell";
 import { VireoLabelBox } from "@vireocodedev/ui";
 import { useVireoForm } from "@vireocodedev/ui/forms";
 import { APP_PAGES } from "@/app/app.pages";
+import { appConfig } from "@/app/config/app-config";
 import { useAppAuth } from "@/app/shell/hooks/useAppAuth";
 import { useTranslation } from "react-i18next";
 import { LOGIN_TRANSLATION_NAMESPACE } from "@/app/app.localization";
+
+const DEVELOPMENT_CREDENTIALS =
+  appConfig.apiMode === "mock"
+    ? { username: "demo", password: "demo123" }
+    : { username: "admin", password: "admin123" };
 
 export function AppPageLogin() {
   const { t } = useTranslation(LOGIN_TRANSLATION_NAMESPACE);
@@ -27,7 +33,7 @@ export function AppPageLogin() {
   const navigate = useNavigate();
   const [error, setError] = React.useState<string | null>(null);
   const form = useVireoForm({
-    defaultValues: { username: "admin", password: "admin123" },
+    defaultValues: DEVELOPMENT_CREDENTIALS,
     validationLogic: revalidateLogic(),
     validators: { onDynamic: loginSchema },
     onSubmit: async ({ value }) => {
@@ -48,7 +54,7 @@ export function AppPageLogin() {
       component="main"
       sx={{
         alignItems: "center",
-        bgcolor: "surface.sunken",
+        bgcolor: "surface.canvas",
         backgroundImage: theme =>
           `radial-gradient(circle at 50% 28%, color-mix(in srgb, ${theme.palette.primary.main} 14%, transparent), transparent 36%), linear-gradient(color-mix(in srgb, ${theme.palette.divider} 18%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, ${theme.palette.divider} 18%, transparent) 1px, transparent 1px)`,
         backgroundSize: "auto, 28px 28px, 28px 28px",
@@ -84,8 +90,9 @@ export function AppPageLogin() {
               sx={{
                 alignItems: "center",
                 bgcolor: "primary.main",
-                border: 1,
                 borderColor: "primary.light",
+                borderStyle: "solid",
+                borderWidth: 1,
                 borderRadius: 1,
                 boxShadow: theme =>
                   `0 8px 24px color-mix(in srgb, ${theme.palette.primary.main} 25%, transparent), inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 28%, transparent)`,
@@ -120,7 +127,7 @@ export function AppPageLogin() {
             </Alert>
           )}
           <form.Form layoutWidth="full">
-            <form.Section label={null} variant="plain" layout="stack">
+            <form.Section label={null} variant="outlined" layout="stack">
               <form.Field name="username">
                 {field => (
                   <VireoLabelBox label={t("fields.username")} required>
@@ -150,7 +157,7 @@ export function AppPageLogin() {
             </form.Section>
           </form.Form>
           <Typography color="text.secondary" variant="caption" sx={{ display: "block", mt: 2, textAlign: "center" }}>
-            {t("developmentCredentials")}
+            {t("developmentCredentials", DEVELOPMENT_CREDENTIALS)}
           </Typography>
         </CardContent>
       </Card>

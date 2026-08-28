@@ -104,7 +104,7 @@ export function EntityQueryFiltersOverlay({
       mobileSurface="bottomDrawer"
     >
       <VireoOverlayHeader title={title} closeLabel={t("overlay.close")} onClose={requestClose} />
-      <Box sx={{ bgcolor: "surface.sunken", flex: 1, minHeight: 0, overflowY: "auto", p: 2 }}>
+      <Box sx={{ bgcolor: "surface.recessed", flex: 1, minHeight: 0, overflowY: "auto", p: 2 }}>
         <VireoLoadingRegion loading={initialLoading || refreshing} loadingLabel={t("overlay.loading")}>
           {({ loadingVisible }) => (
             <Box
@@ -157,7 +157,14 @@ export function EntityQueryFiltersOverlay({
       <Stack
         direction="row"
         spacing={1}
-        sx={{ bgcolor: "surface.raised", borderTop: 1, borderColor: "divider", justifyContent: "flex-end", p: 2 }}
+        sx={{
+          bgcolor: "surface.chrome",
+          borderTopColor: "divider",
+          borderTopStyle: "solid",
+          borderTopWidth: 1,
+          justifyContent: "flex-end",
+          p: 2,
+        }}
       >
         <Button disabled={rules.length === 0 && value == null} onClick={clear}>
           {t("overlay.clear")}

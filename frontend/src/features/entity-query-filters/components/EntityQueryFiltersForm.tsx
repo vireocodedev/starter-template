@@ -42,9 +42,10 @@ export function EntityQueryFiltersForm({
           <Box
             key={rule.id}
             sx={{
-              bgcolor: "surface.raised",
-              border: 1,
+              bgcolor: "surface.elevated",
               borderColor: errors[rule.id] ? "error.main" : "divider",
+              borderStyle: "solid",
+              borderWidth: 1,
               borderRadius: 1,
               p: 2,
             }}

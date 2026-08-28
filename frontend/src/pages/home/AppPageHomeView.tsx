@@ -8,7 +8,7 @@ import {
   WarningAmberRounded,
 } from "@mui/icons-material";
 import { Alert, Box, Button, Card, CardContent, Chip, Divider, LinearProgress, Stack, Typography } from "@mui/material";
-import { VireoLoadingRegion } from "@vireocodedev/ui";
+import { VireoLoadingRegion, VireoResponsiveCard } from "@vireocodedev/ui";
 import { useTranslation } from "react-i18next";
 import { HOME_TRANSLATION_NAMESPACE } from "@/app/app.localization";
 import { AppSkeletonText } from "@/app/shell/components/AppSkeletonText";
@@ -75,6 +75,7 @@ export function AppPageHomeView({
     >
       {({ loadingVisible }) => (
         <AppPageLayout
+          paddingOnCompact={false}
           header={
             <AppPageHeader
               description={contentLeaf(loading, loadingVisible, t("header.description"))}
@@ -91,20 +92,25 @@ export function AppPageHomeView({
             <Box
               data-app-overview-frame
               sx={{
-                bgcolor: "surface.base",
-                border: 1,
+                bgcolor: { xs: "surface.screen", sm: "surface.content" },
                 borderColor: "divider",
-                boxShadow: theme =>
-                  `inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 8%, transparent), 0 18px 50px color-mix(in srgb, ${theme.palette.common.black} 8%, transparent)`,
+                borderStyle: "solid",
+                borderWidth: { xs: 0, sm: 1 },
+                boxShadow: {
+                  xs: "none",
+                  sm: theme =>
+                    `inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 8%, transparent), 0 18px 50px color-mix(in srgb, ${theme.palette.common.black} 8%, transparent)`,
+                },
                 maxWidth: 1280,
                 mx: "auto",
                 overflow: "hidden",
-                p: { xs: 2, sm: 3, md: 4 },
+                p: { xs: 0, sm: 3, md: 4 },
                 position: "relative",
                 width: "100%",
                 "&::before": {
                   bgcolor: "primary.main",
                   content: '""',
+                  display: { xs: "none", sm: "block" },
                   height: 4,
                   insetInline: 0,
                   position: "absolute",
@@ -112,7 +118,19 @@ export function AppPageHomeView({
                 },
               }}
             >
-              <Stack direction={{ xs: "column", md: "row" }} spacing={3} sx={{ justifyContent: "space-between" }}>
+              <Stack
+                data-app-overview-hero
+                direction={{ xs: "column", md: "row" }}
+                spacing={3}
+                sx={{
+                  borderBottomColor: "divider",
+                  borderBottomStyle: "solid",
+                  borderBottomWidth: { xs: 1, sm: 0 },
+                  justifyContent: "space-between",
+                  p: { xs: 2, sm: 0 },
+                  pb: { xs: 3, sm: 0 },
+                }}
+              >
                 <Box sx={{ maxWidth: 760 }}>
                   <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 1 }}>
                     <Chip color="success" label={contentLeaf(loading, loadingVisible, t("status.live"))} size="small" />
@@ -148,7 +166,7 @@ export function AppPageHomeView({
                   endIcon={<ArrowForwardRounded />}
                   onClick={onOpenItems}
                   size="large"
-                  sx={{ alignSelf: { md: "flex-end" }, whiteSpace: "nowrap" }}
+                  sx={{ alignSelf: { xs: "stretch", md: "flex-end" }, whiteSpace: "nowrap" }}
                   variant="contained"
                 >
                   {t("actions.openInventory")}
@@ -165,7 +183,7 @@ export function AppPageHomeView({
                     ) : undefined
                   }
                   severity="error"
-                  sx={{ mt: 3 }}
+                  sx={{ m: { xs: 2, sm: 0 }, mt: { xs: 2, sm: 3 } }}
                 >
                   {t("error")}
                 </Alert>
@@ -177,11 +195,17 @@ export function AppPageHomeView({
                   display: "grid",
                   gap: { xs: 1.5, sm: 2 },
                   gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
-                  mt: { xs: 3, sm: 4 },
+                  mt: { xs: 0, sm: 4 },
+                  p: { xs: 2, sm: 0 },
                 }}
               >
                 {metrics.map(metric => (
-                  <Card data-app-overview-card={metric.key} key={metric.key}>
+                  <Card
+                    data-app-overview-card={metric.key}
+                    key={metric.key}
+                    variant="inset"
+                    sx={{ bgcolor: { xs: "surface.content", sm: "surface.recessed" } }}
+                  >
                     <CardContent sx={{ p: { xs: 2, sm: 2.5 }, "&:last-child": { pb: { xs: 2, sm: 2.5 } } }}>
                       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                         <Box sx={{ color: "primary.main", display: "flex" }}>{metric.icon}</Box>
@@ -204,103 +228,121 @@ export function AppPageHomeView({
               <Box
                 sx={{
                   display: "grid",
-                  gap: { xs: 1.5, sm: 2 },
+                  gap: { xs: 0, sm: 2 },
                   gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.1fr) minmax(320px, 0.9fr)" },
-                  mt: { xs: 1.5, sm: 2 },
+                  mt: { xs: 0, sm: 2 },
                 }}
               >
-                <Card data-app-overview-health>
-                  <CardContent sx={{ p: { xs: 2, sm: 3 }, "&:last-child": { pb: { xs: 2, sm: 3 } } }}>
-                    <Typography component="h3" sx={{ fontSize: "1.125rem", fontWeight: 800 }}>
-                      {contentLeaf(loading, loadingVisible, t("health.title"))}
-                    </Typography>
-                    <Typography color="text.secondary" sx={{ fontSize: "0.875rem", mt: 0.5 }}>
-                      {contentLeaf(loading, loadingVisible, t("health.description", { count: snapshot.totalItems }))}
-                    </Typography>
-                    <Stack spacing={2.25} sx={{ mt: 3 }}>
-                      {statusRows.map(row => {
-                        const percentage = displayItems.length === 0 ? 0 : (row.count / displayItems.length) * 100;
-                        return (
-                          <Box key={row.key}>
-                            <Stack direction="row" sx={{ justifyContent: "space-between" }}>
-                              <Typography sx={{ fontSize: "0.875rem", fontWeight: 700 }}>
-                                {contentLeaf(loading, loadingVisible, t(`health.${row.key}`))}
-                              </Typography>
-                              <Typography color="text.secondary" sx={{ fontSize: "0.875rem" }}>
-                                {contentLeaf(loading, loadingVisible, row.count)}
-                              </Typography>
-                            </Stack>
-                            <LinearProgress
-                              aria-label={t(`health.${row.key}`)}
-                              value={percentage}
-                              variant="determinate"
-                              sx={{
-                                bgcolor: "action.hover",
-                                height: 8,
-                                mt: 1,
-                                "& .MuiLinearProgress-bar": { bgcolor: row.color },
-                              }}
-                            />
-                          </Box>
-                        );
-                      })}
-                    </Stack>
-                  </CardContent>
-                </Card>
-
-                <Card data-app-overview-attention>
-                  <CardContent sx={{ p: { xs: 2, sm: 3 }, "&:last-child": { pb: { xs: 2, sm: 3 } } }}>
-                    <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
-                      <Box>
-                        <Typography component="h3" sx={{ fontSize: "1.125rem", fontWeight: 800 }}>
-                          {contentLeaf(loading, loadingVisible, t("attention.title"))}
-                        </Typography>
-                        <Typography color="text.secondary" sx={{ fontSize: "0.875rem", mt: 0.5 }}>
-                          {contentLeaf(loading, loadingVisible, t("attention.description"))}
-                        </Typography>
-                      </Box>
-                      <Chip
-                        color={attentionItems.length > 0 ? "warning" : "success"}
-                        label={attentionItems.length}
-                        size="small"
-                      />
-                    </Stack>
-                    <Stack divider={<Divider flexItem />} sx={{ mt: 2 }}>
-                      {attentionItems.length === 0 ? (
-                        <Typography color="text.secondary" sx={{ py: 2 }}>
-                          {t(items.length === 0 ? "attention.emptyInventory" : "attention.clear")}
-                        </Typography>
-                      ) : (
-                        attentionItems.map(item => (
-                          <Stack
-                            direction="row"
-                            key={item.id}
-                            sx={{ alignItems: "center", justifyContent: "space-between", py: 1.5 }}
-                          >
-                            <Box sx={{ minWidth: 0, pr: 2 }}>
-                              <Typography noWrap sx={{ fontSize: "0.875rem", fontWeight: 700 }}>
-                                {contentLeaf(loading, loadingVisible, item.name)}
-                              </Typography>
-                              <Typography color="text.secondary" sx={{ fontSize: "0.75rem" }}>
-                                {contentLeaf(loading, loadingVisible, statusLabels[item.status])}
-                              </Typography>
+                <Box
+                  sx={{
+                    borderTopColor: "divider",
+                    borderTopStyle: "solid",
+                    borderTopWidth: { xs: 1, sm: 0 },
+                    minWidth: 0,
+                  }}
+                >
+                  <VireoResponsiveCard data-app-overview-health variant="inset" sx={{ height: "100%" }}>
+                    <CardContent sx={{ p: { xs: 2, sm: 3 }, "&:last-child": { pb: { xs: 3, sm: 3 } } }}>
+                      <Typography component="h3" sx={{ fontSize: "1.125rem", fontWeight: 800 }}>
+                        {contentLeaf(loading, loadingVisible, t("health.title"))}
+                      </Typography>
+                      <Typography color="text.secondary" sx={{ fontSize: "0.875rem", mt: 0.5 }}>
+                        {contentLeaf(loading, loadingVisible, t("health.description", { count: snapshot.totalItems }))}
+                      </Typography>
+                      <Stack spacing={2.25} sx={{ mt: 3 }}>
+                        {statusRows.map(row => {
+                          const percentage = displayItems.length === 0 ? 0 : (row.count / displayItems.length) * 100;
+                          return (
+                            <Box key={row.key}>
+                              <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+                                <Typography sx={{ fontSize: "0.875rem", fontWeight: 700 }}>
+                                  {contentLeaf(loading, loadingVisible, t(`health.${row.key}`))}
+                                </Typography>
+                                <Typography color="text.secondary" sx={{ fontSize: "0.875rem" }}>
+                                  {contentLeaf(loading, loadingVisible, row.count)}
+                                </Typography>
+                              </Stack>
+                              <LinearProgress
+                                aria-label={t(`health.${row.key}`)}
+                                value={percentage}
+                                variant="determinate"
+                                sx={{
+                                  bgcolor: "action.hover",
+                                  height: 8,
+                                  mt: 1,
+                                  "& .MuiLinearProgress-bar": { bgcolor: row.color },
+                                }}
+                              />
                             </Box>
-                            <Chip
-                              color={item.quantity <= 5 ? "warning" : "default"}
-                              label={contentLeaf(
-                                loading,
-                                loadingVisible,
-                                t("attention.units", { count: item.quantity }),
-                              )}
-                              size="small"
-                              variant="outlined"
-                            />
-                          </Stack>
-                        ))
-                      )}
-                    </Stack>
-                  </CardContent>
-                </Card>
+                          );
+                        })}
+                      </Stack>
+                    </CardContent>
+                  </VireoResponsiveCard>
+                </Box>
+
+                <Box
+                  sx={{
+                    borderTopColor: "divider",
+                    borderTopStyle: "solid",
+                    borderTopWidth: { xs: 1, sm: 0 },
+                    minWidth: 0,
+                  }}
+                >
+                  <VireoResponsiveCard data-app-overview-attention variant="inset" sx={{ height: "100%" }}>
+                    <CardContent sx={{ p: { xs: 2, sm: 3 }, "&:last-child": { pb: { xs: 3, sm: 3 } } }}>
+                      <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
+                        <Box>
+                          <Typography component="h3" sx={{ fontSize: "1.125rem", fontWeight: 800 }}>
+                            {contentLeaf(loading, loadingVisible, t("attention.title"))}
+                          </Typography>
+                          <Typography color="text.secondary" sx={{ fontSize: "0.875rem", mt: 0.5 }}>
+                            {contentLeaf(loading, loadingVisible, t("attention.description"))}
+                          </Typography>
+                        </Box>
+                        <Chip
+                          color={attentionItems.length > 0 ? "warning" : "success"}
+                          label={attentionItems.length}
+                          size="small"
+                        />
+                      </Stack>
+                      <Stack divider={<Divider flexItem />} sx={{ mt: 2 }}>
+                        {attentionItems.length === 0 ? (
+                          <Typography color="text.secondary" sx={{ py: 2 }}>
+                            {t(items.length === 0 ? "attention.emptyInventory" : "attention.clear")}
+                          </Typography>
+                        ) : (
+                          attentionItems.map(item => (
+                            <Stack
+                              direction="row"
+                              key={item.id}
+                              sx={{ alignItems: "center", justifyContent: "space-between", py: 1.5 }}
+                            >
+                              <Box sx={{ minWidth: 0, pr: 2 }}>
+                                <Typography noWrap sx={{ fontSize: "0.875rem", fontWeight: 700 }}>
+                                  {contentLeaf(loading, loadingVisible, item.name)}
+                                </Typography>
+                                <Typography color="text.secondary" sx={{ fontSize: "0.75rem" }}>
+                                  {contentLeaf(loading, loadingVisible, statusLabels[item.status])}
+                                </Typography>
+                              </Box>
+                              <Chip
+                                color={item.quantity <= 5 ? "warning" : "default"}
+                                label={contentLeaf(
+                                  loading,
+                                  loadingVisible,
+                                  t("attention.units", { count: item.quantity }),
+                                )}
+                                size="small"
+                                variant="outlined"
+                              />
+                            </Stack>
+                          ))
+                        )}
+                      </Stack>
+                    </CardContent>
+                  </VireoResponsiveCard>
+                </Box>
               </Box>
             </Box>
           </Box>

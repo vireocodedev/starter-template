@@ -120,14 +120,6 @@ export function AppShellLayout() {
         resizable={desktop && !preferences.navigationLocked}
         onModeChange={commitNavigationMode}
         onExpandedWidthChange={commitNavigationWidth}
-        sx={{
-          "& .MuiDrawer-paper": {
-            bgcolor: "surface.base",
-            borderColor: "divider",
-            boxShadow: theme =>
-              `10px 0 28px color-mix(in srgb, ${theme.palette.common.black} 10%, transparent), inset -1px 0 0 color-mix(in srgb, ${theme.palette.primary.main} 18%, transparent)`,
-          },
-        }}
       >
         {({ mode, toggleMode }) => {
           const compact = mode === "compact";
@@ -152,8 +144,9 @@ export function AppShellLayout() {
                     variant="rounded"
                     sx={{
                       bgcolor: "primary.main",
-                      border: 1,
                       borderColor: "primary.light",
+                      borderStyle: "solid",
+                      borderWidth: 1,
                       borderRadius: 1,
                       boxShadow: theme =>
                         `inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 30%, transparent), 0 4px 12px color-mix(in srgb, ${theme.palette.primary.main} 24%, transparent)`,
@@ -239,22 +232,7 @@ export function AppShellLayout() {
                     onClick={() => navigateTo(item.path)}
                     onFocus={() => preloadAppPage(item.path)}
                     onPointerEnter={() => preloadAppPage(item.path)}
-                    sx={{
-                      mb: 0.5,
-                      border: "1px solid transparent",
-                      "&.Mui-selected": {
-                        bgcolor: "action.selected",
-                        borderColor: theme =>
-                          `color-mix(in srgb, ${theme.palette.primary.main} 42%, ${theme.palette.divider})`,
-                        boxShadow: theme =>
-                          `inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 8%, transparent)`,
-                        color: "primary.main",
-                      },
-                      "&.Mui-selected:hover": { bgcolor: "action.selected" },
-                      "& .VireoApplicationNavigationItem-label": {
-                        letterSpacing: compact ? "0.035em" : "0.01em",
-                      },
-                    }}
+                    sx={{ mb: 0.5 }}
                   />
                 ))}
               </List>
@@ -303,7 +281,7 @@ export function AppShellLayout() {
                   </Popover>
                 </Box>
               ) : (
-                <Box sx={{ alignItems: "center", bgcolor: "surface.raised", display: "flex", gap: 1.25, p: 2 }}>
+                <Box sx={{ alignItems: "center", bgcolor: "surface.chrome", display: "flex", gap: 1.25, p: 2 }}>
                   <Avatar sx={{ height: 36, width: 36 }}>{user?.username.slice(0, 1).toUpperCase()}</Avatar>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography noWrap variant="body2" sx={{ fontWeight: 700 }}>
@@ -364,8 +342,6 @@ export function AppShellLayout() {
               value={activeNavigationPath}
               onChange={navigateTo}
               sx={{
-                bgcolor: "surface.raised",
-                boxShadow: theme => `0 -8px 24px color-mix(in srgb, ${theme.palette.common.black} 12%, transparent)`,
                 position: "relative",
                 zIndex: theme.zIndex.appBar,
               }}

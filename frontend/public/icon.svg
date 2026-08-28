@@ -1,4 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="16" fill="#111827"/>
-  <path d="M14 18h10l8 26 8-26h10L37 52H27L14 18Z" fill="#38bdf8"/>
+  <defs>
+    <linearGradient id="vireo-icon" x1="12" y1="12" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#73e0ff" />
+      <stop offset="1" stop-color="#5b7cff" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#07111f" />
+  <path d="M14 18h10l8 26 8-26h10L37 52H27L14 18Z" fill="url(#vireo-icon)" />
 </svg>
