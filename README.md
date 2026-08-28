@@ -131,6 +131,7 @@ main website is authoritative.
 - [Accessibility statement and verification](docs/accessibility.md)
 - [Manual accessibility and platform checklist](docs/manual-platform-checklist.md)
 - [Interactive Storybook and exact references](https://vireocode.com/reference/)
+- [Framework evaluation and limitations](https://github.com/vireocodedev/starter/blob/main/docs/EVALUATION.md)
 - [Vireo public API entry points](https://github.com/vireocodedev/starter/blob/main/docs/PUBLIC_API.md)
 - [Canonical temporal values](https://github.com/vireocodedev/starter/blob/main/docs/TEMPORAL_VALUES.md)
 
