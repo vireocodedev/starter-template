@@ -1,26 +1,37 @@
 const en = {
   header: {
     title: "Overview",
-    description: "A concise tour of the production-shaped workflows included in this template.",
+    description: "A live operational view of the inventory workflow included in this template.",
   },
-  version: "Starter 0.1.0 · UI 7.0.0",
-  title: "A clean starting point for the next Vireo application.",
+  title: "Keep field operations supplied and moving.",
   introduction:
-    "This repository is deliberately small, but every included workflow is production-shaped and backed by the latest Starter libraries.",
+    "Track active inventory, spot low-stock lines and move directly into the complete Item workflow. Every figure below comes from the live API.",
   status: {
+    live: "Live snapshot",
     api: "API connected",
-    pwa: "PWA ready",
-    responsive: "Responsive shell",
+    offline: "Offline-ready shell",
   },
-  module: "Module {{number}}",
-  operational: "Operational",
-  cards: {
-    entity: { title: "Complete entity flow", body: "Search, create, edit and delete a real Spring Data entity." },
-    contracts: {
-      title: "Current Vireo contracts",
-      body: "Responsive tables, overlays and TanStack/Zod forms come from Starter.",
-    },
-    pwa: { title: "PWA baseline", body: "Installable shell with explicit API network behavior and update support." },
+  actions: { openInventory: "Open inventory", retry: "Retry" },
+  metrics: {
+    units: "Units on hand",
+    active: "Active lines",
+    attention: "Need attention",
+    draft: "Draft plans",
   },
+  health: {
+    title: "Inventory health",
+    description: "Status mix across {{count}} inventory lines.",
+    active: "Active",
+    draft: "Draft",
+    archived: "Archived",
+  },
+  attention: {
+    title: "Operations queue",
+    description: "Low stock and draft lines to review next.",
+    units: "{{count}} units",
+    clear: "No inventory lines need attention.",
+    emptyInventory: "No inventory yet. Open inventory to create the first line.",
+  },
+  error: "The live inventory snapshot could not be loaded. The rest of the application remains available.",
 } as const;
 export default en;

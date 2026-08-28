@@ -24,7 +24,7 @@ Every lazy route must declare exactly one presentation policy. This metadata con
 | `skeleton` | Use a named synchronous composition shared with the loaded route. Never build an independent imitation. |
 | `none`     | Render no waiting surface when silence is intentional and documented.                                   |
 
-No production route currently uses `skeleton`: eager Overview has no route-code wait. `AppPageHomeView` retains its loaded/loading modes as the verified Level A reference composition in Storybook. Lazy authenticated routes use page-framed progress with their real localized static header. Login uses application-framed progress. The resolver in `AppLoadingSurface.tsx` remains exhaustive so a future route may adopt a named shared skeleton composition when bundle evidence supports it.
+No production route currently uses a route-code `skeleton`: eager Overview has no route-code wait. `AppPageHomeView` uses its verified Level A loaded/loading composition for the production Item query as well as Storybook. Lazy authenticated routes use page-framed progress with their real localized static header. Login uses application-framed progress. The resolver in `AppLoadingSurface.tsx` remains exhaustive so a future route may adopt a named shared skeleton composition when bundle evidence supports it.
 
 ## Stable page-state architecture
 

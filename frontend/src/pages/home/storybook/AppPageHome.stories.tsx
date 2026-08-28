@@ -1,5 +1,4 @@
 import React from "react";
-import { CheckCircleOutlined, Inventory2Outlined, OfflineBoltOutlined } from "@mui/icons-material";
 import { Box, Button } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { createInstance } from "i18next";
@@ -14,12 +13,20 @@ import { APP_LOCALES, type AppLocale } from "@/app/ui/localization/app-locales";
 import { AppPreferencesContext } from "@/app/ui/preferences/contexts/AppPreferencesContext";
 import { DEFAULT_APP_PREFERENCES, type AppPreferences } from "@/app/ui/preferences/models/AppPreferences";
 import { measureUnexpectedLayoutShift } from "@/app/storybook/loadingGeometry";
-import { AppPageHome } from "../AppPageHome";
+import type { Item } from "@/features/item/public";
 import { AppPageHomeView } from "../AppPageHomeView";
+
+const overviewItems: Item[] = [
+  { id: 1, name: "Portable barcode scanners", description: "Receiving and dispatch", quantity: 18, status: "ACTIVE" },
+  { id: 2, name: "Thermal label rolls", description: "Packing stations", quantity: 4, status: "ACTIVE" },
+  { id: 3, name: "Safety inspection kits", description: "Awaiting approval", quantity: 2, status: "DRAFT" },
+  { id: 4, name: "Rugged field tablets", description: "Warehouse leads", quantity: 11, status: "ACTIVE" },
+  { id: 5, name: "Legacy handheld terminals", description: "Audit history", quantity: 0, status: "ARCHIVED" },
+];
 
 const meta = {
   title: "PAGES/Overview",
-  component: AppPageHome,
+  component: AppPageHomeView,
   parameters: {
     controls: { disable: true },
     vireo: {
@@ -31,21 +38,29 @@ const meta = {
     docs: {
       description: {
         component:
-          "Overview is an eager static route with no production loading state. Its loaded/loading modes remain here as the verified Level A reference composition. Refreshing, Empty, and Error are intentionally omitted because the page owns no asynchronous data state.",
+          "Overview is the template's data-backed flagship surface. It projects the real Item API into an operational snapshot and explicitly covers loaded, loading, empty, and error states.",
       },
     },
   },
-} satisfies Meta<typeof AppPageHome>;
+} satisfies Meta<typeof AppPageHomeView>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = { args: { items: overviewItems, onOpenItems: () => undefined } };
 
-export const Loaded: Story = {};
+export const Loaded: Story = { args: { items: overviewItems, onOpenItems: () => undefined } };
 
 export const Loading: Story = {
   render: () => <AppPageHomeView loading />,
+};
+
+export const Empty: Story = {
+  args: { items: [], onOpenItems: () => undefined },
+};
+
+export const ErrorState: Story = {
+  args: { error: true, onRetry: () => undefined },
 };
 
 const storyI18n = Object.fromEntries(
@@ -73,8 +88,6 @@ type OverviewScenarioProps = {
   pageWidth: AppPreferences["pageWidth"];
 };
 
-const overviewIcons = [<Inventory2Outlined />, <CheckCircleOutlined />, <OfflineBoltOutlined />] as const;
-
 function OverviewScenario({ darkMode, loading, locale, pageWidth }: OverviewScenarioProps) {
   const preferences = React.useMemo(
     () => ({
@@ -94,7 +107,7 @@ function OverviewScenario({ darkMode, loading, locale, pageWidth }: OverviewScen
     >
       <I18nextProvider i18n={storyI18n[locale]}>
         <AppPreferencesContext.Provider value={preferences}>
-          <AppPageHomeView icons={overviewIcons} loading={loading} />
+          <AppPageHomeView items={overviewItems} loading={loading} onOpenItems={() => undefined} />
         </AppPreferencesContext.Provider>
       </I18nextProvider>
     </Box>
@@ -130,9 +143,10 @@ const alignmentSelectors = [
   "header h1",
   "[data-app-overview-frame]",
   "[data-app-overview-frame] h2",
-  '[data-app-overview-card="entity"]',
-  '[data-app-overview-card="contracts"]',
-  '[data-app-overview-card="pwa"]',
+  '[data-app-overview-card="units"]',
+  '[data-app-overview-card="active"]',
+  "[data-app-overview-health]",
+  "[data-app-overview-attention]",
 ] as const;
 
 function measureAlignmentAnchors(canvasElement: HTMLElement) {
@@ -156,10 +170,7 @@ function AlignmentContractFixture() {
       >
         Toggle loading
       </Button>
-      <AppPageHomeView
-        icons={[<Inventory2Outlined />, <CheckCircleOutlined />, <OfflineBoltOutlined />]}
-        loading={loading}
-      />
+      <AppPageHomeView items={overviewItems} loading={loading} onOpenItems={() => undefined} />
     </>
   );
 }

@@ -3,32 +3,37 @@ import type en from "./home.en";
 const hr = {
   header: {
     title: "Pregled",
-    description: "Sažeti pregled produkcijski oblikovanih tijekova rada uključenih u ovaj predložak.",
+    description: "Operativni prikaz uživo za tijek zaliha uključen u ovaj predložak.",
   },
-  version: "Starter 0.1.0 · UI 7.0.0",
-  title: "Čista polazna točka za sljedeću Vireo aplikaciju.",
+  title: "Održavajte terenske operacije opskrbljenima i u pokretu.",
   introduction:
-    "Ovaj je repozitorij namjerno malen, ali svaki uključeni tijek rada oblikovan je za produkciju i oslanja se na najnovije Starter biblioteke.",
+    "Pratite aktivne zalihe, uočite stavke s malom količinom i odmah prijeđite u cjelovit tijek stavki. Svaki podatak dolazi iz API-ja uživo.",
   status: {
+    live: "Snimka uživo",
     api: "API je povezan",
-    pwa: "PWA je spreman",
-    responsive: "Responzivna ljuska",
+    offline: "Ljuska spremna za rad izvan mreže",
   },
-  module: "Modul {{number}}",
-  operational: "Operativno",
-  cards: {
-    entity: {
-      title: "Cjelovit tijek entiteta",
-      body: "Pretražujte, stvarajte, uređujte i brišite stvarni Spring Data entitet.",
-    },
-    contracts: {
-      title: "Aktualni Vireo ugovori",
-      body: "Responzivne tablice, preklopi i TanStack/Zod obrasci dolaze iz Startera.",
-    },
-    pwa: {
-      title: "PWA osnova",
-      body: "Instalabilna ljuska s izričitim mrežnim ponašanjem API-ja i podrškom za ažuriranja.",
-    },
+  actions: { openInventory: "Otvori zalihe", retry: "Pokušaj ponovno" },
+  metrics: {
+    units: "Jedinica na stanju",
+    active: "Aktivnih stavki",
+    attention: "Za pregled",
+    draft: "Nacrta planova",
   },
+  health: {
+    title: "Stanje zaliha",
+    description: "Raspodjela statusa kroz {{count}} stavki zaliha.",
+    active: "Aktivno",
+    draft: "Nacrt",
+    archived: "Arhivirano",
+  },
+  attention: {
+    title: "Operativni red",
+    description: "Stavke s malom količinom i nacrti za sljedeći pregled.",
+    units: "{{count}} jedinica",
+    clear: "Nijedna stavka zaliha ne zahtijeva pažnju.",
+    emptyInventory: "Još nema zaliha. Otvorite zalihe i stvorite prvu stavku.",
+  },
+  error: "Snimku zaliha uživo nije bilo moguće učitati. Ostatak aplikacije i dalje je dostupan.",
 } satisfies WidenLeaves<typeof en>;
 export default hr;
