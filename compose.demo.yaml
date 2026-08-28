@@ -1,6 +1,15 @@
 services:
+  postgres:
+    restart: unless-stopped
+    mem_limit: 384m
+
   app:
+    restart: unless-stopped
+    mem_limit: 768m
     environment:
       SPRING_PROFILES_ACTIVE: prod,demo
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
 
+  frontend:
+    restart: unless-stopped
+    mem_limit: 128m

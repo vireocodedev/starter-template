@@ -35,7 +35,12 @@ POSTGRES_PASSWORD=change-me SESSION_COOKIE_SECURE=false docker compose up
 Open <http://localhost:3000>. Compose builds two independent runtime images, waits for
 PostgreSQL and backend readiness, then starts an unprivileged Nginx frontend. The
 frontend serves the PWA with history fallback and proxies `/api` over the internal
-Compose network. Neither PostgreSQL nor the backend port is published to the host.
+Compose network. The frontend is published on host loopback only. Neither PostgreSQL
+nor the backend port is published to the host.
+
+The development launcher adds `compose.dev.yaml`, which publishes PostgreSQL on
+`127.0.0.1:5432` for the host-side Spring Boot process. Do not add that descriptor to
+a deployed environment.
 
 For the same disposable production-like health/static/proxy check used by CI, run:
 

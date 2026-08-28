@@ -37,6 +37,13 @@ jobs:
         working-directory: frontend
         run: corepack npm exec -- playwright install --with-deps chromium
 
+      - name: Verify public health boundaries
+        env:
+          VIREO_DEMO_BASE_URL: ${{ vars.VIREO_DEMO_BASE_URL }}
+        run: |
+          curl --fail --silent --show-error --retry 3 "${VIREO_DEMO_BASE_URL}/healthz"
+          curl --fail --silent --show-error --retry 3 "${VIREO_DEMO_BASE_URL}/actuator/health/readiness" | grep --quiet '"status":"UP"'
+
       - name: Exercise public evaluation journey
         env:
           VIREO_DEMO_BASE_URL: ${{ vars.VIREO_DEMO_BASE_URL }}

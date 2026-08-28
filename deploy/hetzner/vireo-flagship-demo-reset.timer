@@ -1,0 +1,11 @@
+[Unit]
+Description=Reset the isolated Vireo flagship demo every 24 hours
+
+[Timer]
+OnCalendar=*-*-* 04:17:00 UTC
+RandomizedDelaySec=20m
+Persistent=true
+Unit=vireo-flagship-demo-reset.service
+
+[Install]
+WantedBy=timers.target

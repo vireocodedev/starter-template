@@ -51,6 +51,12 @@ if [[ "$api_status" != "401" ]]; then
   exit 1
 fi
 
+if ! curl --fail --silent --show-error \
+  http://127.0.0.1:3000/actuator/health/readiness | grep --quiet '"status":"UP"'; then
+  printf 'Public backend readiness did not report UP.\n' >&2
+  exit 1
+fi
+
 "${compose_command[@]}" --project-name "$deployment_project" exec --no-TTY frontend \
   wget --quiet --output-document=- http://app:8080/actuator/health/readiness | grep --quiet '"status":"UP"'
 

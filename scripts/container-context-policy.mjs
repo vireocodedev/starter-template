@@ -81,6 +81,14 @@ for (const [service, image] of Object.entries(policy.composeImages)) {
     problems.push(`Compose service ${service} must pin ${image}`);
   }
 }
+if (compose.includes("5432:5432")) {
+  problems.push(
+    "Compose must keep PostgreSQL private to its container network",
+  );
+}
+if (!compose.includes("127.0.0.1:${FRONTEND_PORT:-3000}:8080")) {
+  problems.push("Compose must publish the frontend on host loopback only");
+}
 
 if (problems.length > 0) {
   console.error("Container context policy failed:\n");

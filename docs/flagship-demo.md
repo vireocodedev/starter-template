@@ -10,22 +10,28 @@ The Compose overlay activates `prod,demo`: production-safe error, documentation,
 
 ## Deploy
 
-Build the normal production artifacts, then deploy with both Compose descriptors:
+Build the normal production artifacts, create a mode-`600` `.env` from the supplied
+host template, then deploy with both Compose descriptors:
 
 ```bash
-POSTGRES_PASSWORD=replace-with-a-dedicated-secret \
-  docker compose -f compose.yaml -f compose.demo.yaml \
-  --project-name vireo-flagship-demo up --build --detach --wait
+cp deploy/hetzner/vireo-flagship-demo.env.example .env
+chmod 600 .env
+# Replace the placeholder POSTGRES_PASSWORD before continuing.
+./deploy/hetzner/deploy.sh
 ```
 
 Terminate TLS at the public ingress, retain the frontend security headers and same-origin `/api` proxy, and keep `SESSION_COOKIE_SECURE=true`. Publish only the frontend origin. The database and backend remain private network services.
+
+The audited single-VPS integration for `demo.vireocode.com` is documented in
+[`deploy/hetzner/README.md`](../deploy/hetzner/README.md). It binds the frontend to
+host loopback, keeps the backend and database on the private Compose network, adds a
+Caddy route, and installs a persistent daily reset timer.
 
 ## Reset
 
 The reset destroys only the named demo project's volumes, rebuilds the deployment, runs migrations, and restores the deterministic seed. Run it at least every 24 hours and after abuse, unexpected content, or a failed evaluation journey:
 
 ```bash
-POSTGRES_PASSWORD=replace-with-the-same-dedicated-secret \
 VIREO_DEMO_RESET_CONFIRM=reset-vireo-demo \
   ./scripts/reset-flagship-demo.sh
 ```

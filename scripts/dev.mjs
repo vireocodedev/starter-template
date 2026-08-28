@@ -23,7 +23,7 @@ if (metadata.database === "postgresql") {
     SPRING_DATASOURCE_USERNAME: databaseName,
     SPRING_DATASOURCE_PASSWORD: "vireo_local_only",
   });
-  const compose = spawnSync("docker", ["compose", "up", "-d", "--wait", "postgres"], { cwd: root, env: developmentEnv, stdio: "inherit" });
+  const compose = spawnSync("docker", ["compose", "-f", "compose.yaml", "-f", "compose.dev.yaml", "up", "-d", "--wait", "postgres"], { cwd: root, env: developmentEnv, stdio: "inherit" });
   if (compose.status !== 0) process.exit(compose.status ?? 1);
 } else {
   Object.assign(developmentEnv, {
