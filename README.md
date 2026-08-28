@@ -82,6 +82,9 @@ corepack npm run generate:check
 
 - [Getting started and configuration](docs/getting-started.md)
 - [30-minute vertical slice](docs/tutorials/30-minute-vertical-slice.md)
+- [10-minute flagship evaluation](docs/tutorials/evaluate-flagship.md)
+- [Flagship experience and proof](docs/flagship.md)
+- [Evaluation and comparison boundaries](docs/comparison.md)
 - [Doctor diagnostics and remedies](docs/troubleshooting.md)
 - [Customizing the template](docs/customizing-the-template.md)
 - [Generated capabilities](docs/generated-capabilities.md)
