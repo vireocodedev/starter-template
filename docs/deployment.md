@@ -65,6 +65,13 @@ fallback, service-worker cache behavior, HTTPS, and `/api` routing contract.
 
 Terminate TLS at the ingress or reverse proxy, forward the standard proxy headers, retain the default `HttpOnly` and `SameSite=Lax` session cookie settings, and store secrets in the deployment platform rather than an image or repository file.
 
+Before exposing an environment, complete the [security hardening
+guide](security-hardening.md) and review the [threat
+model](security-threat-model.md). The canonical frontend image supplies a
+same-origin content security policy, frame denial, MIME-sniffing prevention,
+referrer policy, browsing-context isolation, and a deny-by-default permissions
+policy. Preserve or deliberately replace those headers at the public ingress.
+
 ## Release check
 
 Before producing the image, run the same merge gate as CI:

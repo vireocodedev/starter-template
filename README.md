@@ -86,6 +86,8 @@ corepack npm run generate:check
 - [Customizing the template](docs/customizing-the-template.md)
 - [Generated capabilities](docs/generated-capabilities.md)
 - [Deployment](docs/deployment.md)
+- [Security threat model](docs/security-threat-model.md)
+- [Production security hardening](docs/security-hardening.md)
 - [Starter compatibility and bundle policy](docs/starter-compatibility.md)
 - [Platform support evidence](docs/platform-support-evidence.md)
 - [Verification performance budget](docs/verification-performance.md)

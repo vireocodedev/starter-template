@@ -8,9 +8,18 @@ The current `main` branch and the latest tagged template release receive securit
 
 Do not open a public issue. Use GitHub private vulnerability reporting for `vireocodedev/starter-template` and include the affected revision, reproduction steps, impact, and proposed mitigation when available.
 
-Maintainers target acknowledgement of a complete report within five business days.
-This is a response target, not a guaranteed remediation deadline. Confirmed issues
-are handled through a private advisory and coordinated disclosure when appropriate.
+Maintainers target acknowledgement of a complete report within two business days
+and initial severity/next-step triage within five business days. Once confirmed,
+the remediation targets are 7 calendar days for critical, 30 days for high, 90 days
+for medium, and the next appropriate release for low severity. These are operating
+targets rather than warranties; if a safe fix needs longer, maintainers document
+containment and a revised private target. Confirmed issues are handled through a
+private advisory and coordinated disclosure when appropriate.
+
+The maintainer-authored [threat model](docs/security-threat-model.md) and
+[production hardening guide](docs/security-hardening.md) define the current scope
+and explicitly identify controls owned by an application or deployment. They do
+not replace an independent security review.
 
 The `dev` profile intentionally creates documented sample users. It must never be enabled in a public environment. Never include production credentials or personal data in a report.
 
