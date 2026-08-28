@@ -85,6 +85,7 @@ corepack npm run generate:check
 - [Doctor diagnostics and remedies](docs/troubleshooting.md)
 - [Customizing the template](docs/customizing-the-template.md)
 - [Generated capabilities](docs/generated-capabilities.md)
+- [Offline behavior and limits](docs/offline.md)
 - [Deployment](docs/deployment.md)
 - [Security threat model](docs/security-threat-model.md)
 - [Production security hardening](docs/security-hardening.md)
