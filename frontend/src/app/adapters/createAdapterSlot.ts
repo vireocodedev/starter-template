@@ -10,7 +10,7 @@ export type AdapterSlot<TAdapter extends object> = {
  */
 export function createAdapterSlot<TAdapter extends object>(defaultAdapter: TAdapter): AdapterSlot<TAdapter> {
   let current = defaultAdapter;
-  const adapter = new Proxy({} as TAdapter, {
+  const adapter = new Proxy(defaultAdapter, {
     get: (_target, property) => {
       const value = Reflect.get(current, property);
       return typeof value === "function" ? value.bind(current) : value;

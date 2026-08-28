@@ -111,6 +111,10 @@ class MockHistoryApi implements HistoryApi {
     _entityId: string | number,
     _signal?: AbortSignal,
   ): Promise<HistoryRecord<TSnapshot, TEntityKind, TTimestamp>[]> {
+    void _schema;
+    void _entity;
+    void _entityId;
+    void _signal;
     return [];
   }
 }
