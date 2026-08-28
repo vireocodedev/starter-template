@@ -17,6 +17,9 @@ const requiredFiles = [
   "docs/deployment.md",
   "docs/security-threat-model.md",
   "docs/security-hardening.md",
+  "docs/operations.md",
+  "docs/database-recovery.md",
+  "docs/incident-response.md",
   "docs/offline.md",
   "docs/accessibility.md",
   "docs/manual-platform-checklist.md",
@@ -53,6 +56,9 @@ requireText("README.md", [
   "docs/deployment.md",
   "docs/security-threat-model.md",
   "docs/security-hardening.md",
+  "docs/operations.md",
+  "docs/database-recovery.md",
+  "docs/incident-response.md",
   "docs/offline.md",
   "docs/accessibility.md",
   "docs/manual-platform-checklist.md",
@@ -123,6 +129,12 @@ const executableDocumentationClaims = [
     documentedCommand: "./scripts/verify-deployment.sh",
     evidence: ".github/workflows/ci.yml",
     evidenceCommand: "./scripts/verify-deployment.sh",
+  },
+  {
+    documentation: "docs/database-recovery.md",
+    documentedCommand: "./scripts/verify-database-recovery.sh",
+    evidence: ".github/workflows/support-evidence.yml",
+    evidenceCommand: "./scripts/verify-database-recovery.sh",
   },
 ];
 

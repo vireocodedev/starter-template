@@ -197,3 +197,36 @@ jobs:
           path: .support-evidence/postgres-${{ matrix.postgresql }}.json
           if-no-files-found: error
           retention-days: 14
+
+  database-recovery:
+    name: PostgreSQL 17 to 18 recovery rehearsal
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+      - name: Back up PostgreSQL 17 and recover on PostgreSQL 18
+        run: ./scripts/verify-database-recovery.sh
+      - name: Record evidence
+        if: always()
+        env:
+          VIREO_EVIDENCE_COMMAND: ./scripts/verify-database-recovery.sh
+          VIREO_EVIDENCE_SOURCE_POSTGRESQL: "17"
+          VIREO_EVIDENCE_TARGET_POSTGRESQL: "18"
+          VIREO_EVIDENCE_DATABASE_MODE: logical-backup-restore-and-production-readiness
+        run: node scripts/write-support-evidence.mjs database-recovery ${{ job.status }} .support-evidence/database-recovery.json
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: support-database-recovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .support-evidence/database-recovery.json
+          if-no-files-found: error
+          retention-days: 90

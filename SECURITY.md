@@ -21,6 +21,10 @@ The maintainer-authored [threat model](docs/security-threat-model.md) and
 and explicitly identify controls owned by an application or deployment. They do
 not replace an independent security review.
 
+For containment, evidence handling, communication, and recovery during an active
+event, follow the private-routing rules in the [incident-response
+playbook](docs/incident-response.md).
+
 The `dev` profile intentionally creates documented sample users. It must never be enabled in a public environment. Never include production credentials or personal data in a report.
 
 GitHub secret scanning and push protection supplement the repository-owned weekly

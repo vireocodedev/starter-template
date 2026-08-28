@@ -72,6 +72,11 @@ same-origin content security policy, frame denial, MIME-sniffing prevention,
 referrer policy, browsing-context isolation, and a deny-by-default permissions
 policy. Preserve or deliberately replace those headers at the public ingress.
 
+Before the first production release, connect the [operations and observability
+baseline](operations.md), rehearse [database backup and recovery](database-recovery.md),
+and assign the roles and contact paths in the [incident-response
+playbook](incident-response.md).
+
 ## Release check
 
 Before producing the image, run the same merge gate as CI:
