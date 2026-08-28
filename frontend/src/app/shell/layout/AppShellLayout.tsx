@@ -6,6 +6,7 @@ import {
   CloseRounded,
   DashboardOutlined,
   Inventory2Outlined,
+  ExtensionOutlined,
   LogoutOutlined,
   SettingsOutlined,
 } from "@mui/icons-material";
@@ -42,6 +43,7 @@ const navigationIcons: Record<AppNavigationIcon, React.ReactNode> = {
   OVERVIEW: <DashboardOutlined />,
   ITEMS: <Inventory2Outlined />,
   SETTINGS: <SettingsOutlined />,
+  GENERATED: <ExtensionOutlined />,
 };
 export function AppShellLayout() {
   const { t } = useAppTranslation();
@@ -59,9 +61,9 @@ export function AppShellLayout() {
       APP_NAVIGATION_PAGES.map(item => ({
         ...item,
         icon: navigationIcons[item.icon],
-        label: t(`navigation.${item.labelKey}`),
+        label: "labels" in item ? item.labels[preferences.locale] : t(`navigation.${item.labelKey}`),
       })),
-    [t],
+    [preferences.locale, t],
   );
   const mobileNavigationItems = React.useMemo(
     () => navigation.map(item => ({ icon: item.icon, label: item.label, value: item.path })),

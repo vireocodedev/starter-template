@@ -2,11 +2,12 @@
 
 A production-shaped React PWA and Spring Boot application for starting a Vireo product. It demonstrates an authenticated, localized, responsive CRUD workflow while keeping reusable contracts in [Vireo Starter](https://github.com/vireocodedev/starter) and product behavior in this repository.
 
-This is a public `0.x` Template, not a production-readiness claim or generated
-application. Clone it and replace the handwritten Item slice. Vireo provides
-libraries and explicit integration seams; the application owns domain rules,
-authorization policy, sensitive-data decisions, offline eligibility, and conflict
-resolution. A full-stack entity generator does not yet exist.
+This is a public `0.x` Template, not a production-readiness claim. Clone it, keep or
+replace the handwritten Item slice, or generate an additional scalar/enum capability
+from a versioned schema. Vireo provides libraries and explicit integration seams;
+the application owns domain rules, authorization policy, sensitive-data decisions,
+offline eligibility, and conflict resolution. The generator remains unreleased until
+`create-vireo@0.2.0` receives its first public npm publication.
 
 ## Evaluate before adopting
 
@@ -69,12 +70,22 @@ verifies the PWA shell, API proxy, and backend readiness through the deployed ne
 
 Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md). Rename the product, replace the sample Item capability, configure real authentication/bootstrap behavior, and provide deployment secrets through the environment.
 
+To review the Phase 3 generator against the included Purchase Order schema after its
+first publication:
+
+```bash
+corepack npm run vireo -- generate entity .vireo/examples/purchase-order.entity.json --dry-run
+corepack npm run vireo -- generate entity .vireo/examples/purchase-order.entity.json
+corepack npm run generate:check
+```
+
 ## Developer documentation
 
 - [Getting started and configuration](docs/getting-started.md)
 - [30-minute vertical slice](docs/tutorials/30-minute-vertical-slice.md)
 - [Doctor diagnostics and remedies](docs/troubleshooting.md)
 - [Customizing the template](docs/customizing-the-template.md)
+- [Generated capabilities](docs/generated-capabilities.md)
 - [Deployment](docs/deployment.md)
 - [Starter compatibility and bundle policy](docs/starter-compatibility.md)
 - [Platform support evidence](docs/platform-support-evidence.md)

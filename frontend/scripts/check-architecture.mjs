@@ -6,7 +6,16 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourceRoot = path.join(root, "src");
 const errors = [];
 
-const allowedSourceEntries = new Set(["@types", "app", "features", "pages", "main.css", "main.tsx", "vite-env.d.ts"]);
+const allowedSourceEntries = new Set([
+  "@types",
+  "app",
+  "features",
+  "generated",
+  "pages",
+  "main.css",
+  "main.tsx",
+  "vite-env.d.ts",
+]);
 const allowedFeatureDirectories = new Set([
   "api",
   "assets",

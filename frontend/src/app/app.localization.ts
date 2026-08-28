@@ -23,6 +23,8 @@ import itemsEn from "@/pages/items/localization/resources/items.en";
 import itemsHr from "@/pages/items/localization/resources/items.hr";
 import entityQueryFiltersEn from "@/features/entity-query-filters/localization/resources/entity-query-filters.en";
 import entityQueryFiltersHr from "@/features/entity-query-filters/localization/resources/entity-query-filters.hr";
+import { VIREO_GENERATED_CAPABILITIES } from "@/generated/vireo.capabilities";
+import type { VireoGeneratedCapability } from "@/app/generated/VireoGeneratedCapability";
 
 export const APP_TRANSLATION_NAMESPACE = "app" as const;
 export const ITEM_TRANSLATION_NAMESPACE = "item" as const;
@@ -45,6 +47,13 @@ export type ItemsTranslationResources = WidenLeaves<typeof itemsEn>;
 export type EntityQueryFiltersTranslationResources = WidenLeaves<typeof entityQueryFiltersEn>;
 
 const starterResources = createStarterResources({ locales: APP_LOCALES });
+const generatedCapabilities: readonly VireoGeneratedCapability[] = VIREO_GENERATED_CAPABILITIES;
+const generatedResources = Object.fromEntries(
+  APP_LOCALES.map(locale => [
+    locale,
+    Object.fromEntries(generatedCapabilities.map(capability => [capability.namespace, capability.resources[locale]])),
+  ]),
+) as Record<AppLocale, Record<string, Record<string, unknown>>>;
 type AppLocaleResources = StarterNamespaceResources & {
   app: AppTranslationResources;
   item: ItemTranslationResources;
@@ -68,6 +77,7 @@ export const APP_LOCALIZATION_RESOURCES = {
     settings: settingsEn,
     items: itemsEn,
     entityQueryFilters: entityQueryFiltersEn,
+    ...generatedResources.en,
     ...starterResources.en,
   },
   hr: {
@@ -80,6 +90,7 @@ export const APP_LOCALIZATION_RESOURCES = {
     settings: settingsHr,
     items: itemsHr,
     entityQueryFilters: entityQueryFiltersHr,
+    ...generatedResources.hr,
     ...starterResources.hr,
   },
 } satisfies Record<AppLocale, AppLocaleResources>;
@@ -94,5 +105,6 @@ export const APP_TRANSLATION_NAMESPACES = [
   SETTINGS_TRANSLATION_NAMESPACE,
   ITEMS_TRANSLATION_NAMESPACE,
   ENTITY_QUERY_FILTERS_TRANSLATION_NAMESPACE,
+  ...generatedCapabilities.map(capability => capability.namespace),
   ...STARTER_TRANSLATION_NAMESPACES,
-] as const;
+];

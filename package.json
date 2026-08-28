@@ -13,6 +13,8 @@
     "dev": "node scripts/dev.mjs",
     "doctor": "node scripts/vireo-doctor.mjs",
     "doctor:json": "node scripts/vireo-doctor.mjs --json",
+    "vireo": "npx --yes --package=create-vireo@0.2.0 vireo",
+    "generate:check": "corepack npm run vireo -- check",
     "verify": "bash scripts/verify.sh"
   }
 }

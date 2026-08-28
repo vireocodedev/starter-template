@@ -1,0 +1,86 @@
+{
+  "$schema": "https://vireocode.com/schemas/entity/v1.json",
+  "schemaVersion": 1,
+  "kind": "entity",
+  "entity": {
+    "name": "PurchaseOrder",
+    "plural": "purchase-orders",
+    "description": "Track customer purchase orders from intake through fulfilment."
+  },
+  "database": {
+    "table": "purchase_order",
+    "migrationVersion": 3
+  },
+  "api": {
+    "path": "/api/purchase-orders"
+  },
+  "permissions": {
+    "read": "hasAnyRole('USER', 'SUPERADMIN')",
+    "manage": "hasRole('SUPERADMIN')"
+  },
+  "capabilities": {
+    "history": true,
+    "offline": false,
+    "query": true
+  },
+  "fields": [
+    {
+      "name": "orderNumber",
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "constraints": { "min": 3, "max": 40, "pattern": "^[A-Z0-9-]+$" },
+      "query": { "filterable": true, "searchable": true, "sortable": true },
+      "ui": { "label": "Order number", "list": true }
+    },
+    {
+      "name": "customerName",
+      "type": "string",
+      "required": true,
+      "constraints": { "min": 2, "max": 120 },
+      "query": { "filterable": true, "searchable": true, "sortable": true },
+      "ui": { "label": "Customer", "list": true }
+    },
+    {
+      "name": "amount",
+      "type": "decimal",
+      "required": true,
+      "constraints": { "min": 0, "max": 999999999.99 },
+      "query": { "filterable": true, "sortable": true },
+      "ui": { "control": "number", "label": "Amount", "list": true }
+    },
+    {
+      "name": "status",
+      "type": "enum",
+      "required": true,
+      "enumValues": ["DRAFT", "APPROVED", "FULFILLED", "CANCELLED"],
+      "query": { "filterable": true, "searchable": true, "sortable": true },
+      "ui": { "control": "select", "label": "Status", "list": true }
+    },
+    {
+      "name": "dueDate",
+      "type": "date",
+      "query": { "filterable": true, "sortable": true },
+      "ui": { "control": "date", "label": "Due date" }
+    },
+    {
+      "name": "expedited",
+      "type": "boolean",
+      "required": true,
+      "default": false,
+      "query": { "filterable": true },
+      "ui": { "control": "checkbox", "label": "Expedited" }
+    },
+    {
+      "name": "notes",
+      "type": "text",
+      "constraints": { "max": 2000 },
+      "query": { "searchable": true },
+      "ui": { "control": "textarea", "label": "Notes", "list": false }
+    }
+  ],
+  "localization": {
+    "en": { "singular": "Purchase order", "plural": "Purchase orders" },
+    "hr": { "singular": "Narudžbenica", "plural": "Narudžbenice" }
+  }
+}

@@ -1,9 +1,11 @@
 import type { ComponentType } from "react";
 import { AppPageHome } from "@/pages/home/AppPageHome";
 import { AppPageHomeView } from "@/pages/home/AppPageHomeView";
+import { VIREO_GENERATED_CAPABILITIES } from "@/generated/vireo.capabilities";
+import type { VireoGeneratedCapability } from "@/app/generated/VireoGeneratedCapability";
 
 export type AppPageAccess = "PUBLIC" | "AUTHENTICATED";
-export type AppNavigationIcon = "OVERVIEW" | "ITEMS" | "SETTINGS";
+export type AppNavigationIcon = "OVERVIEW" | "ITEMS" | "SETTINGS" | "GENERATED";
 export type AppPageModule = { default: ComponentType };
 
 export const APP_ROUTE_SKELETON_COMPOSITIONS = {
@@ -30,7 +32,13 @@ type AppPageDefinitionBase = {
   access: AppPageAccess;
   buildPath: () => string;
   loading: AppRouteLoadingPolicy;
-  navigation?: { icon: AppNavigationIcon; labelKey: AppNavigationIcon; order: number };
+  navigation?:
+    | {
+        icon: Exclude<AppNavigationIcon, "GENERATED">;
+        labelKey: Exclude<AppNavigationIcon, "GENERATED">;
+        order: number;
+      }
+    | { icon: "GENERATED"; labels: { en: string; hr: string }; order: number };
   path: string;
 };
 
@@ -60,7 +68,7 @@ function pageProgress(
 }
 
 const APPLICATION_PROGRESS = { policy: "progress", frame: "application" } as const satisfies AppRouteLoadingPolicy;
-export const APP_PAGE_REGISTRY = {
+const APP_BUILT_IN_PAGE_REGISTRY = {
   home: eagerPage({
     access: "AUTHENTICATED",
     component: AppPageHome,
@@ -108,7 +116,27 @@ export const APP_PAGE_REGISTRY = {
   }),
 } as const satisfies Record<string, AppPageDefinition>;
 
-export type AppPageId = keyof typeof APP_PAGE_REGISTRY;
+const generatedCapabilities: readonly VireoGeneratedCapability[] = VIREO_GENERATED_CAPABILITIES;
+const APP_GENERATED_PAGE_REGISTRY = Object.fromEntries(
+  generatedCapabilities.map(capability => [
+    capability.id,
+    lazyPage({
+      access: "AUTHENTICATED",
+      loading: pageProgress(capability.namespace),
+      path: capability.path,
+      buildPath: () => capability.path,
+      navigation: { icon: "GENERATED", labels: capability.navigationLabels, order: capability.navigationOrder },
+      load: capability.load,
+    }),
+  ]),
+) satisfies Record<string, AppPageDefinition>;
+
+export const APP_PAGE_REGISTRY = {
+  ...APP_BUILT_IN_PAGE_REGISTRY,
+  ...APP_GENERATED_PAGE_REGISTRY,
+} as typeof APP_BUILT_IN_PAGE_REGISTRY & Record<string, AppPageDefinition>;
+
+export type AppPageId = string;
 
 const pageModuleCache = new Map<AppPageId, Promise<AppPageModule>>();
 
@@ -134,10 +162,14 @@ export function preloadAppPage(path: string): void {
 
 export const APP_PAGES = Object.fromEntries(
   Object.entries(APP_PAGE_REGISTRY).map(([id, definition]) => [id, definition.path]),
-) as { [K in AppPageId]: (typeof APP_PAGE_REGISTRY)[K]["path"] };
+) as Record<AppPageId, string> & {
+  [K in keyof typeof APP_BUILT_IN_PAGE_REGISTRY]: (typeof APP_BUILT_IN_PAGE_REGISTRY)[K]["path"];
+};
 
 export const APP_NAVIGATION_PAGES = Object.entries(APP_PAGE_REGISTRY)
   .flatMap(([id, definition]) =>
-    "navigation" in definition ? [{ id: id as AppPageId, path: definition.path, ...definition.navigation }] : [],
+    "navigation" in definition && definition.navigation
+      ? [{ id: id as AppPageId, path: definition.path, ...definition.navigation }]
+      : [],
   )
   .sort((left, right) => left.order - right.order);
