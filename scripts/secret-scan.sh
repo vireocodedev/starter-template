@@ -13,4 +13,4 @@ echo "Scanning the complete Git history for secrets with Gitleaks v8.30.1..."
 docker run --rm \
   --volume "$repository_root:/repo:ro" \
   "$gitleaks_image" \
-  git /repo --redact --no-banner
+  git /repo --config /repo/.gitleaks.toml --redact --no-banner

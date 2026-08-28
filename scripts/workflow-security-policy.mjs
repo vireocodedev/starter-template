@@ -62,6 +62,24 @@ const secretScan = readFileSync(
   join(repositoryRoot, "scripts", "secret-scan.sh"),
   "utf8",
 );
+const gitleaksConfig = readFileSync(
+  join(repositoryRoot, ".gitleaks.toml"),
+  "utf8",
+);
+if (!secretScan.includes("--config /repo/.gitleaks.toml")) {
+  problems.push("Secret scanner must load the repository Gitleaks policy");
+}
+for (const requiredPolicy of [
+  "useDefault = true",
+  'condition = "AND"',
+  'regexTarget = "line"',
+  "secret scans, signed/provenanced releases",
+  "^docs/security-threat-model\\.md$",
+]) {
+  if (!gitleaksConfig.includes(requiredPolicy)) {
+    problems.push(`Gitleaks policy must include ${requiredPolicy}`);
+  }
+}
 for (const [image, expected] of Object.entries(policy.containerImages ?? {})) {
   const pinnedReference = `${image}@${expected.digest}`;
   if (!secretScan.includes(pinnedReference)) {

@@ -1,0 +1,11 @@
+title = "Vireo Template secret-scanning policy"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Ignore release-security prose that matches the generic API key rule"
+condition = "AND"
+regexTarget = "line"
+regexes = ["secret scans, signed/provenanced releases"]
+paths = ['''^docs/security-threat-model\.md$''']
