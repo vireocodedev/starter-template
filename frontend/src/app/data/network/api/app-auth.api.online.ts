@@ -2,6 +2,7 @@ import { AppAxiosHttpClient } from "../clients/AppAxiosClient";
 import type { AppAuthApi } from "./app-auth.api";
 import { AuthUser } from "../models/AuthUser";
 import { z } from "zod";
+import { createAdapterSlot } from "@/app/adapters/createAdapterSlot";
 
 const AuthLoginResponseSchema = z.object({ username: z.string(), message: z.string() });
 
@@ -23,4 +24,7 @@ export class AppAuthApiOnline extends AppAxiosHttpClient implements AppAuthApi {
   }
 }
 
-export const appAuthApi = new AppAuthApiOnline();
+const appAuthApiSlot = createAdapterSlot<AppAuthApi>(new AppAuthApiOnline());
+
+export const appAuthApi = appAuthApiSlot.adapter;
+export const configureAppAuthApi = appAuthApiSlot.configure;

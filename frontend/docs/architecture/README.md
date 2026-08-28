@@ -13,6 +13,7 @@ This directory is the authoritative contract for application code in the Vireo t
 - [Styling and assets](styling-and-assets.md)
 - [Storybook and testing](storybook-and-testing.md)
 - [Authentication and errors](authentication-and-errors.md)
+- [Frontend-only adoption](frontend-only-adoption.md)
 
 ## Governing principles
 

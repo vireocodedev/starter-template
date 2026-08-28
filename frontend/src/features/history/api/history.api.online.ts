@@ -2,8 +2,9 @@ import { AppAxiosHttpClient } from "@/app/data/network/clients/AppAxiosClient";
 import type { HistoryApi } from "./history.api";
 import type { HistoryEntityKind, HistoryRecord, HistorySnapshot, HistoryTimestamp } from "@vireocodedev/history";
 import { z } from "zod";
+import { createAdapterSlot } from "@/app/adapters/createAdapterSlot";
 
-class HistoryApiOnline extends AppAxiosHttpClient implements HistoryApi {
+export class HistoryApiOnline extends AppAxiosHttpClient implements HistoryApi {
   constructor() {
     super("history");
   }
@@ -21,4 +22,7 @@ class HistoryApiOnline extends AppAxiosHttpClient implements HistoryApi {
   }
 }
 
-export const historyApi = new HistoryApiOnline();
+const historyApiSlot = createAdapterSlot<HistoryApi>(new HistoryApiOnline());
+
+export const historyApi = historyApiSlot.adapter;
+export const configureHistoryApi = historyApiSlot.configure;

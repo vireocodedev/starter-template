@@ -6,6 +6,7 @@ import type { PageableParams } from "@vireocodedev/infrastructure";
 import { z } from "zod";
 import { APP_QUERY_ENTITY } from "@/app/data/query/models/AppQueryEntityKey";
 import { serializeQueryFilterDocument } from "@/app/data/query/models/QueryFilterDocument";
+import { createAdapterSlot } from "@/app/adapters/createAdapterSlot";
 
 export class ItemApiOnline extends AppAxiosHttpClient implements ItemApi {
   constructor() {
@@ -42,4 +43,7 @@ export class ItemApiOnline extends AppAxiosHttpClient implements ItemApi {
   }
 }
 
-export const itemApi = new ItemApiOnline();
+const itemApiSlot = createAdapterSlot<ItemApi>(new ItemApiOnline());
+
+export const itemApi = itemApiSlot.adapter;
+export const configureItemApi = itemApiSlot.configure;
