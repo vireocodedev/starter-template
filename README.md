@@ -66,6 +66,8 @@ Run `./scripts/verify-deployment.sh` for the disposable production-like Compose
 check. It builds the independent frontend/backend images, starts PostgreSQL, and
 verifies the PWA shell, API proxy, and backend readiness through the deployed network.
 
+After evaluating the workflow, use the framework's structured [public-beta evaluation form](https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml) or [public Discussions](https://github.com/vireocodedev/starter/discussions). Both paths are public: remove credentials, private source, application data, and identifying project information before posting. Suspected vulnerabilities always use the private security-advisory link instead.
+
 ## Customize the template
 
 Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md). Rename the product, replace the sample Item capability, configure real authentication/bootstrap behavior, and provide deployment secrets through the environment.

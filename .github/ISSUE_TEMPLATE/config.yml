@@ -6,3 +6,9 @@ contact_links:
   - name: Vireo package issue
     url: https://github.com/vireocodedev/starter/issues/new/choose
     about: Report a reusable npm or JVM package defect in the framework repository.
+  - name: Public-beta evaluation
+    url: https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml
+    about: Share a sanitized outcome from evaluating the supported Vireo path.
+  - name: Public discussion
+    url: https://github.com/vireocodedev/starter/discussions
+    about: Ask open-ended evaluation and design questions in public.

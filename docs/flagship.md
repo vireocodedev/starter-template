@@ -28,6 +28,8 @@ The development profile seeds active, draft, archived, low-stock, and healthy re
 
 See [flagship architecture proof](flagship-architecture.md) for the request path and [evaluation guide](tutorials/evaluate-flagship.md) for a copy-pastable walkthrough.
 
+Record a sanitized result through the framework's [public-beta evaluation form](https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml). Open-ended questions belong in [Discussions](https://github.com/vireocodedev/starter/discussions); suspected vulnerabilities do not.
+
 ## Honest boundary
 
 - The overview summarizes at most the first 100 Item lines and is a reference projection, not an analytics engine.
@@ -35,4 +37,3 @@ See [flagship architecture proof](flagship-architecture.md) for the request path
 - The public demo, once hosted, is disposable synthetic data with no uptime claim until the versioned operations policy says otherwise.
 - A polished maintainer-built demo is not independent-adopter, demand, production-readiness, or time-saved evidence.
 - Authentication, authorization, data classification, domain rules, and deployment ownership remain application responsibilities.
-
