@@ -6,8 +6,8 @@ This is a public `0.x` Template, not a production-readiness claim. Clone it, kee
 replace the handwritten Item slice, or generate an additional scalar/enum capability
 from a versioned schema. Vireo provides libraries and explicit integration seams;
 the application owns domain rules, authorization policy, sensitive-data decisions,
-offline eligibility, and conflict resolution. The generator remains unreleased until
-`create-vireo@0.2.0` receives its first public npm publication.
+offline eligibility, and conflict resolution. The generator is publicly available in
+`create-vireo@0.2.0`.
 
 ## Evaluate before adopting
 
@@ -70,8 +70,7 @@ verifies the PWA shell, API proxy, and backend readiness through the deployed ne
 
 Start with [`docs/customizing-the-template.md`](docs/customizing-the-template.md). Rename the product, replace the sample Item capability, configure real authentication/bootstrap behavior, and provide deployment secrets through the environment.
 
-To review the Phase 3 generator against the included Purchase Order schema after its
-first publication:
+To review the Phase 3 generator against the included Purchase Order schema:
 
 ```bash
 corepack npm run vireo -- generate entity .vireo/examples/purchase-order.entity.json --dry-run
