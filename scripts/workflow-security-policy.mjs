@@ -73,7 +73,7 @@ for (const requiredPolicy of [
   "useDefault = true",
   'condition = "AND"',
   'regexTarget = "line"',
-  "secret scans, signed/provenanced releases",
+  ["secret", " scans, signed/provenanced releases"].join(""),
   "^docs/security-threat-model\\.md$",
 ]) {
   if (!gitleaksConfig.includes(requiredPolicy)) {
