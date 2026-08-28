@@ -1,6 +1,10 @@
 # Generated capabilities
 
-The root `vireo` script runs the `vireo` executable from `create-vireo@0.2.0`. Until that version receives its first npm publication, use the built CLI from a local Starter checkout as shown in the framework's [entity-generator guide](https://github.com/vireocodedev/starter/blob/main/docs/generators/entity-schema.md).
+The root `vireo` script pins the `vireo` executable from `create-vireo@0.3.0`.
+Use that command for supported entity generation and the 0.2.0-to-0.3.0 project
+upgrade path. When developing unpublished Starter changes, use the built CLI from a
+local Starter checkout as shown in the framework's [entity-generator
+guide](https://github.com/vireocodedev/starter/blob/main/docs/generators/entity-schema.md).
 
 Review the included realistic schema without writing:
 
