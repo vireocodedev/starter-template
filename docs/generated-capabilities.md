@@ -1,6 +1,6 @@
 # Generated capabilities
 
-The root `vireo` script pins the `vireo` executable from `create-vireo@0.4.0`.
+The root `vireo` script pins the `vireo` executable from `create-vireo@0.4.2`.
 Use that command for supported entity generation and the 0.2.0-to-0.3.0 project
 upgrade path. When developing unpublished Starter changes, use the built CLI from a
 local Starter checkout as shown in the framework's [entity-generator

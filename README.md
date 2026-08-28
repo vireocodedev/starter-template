@@ -7,7 +7,7 @@ replace the handwritten Item slice, or generate an additional scalar/enum capabi
 from a versioned schema. Vireo provides libraries and explicit integration seams;
 the application owns domain rules, authorization policy, sensitive-data decisions,
 offline eligibility, and conflict resolution. The generator is publicly available in
-the `create-vireo@0.4.0` release line, including frontend-only project and entity
+the `create-vireo@0.4.2` release line, including frontend-only project and entity
 generation for separately owned backend systems.
 
 ## Evaluate before adopting
