@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+import { parallelPlaywrightPolicy } from "./playwright.policy";
+
 const useLocalStarter = process.env.USE_LOCAL_STARTER_SOURCE === "true";
 const browserLane = process.env.VIREO_E2E_BROWSER ?? "chromium";
 const webServerStartupTimeout = 90_000;
@@ -25,8 +27,8 @@ if (!new Set(["chromium", "firefox", "webkit"]).has(browserLane)) {
 }
 
 export default defineConfig({
+  ...parallelPlaywrightPolicy,
   testDir: "./tests/e2e",
-  fullyParallel: true,
   reporter: "list",
   use: { baseURL: "http://127.0.0.1:3000", trace: "on-first-retry" },
   webServer: [

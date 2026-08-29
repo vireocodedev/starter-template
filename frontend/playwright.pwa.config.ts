@@ -1,8 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 
+import { serialPlaywrightPolicy } from "./playwright.policy";
+
 export default defineConfig({
+  ...serialPlaywrightPolicy,
   testDir: "./tests/pwa",
-  fullyParallel: false,
   reporter: "list",
   use: {
     ...devices["Desktop Chrome"],
