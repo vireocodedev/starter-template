@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,12 +34,14 @@ public class Item extends BaseEntity {
     private Long id;
 
     @NotBlank
-    @Column(nullable = false)
+    @Size(max = 255)
+    @Column(nullable = false, length = 255)
     @Filterable(label = "item.fields.name", operators = {
             QueryOperator.CONTAINS, QueryOperator.EQUALS, QueryOperator.STARTS_WITH, QueryOperator.ENDS_WITH
     })
     private String name;
 
+    @Size(max = 2000)
     @Column(length = 2000)
     @Filterable(label = "item.fields.description", operators = { QueryOperator.CONTAINS, QueryOperator.EQUALS })
     private String description;

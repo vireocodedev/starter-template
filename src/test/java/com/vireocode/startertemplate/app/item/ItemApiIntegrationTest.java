@@ -1,5 +1,7 @@
 package com.vireocode.startertemplate.app.item;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -12,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,11 +29,13 @@ class ItemApiIntegrationTest {
 
     private final MockMvc mockMvc;
     private final ItemRepository items;
+    private final JdbcTemplate jdbc;
 
     @Autowired
-    ItemApiIntegrationTest(MockMvc mockMvc, ItemRepository items) {
+    ItemApiIntegrationTest(MockMvc mockMvc, ItemRepository items, JdbcTemplate jdbc) {
         this.mockMvc = mockMvc;
         this.items = items;
+        this.jdbc = jdbc;
     }
 
     @Test
@@ -106,6 +112,38 @@ class ItemApiIntegrationTest {
                         }
                         """))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(roles = "SUPERADMIN")
+    @DisplayName("Item API rejects values beyond the database column contract before persistence")
+    void createRejectsValuesBeyondColumnContract() throws Exception {
+        long before = items.count();
+
+        mockMvc.perform(post("/api/items")
+                .with(csrf())
+                .contentType("application/json")
+                .content("""
+                        {
+                          "name": "%s",
+                          "description": "%s",
+                          "quantity": 1,
+                          "status": "ACTIVE"
+                        }
+                        """.formatted("n".repeat(256), "d".repeat(2001))))
+                .andExpect(status().isBadRequest());
+
+        assertThat(items.count()).isEqualTo(before);
+    }
+
+    @Test
+    @DisplayName("Database constraints retain the same blank-name and quantity invariants")
+    void databaseRejectsValuesOutsideApiContract() {
+        assertThatThrownBy(() -> jdbc.update("""
+                INSERT INTO item (name, description, quantity, status, deleted)
+                VALUES ('   ', NULL, -1, 'ACTIVE', FALSE)
+                """))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
