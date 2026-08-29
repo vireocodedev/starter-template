@@ -38,7 +38,12 @@ before committing to individual packages.
 - PostgreSQL 17 or 18 for a production-like local environment (H2 is also supported for quick development)
 - Anonymous access to the public npm registry
 
-The default H2 database needs no service or environment setup. Copy [`.env.example`](.env.example) to `.env` only when overriding it. Copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env.local` when the frontend defaults are not suitable.
+The default H2 database needs no service or environment setup. The development
+workflow also supports a managed Compose PostgreSQL service and an external
+datasource. Copy [`.env.example`](.env.example) to `.env` only when overriding
+the defaults; existing datasource credentials are preserved. Copy
+[`frontend/.env.example`](frontend/.env.example) to `frontend/.env.local` when
+the frontend defaults are not suitable.
 
 The JVM libraries resolve anonymously from Maven Central, and the public frontend
 packages resolve anonymously from npm. No package-registry credential is
@@ -52,7 +57,11 @@ corepack npm run doctor
 corepack npm run dev
 ```
 
-The root workflow starts the Spring Boot API and React PWA together. A generated PostgreSQL project also starts its Compose database. Press Ctrl-C once to stop the application processes.
+The root workflow starts the Spring Boot API and React PWA together. A generated
+PostgreSQL project defaults to managed Compose and accepts either the Docker
+Compose plugin or standalone `docker-compose`. Set `VIREO_DATABASE_MODE` to
+`h2`, `compose`, or `external` to choose explicitly. Press Ctrl-C once to stop
+the application processes.
 
 Open <http://localhost:3000>. API documentation is available at <http://localhost:8080/swagger-ui.html> only in the `dev` profile.
 

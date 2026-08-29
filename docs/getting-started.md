@@ -12,7 +12,22 @@ corepack npm run dev
 
 Open <http://localhost:3000>, sign in with `demo` / `demo123`, then create, edit, filter, and delete an Item. That loop proves the npm packages and JVM modules work across the real HTTP boundary. The `dev` profile alone seeds the public demonstration credentials; never enable it in a public deployment.
 
-The source Template uses H2 for a zero-service first run. `create-vireo` defaults generated applications to PostgreSQL and the root `dev` command starts its Compose service. Select H2 explicitly when creating a project if that is your intended local database.
+The source Template uses H2 for a zero-service first run. `create-vireo` defaults
+generated applications to PostgreSQL and the root `dev` command starts its
+Compose service. The launcher and Doctor share these database modes:
+
+| `VIREO_DATABASE_MODE` | Behavior                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------- |
+| `h2`                  | Starts the application with a local file-backed H2 default.                                          |
+| `compose`             | Starts the managed PostgreSQL service with the Docker Compose plugin or standalone `docker-compose`. |
+| `external`            | Starts no database service and requires the caller's complete `SPRING_DATASOURCE_*` configuration.   |
+
+When the variable is omitted, H2 project metadata selects `h2` and PostgreSQL
+project metadata selects `compose` for backward compatibility. Export the mode
+and datasource variables in your shell or put them in the root `.env` file.
+Caller-provided datasource, Flyway, PostgreSQL role, database, and port values
+always win over development defaults. Doctor reports only whether external
+configuration is complete; it never prints its values.
 
 Run the complete gate before merging:
 

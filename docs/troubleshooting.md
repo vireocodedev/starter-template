@@ -13,7 +13,7 @@ Run `corepack npm run doctor` for readable output or `corepack npm run doctor:js
 | `VIR-DEPS-002`    | Vireo package declarations are unsupported. | Use a combination admitted by `contracts/vireo-package-compatibility.json`; packages are independently versioned and need not use identical strings. |
 | `VIR-PORT-001`    | Port 8080 is occupied.                      | Stop or reconfigure the existing backend.                                                                                                            |
 | `VIR-PORT-002`    | Port 3000 is occupied.                      | Stop or reconfigure the existing frontend.                                                                                                           |
-| `VIR-DB-001`      | The selected database cannot start.         | For PostgreSQL, start Docker and verify `docker compose version`; H2 needs no service.                                                               |
+| `VIR-DB-001`      | The selected database mode is incomplete.   | Use `h2`, install either Compose launcher for `compose`, or supply all three `SPRING_DATASOURCE_*` variables for `external`.                         |
 | `VIR-PWA-001`     | PWA configuration is incomplete.            | Restore `VitePWA` configuration in `frontend/vite.config.ts`.                                                                                        |
 
 After applying a remedy, rerun doctor. If the same code remains, include the JSON report in a support request; review it before sharing as you would any diagnostic output.

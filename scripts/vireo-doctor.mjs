@@ -3,10 +3,19 @@ import { accessSync, constants, existsSync, readFileSync } from "node:fs";
 import { createConnection } from "node:net";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import {
+  DATABASE_MODES,
+  detectComposeCommand,
+  externalDatasourceProblem,
+  resolveDatabaseMode,
+} from "./database-development.mjs";
 import { evaluateVireoPackageCompatibility } from "./vireo-package-compatibility.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const jsonMode = process.argv.includes("--json");
+
+const environmentFile = resolve(root, ".env");
+if (existsSync(environmentFile)) process.loadEnvFile(environmentFile);
 
 function command(name, args = ["--version"]) {
   const completed = spawnSync(name, args, { encoding: "utf8" });
@@ -212,22 +221,50 @@ export async function runDoctor() {
         ),
   );
 
-  if (metadata.database === "postgresql") {
-    const compose = command("docker", ["compose", "version"]);
+  let databaseMode;
+  try {
+    databaseMode = resolveDatabaseMode(metadata);
+  } catch (error) {
+    results.push(
+      result(
+        "VIR-DB-001",
+        "fail",
+        error.message,
+        "Set VIREO_DATABASE_MODE to h2, compose, or external.",
+      ),
+    );
+  }
+
+  if (databaseMode === DATABASE_MODES.COMPOSE) {
+    const compose = detectComposeCommand();
     results.push(
       compose
-        ? result("VIR-DB-001", "pass", compose.split("\n")[0])
+        ? result("VIR-DB-001", "pass", `Managed Compose: ${compose.summary}`)
         : result(
             "VIR-DB-001",
             "fail",
-            "Docker Compose is required for this PostgreSQL project",
-            "Start Docker Desktop/Engine and ensure `docker compose version` succeeds.",
+            "Managed Compose mode cannot find a Compose launcher",
+            "Start Docker and install either the `docker compose` plugin or standalone `docker-compose`.",
           ),
     );
-  } else {
+  } else if (databaseMode === DATABASE_MODES.EXTERNAL) {
+    const datasourceProblem = externalDatasourceProblem();
     results.push(
-      result("VIR-DB-001", "pass", "Embedded H2 development database selected"),
+      datasourceProblem
+        ? result(
+            "VIR-DB-001",
+            "fail",
+            datasourceProblem,
+            "Export the complete SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME, and SPRING_DATASOURCE_PASSWORD configuration.",
+          )
+        : result(
+            "VIR-DB-001",
+            "pass",
+            "External datasource configuration is present",
+          ),
     );
+  } else if (databaseMode === DATABASE_MODES.H2) {
+    results.push(result("VIR-DB-001", "pass", "H2 development mode selected"));
   }
 
   const vitePath = resolve(root, "frontend/vite.config.ts");
@@ -253,6 +290,7 @@ export async function runDoctor() {
     ok: results.every((entry) => entry.status !== "fail"),
     project: metadata.projectName ?? "unknown",
     database: metadata.database,
+    databaseMode: databaseMode ?? "invalid",
     results,
   };
 }
@@ -261,7 +299,7 @@ async function main() {
   const report = await runDoctor();
   if (jsonMode) console.log(JSON.stringify(report, null, 2));
   else {
-    console.log(`Vireo doctor — ${report.project} (${report.database})`);
+    console.log(`Vireo doctor — ${report.project} (${report.databaseMode})`);
     for (const entry of report.results) {
       console.log(
         `${entry.status === "pass" ? "✓" : entry.status === "warn" ? "!" : "✗"} ${entry.code} ${entry.summary}`,

@@ -18,6 +18,7 @@ fi
 steps=(
   "verification-pipeline|Verification pipeline contract|node scripts/verification-pipeline-policy.mjs"
   "vireo-compatibility|Vireo package compatibility|node scripts/vireo-package-compatibility-policy.mjs"
+  "development-database|Development database modes|corepack npm run test:scripts"
   "public-contract|Public contract policy|node scripts/public-contract-policy.mjs"
   "flagship-demo|Flagship demo contract|node scripts/flagship-demo-policy.mjs"
   "flagship-proof|Flagship proof material|node scripts/flagship-proof-policy.mjs"
