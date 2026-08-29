@@ -10,6 +10,8 @@ frontend_port="${FRONTEND_PORT:-3000}"
 export POSTGRES_OWNER_PASSWORD="${POSTGRES_OWNER_PASSWORD:-deployment-owner-only}"
 export POSTGRES_RUNTIME_PASSWORD="${POSTGRES_RUNTIME_PASSWORD:-deployment-runtime-only}"
 export SESSION_COOKIE_SECURE=false
+export VIREO_DEPLOYMENT_SMOKE_USERNAME="${VIREO_DEPLOYMENT_SMOKE_USERNAME:-deployment_smoke}"
+export VIREO_DEPLOYMENT_SMOKE_PASSWORD="${VIREO_DEPLOYMENT_SMOKE_PASSWORD:-deployment-smoke-${RANDOM}-${RANDOM}}"
 
 if docker compose version >/dev/null 2>&1; then
   compose_command=(docker compose)
@@ -21,11 +23,19 @@ else
 fi
 
 cleanup() {
-  "${compose_command[@]}" --project-name "$deployment_project" down --volumes --remove-orphans >/dev/null 2>&1 || true
+  "${compose_command[@]}" -f compose.yaml -f compose.smoke.yaml --project-name "$deployment_project" \
+    down --volumes --remove-orphans >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
-"${compose_command[@]}" --project-name "$deployment_project" up --build --detach --wait
+./gradlew bootJar --console=plain
+(
+  cd frontend
+  corepack npm run build
+)
+
+"${compose_command[@]}" -f compose.yaml -f compose.smoke.yaml --project-name "$deployment_project" \
+  up --build --detach --wait
 
 index_document="$(curl --fail --silent --show-error "http://127.0.0.1:${frontend_port}/")"
 if [[ "$index_document" != *'<div id="root"></div>'* ]]; then
@@ -72,4 +82,10 @@ if [[ "$runtime_privileges" != "f|t|f" ]]; then
   exit 1
 fi
 
-printf 'Production-like deployment smoke passed: static PWA, security headers, API proxy, backend readiness, PostgreSQL health, and separated database privileges.\n'
+(
+  cd frontend
+  VIREO_DEPLOYMENT_BASE_URL="http://127.0.0.1:${frontend_port}" \
+    corepack npm exec -- playwright test --config=playwright.deployment.config.ts
+)
+
+printf 'Production-like deployment smoke passed: built browser application, authenticated persisted CRUD, security headers, API proxy, backend readiness, PostgreSQL health, and separated database privileges.\n'

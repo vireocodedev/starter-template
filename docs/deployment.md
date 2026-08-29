@@ -45,11 +45,17 @@ The development launcher adds `compose.dev.yaml`, which publishes PostgreSQL on
 `127.0.0.1:5432` for the host-side Spring Boot process. Do not add that descriptor to
 a deployed environment.
 
-For the same disposable production-like health/static/proxy check used by CI, run:
+For the same disposable production-like check used by CI, run:
 
 ```bash
 ./scripts/verify-deployment.sh
 ```
+
+The script rebuilds the JAR and frontend bundle before it adds `compose.smoke.yaml`,
+creates an ephemeral smoke-only administrator, and drives Chromium through login,
+Item creation, and a reload that proves the write reached PostgreSQL. The smoke
+profile requires credentials and is not enabled by the base deployment descriptor.
+The stack and its volume are removed when the check finishes.
 
 Both images run as unprivileged users. Do not expose the database port or Actuator
 beyond the network boundaries that need them. A different static host or edge

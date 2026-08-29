@@ -90,6 +90,36 @@ if (!compose.includes("127.0.0.1:${FRONTEND_PORT:-3000}:8080")) {
   problems.push("Compose must publish the frontend on host loopback only");
 }
 
+const smokeCompose = readFileSync(
+  join(repositoryRoot, "compose.smoke.yaml"),
+  "utf8",
+);
+for (const required of [
+  "SPRING_PROFILES_ACTIVE: prod,deployment-smoke",
+  "VIREO_DEPLOYMENT_SMOKE_USERNAME:",
+  "VIREO_DEPLOYMENT_SMOKE_PASSWORD:",
+]) {
+  if (!smokeCompose.includes(required)) {
+    problems.push(`Deployment-smoke Compose overlay must contain ${required}`);
+  }
+}
+
+const deploymentSmoke = readFileSync(
+  join(repositoryRoot, "scripts/verify-deployment.sh"),
+  "utf8",
+);
+for (const required of [
+  "compose.smoke.yaml",
+  "./gradlew bootJar",
+  "corepack npm run build",
+  "playwright.deployment.config.ts",
+  "VIREO_DEPLOYMENT_BASE_URL",
+]) {
+  if (!deploymentSmoke.includes(required)) {
+    problems.push(`Deployment smoke must execute ${required}`);
+  }
+}
+
 if (problems.length > 0) {
   console.error("Container context policy failed:\n");
   for (const problem of problems) console.error(`- ${problem}`);

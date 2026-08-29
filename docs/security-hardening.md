@@ -75,7 +75,10 @@ Run:
 
 ```bash
 ./scripts/verify.sh
-POSTGRES_PASSWORD=local-only SESSION_COOKIE_SECURE=false ./scripts/verify-deployment.sh
+POSTGRES_OWNER_PASSWORD=local-owner-only \
+POSTGRES_RUNTIME_PASSWORD=local-runtime-only \
+SESSION_COOKIE_SECURE=false \
+./scripts/verify-deployment.sh
 ```
 
 Then review dependency alerts, CodeQL, secret scanning, SBOM/provenance, the manual
