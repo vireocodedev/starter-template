@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { AppProviders } from "./app.providers";
 import { APP_PAGE_REGISTRY, APP_PAGES, loadAppPage, type AppPageId } from "@/app/app.pages";
 import { AppBootstrapFallback, AppRouteFallback } from "@/app/shell/components/AppLoadingSurface";
+import { AppErrorBoundary } from "@/app/shell/components/AppErrorBoundary";
 import { AppShellLayout } from "@/app/shell/layout/AppShellLayout";
 import { AppSessionRecoveryProvider } from "@/app/shell/providers/AppSessionRecoveryProvider";
 import { useAppAuth } from "./shell/hooks/useAppAuth";
@@ -59,13 +60,31 @@ function AppRoutes() {
   );
 }
 
+function AppRouteErrorBoundary({ children }: React.PropsWithChildren) {
+  const { logout } = useAppAuth();
+
+  const signOut = React.useCallback(() => {
+    void logout()
+      .catch(() => undefined)
+      .finally(() => window.location.assign(APP_PAGES.login));
+  }, [logout]);
+
+  return (
+    <AppErrorBoundary onLogout={signOut} scope="route">
+      {children}
+    </AppErrorBoundary>
+  );
+}
+
 export function App() {
   return (
     <AppProviders>
       <BrowserRouter>
-        <AppSessionRecoveryProvider>
-          <AppRoutes />
-        </AppSessionRecoveryProvider>
+        <AppRouteErrorBoundary>
+          <AppSessionRecoveryProvider>
+            <AppRoutes />
+          </AppSessionRecoveryProvider>
+        </AppRouteErrorBoundary>
       </BrowserRouter>
     </AppProviders>
   );
