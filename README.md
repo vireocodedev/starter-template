@@ -33,6 +33,12 @@ before committing to individual packages.
 
 ## Prerequisites
 
+The authoritative local `npm run verify` promise is currently **Ubuntu 24.04
+x86-64** with GNU time/coreutils. macOS, Windows/WSL2, other Linux releases, and
+ARM64 may work for development but remain untested and are not release-evidence
+hosts. `npm run doctor` reports this boundary before saying the project is ready;
+see [platform support evidence](docs/platform-support-evidence.md).
+
 - Java 21 (Java 25 is exercised as a compatibility runtime)
 - Node.js 24.15–24.x through Corepack npm 12.0.2; CI uses Node 24.18.1
 - PostgreSQL 17 or 18 for a production-like local environment (H2 is also supported for quick development)

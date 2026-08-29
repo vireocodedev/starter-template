@@ -10,6 +10,7 @@ import {
   resolveDatabaseMode,
 } from "./database-development.mjs";
 import { evaluateVireoPackageCompatibility } from "./vireo-package-compatibility.mjs";
+import { inspectVerificationHost } from "./verification-host.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const jsonMode = process.argv.includes("--json");
@@ -133,6 +134,16 @@ export async function runDoctor() {
           "Git is unavailable",
           "Install Git if you want local version control.",
         ),
+  );
+
+  const verificationHost = inspectVerificationHost();
+  results.push(
+    result(
+      "VIR-VERIFY-001",
+      verificationHost.status,
+      verificationHost.summary,
+      verificationHost.remedy,
+    ),
   );
 
   const metadataPath = existsSync(resolve(root, ".vireo/project.json"))
@@ -308,7 +319,9 @@ async function main() {
     }
     console.log(
       report.ok
-        ? "Ready to run."
+        ? report.results.some((entry) => entry.status === "warn")
+          ? "Ready for development with warnings; supported release evidence still requires the host noted above."
+          : "Ready to run."
         : "Resolve the failed checks above and rerun `npm run doctor`.",
     );
   }
