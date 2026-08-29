@@ -27,7 +27,10 @@ the pinned JRE image, so its build performs no network package installation.
 ## Run the production-like deployment
 
 ```bash
-POSTGRES_PASSWORD=change-me SESSION_COOKIE_SECURE=false docker compose up
+POSTGRES_OWNER_PASSWORD=change-owner-me \
+POSTGRES_RUNTIME_PASSWORD=change-runtime-me \
+SESSION_COOKIE_SECURE=false \
+docker compose up
 ```
 
 `SESSION_COOKIE_SECURE=false` is only for an HTTP-only local container check. Keep the production default (`true`) behind HTTPS.
@@ -63,10 +66,14 @@ fallback, service-worker cache behavior, HTTPS, and `/api` routing contract.
     <tr><td><code>SPRING_DATASOURCE_URL</code></td><td>PostgreSQL JDBC URL</td></tr>
     <tr><td><code>SPRING_DATASOURCE_USERNAME</code></td><td>Database account</td></tr>
     <tr><td><code>SPRING_DATASOURCE_PASSWORD</code></td><td>Database secret</td></tr>
+    <tr><td><code>SPRING_FLYWAY_USER</code></td><td>Dedicated schema owner/migration account</td></tr>
+    <tr><td><code>SPRING_FLYWAY_PASSWORD</code></td><td>Dedicated schema owner/migration secret</td></tr>
     <tr><td><code>SPRING_PROFILES_ACTIVE=prod</code></td><td>Enables production-safe application defaults</td></tr>
     <tr><td><code>SESSION_COOKIE_SECURE</code></td><td>Defaults to <code>true</code>; disable only for local HTTP checks</td></tr>
   </tbody>
 </table>
+
+The canonical Compose deployment creates separate database identities. Flyway connects as the schema owner, while the application pool connects as a runtime role limited to application table/sequence DML. The runtime role cannot create schema objects or mutate `flyway_schema_history`. Supply independent `POSTGRES_OWNER_PASSWORD` and `POSTGRES_RUNTIME_PASSWORD` secrets; changing either variable for an existing volume requires an explicit credential rotation because PostgreSQL initialization scripts run only when the data directory is first created.
 
 The `prod` profile fails during environment preparation when the resolved datasource URL uses `jdbc:h2:`. H2 remains available for development and tests, but production must use an explicitly configured external datasource so a missing deployment secret cannot silently select embedded storage.
 

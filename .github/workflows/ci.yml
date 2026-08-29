@@ -78,12 +78,14 @@ jobs:
 
       - name: Validate deployment descriptor
         env:
-          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_OWNER_PASSWORD: ci-owner-only-password
+          POSTGRES_RUNTIME_PASSWORD: ci-runtime-only-password
         run: docker compose config --quiet
 
       - name: Verify production-like deployment
         env:
-          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_OWNER_PASSWORD: ci-owner-only-password
+          POSTGRES_RUNTIME_PASSWORD: ci-runtime-only-password
         run: ./scripts/verify-deployment.sh
 
       - name: Upload browser traces
