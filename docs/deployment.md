@@ -68,6 +68,8 @@ fallback, service-worker cache behavior, HTTPS, and `/api` routing contract.
   </tbody>
 </table>
 
+The `prod` profile fails during environment preparation when the resolved datasource URL uses `jdbc:h2:`. H2 remains available for development and tests, but production must use an explicitly configured external datasource so a missing deployment secret cannot silently select embedded storage.
+
 Terminate TLS at the ingress or reverse proxy, forward the standard proxy headers, retain the default `HttpOnly` and `SameSite=Lax` session cookie settings, and store secrets in the deployment platform rather than an image or repository file.
 
 Before exposing an environment, complete the [security hardening
