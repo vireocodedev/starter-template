@@ -83,6 +83,7 @@ VS Code users can instead open the repository and launch **Full stack (published
 ```
 
 The authoritative local gate validates architecture, formatting, lint, TypeScript, unit/integration tests, Storybook, the production frontend bundle, browser smoke tests, and the JVM build. Individual frontend commands remain available from `frontend/package.json`.
+The JVM integration suite also enforces the [semantic OpenAPI compatibility baseline](docs/api-compatibility.md) for paths, statuses, schemas, and security.
 
 Run `./scripts/verify-deployment.sh` for the disposable production-like Compose
 check. It builds the independent frontend/backend images, starts PostgreSQL, and

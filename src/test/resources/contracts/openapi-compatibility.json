@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "operations": {
+    "DELETE /api/filters/{savedFilterId}": {
+      "responses": ["204", "400", "401", "403", "500"],
+      "request": null,
+      "security": ["csrfToken", "sessionCookie"]
+    },
+    "DELETE /api/items/{id}": {
+      "responses": ["204", "400", "401", "403", "500"],
+      "request": null,
+      "security": ["csrfToken", "sessionCookie"]
+    },
+    "GET /api/auth/me": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": null,
+      "security": ["sessionCookie"]
+    },
+    "GET /api/filters/all": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": null,
+      "security": ["sessionCookie"]
+    },
+    "GET /api/filters/default": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": null,
+      "security": ["sessionCookie"]
+    },
+    "GET /api/history": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": null,
+      "security": ["sessionCookie"]
+    },
+    "GET /api/queryengine/entities": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": null,
+      "security": ["sessionCookie"]
+    },
+    "GET /api/queryengine/entities/config": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": null,
+      "security": ["sessionCookie"]
+    },
+    "GET /api/queryengine/entities/{entityKey}": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": null,
+      "security": ["sessionCookie"]
+    },
+    "GET /api/queryengine/entities/{entityKey}/fields/{fieldPath}/options": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": null,
+      "security": ["sessionCookie"]
+    },
+    "POST /api/auth/login": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": "LoginRequest",
+      "security": ["csrfToken"]
+    },
+    "POST /api/auth/logout": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": null,
+      "security": ["csrfToken", "sessionCookie"]
+    },
+    "POST /api/filters": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": "SavedFilterDTO",
+      "security": ["csrfToken", "sessionCookie"]
+    },
+    "POST /api/filters/search": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": "QueryFilterRequest",
+      "security": ["csrfToken", "sessionCookie"]
+    },
+    "POST /api/items": {
+      "responses": ["201", "400", "401", "403", "500"],
+      "request": "ItemDTO",
+      "security": ["csrfToken", "sessionCookie"]
+    },
+    "POST /api/items/search": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": "QueryFilterRequest",
+      "security": ["csrfToken", "sessionCookie"]
+    },
+    "PUT /api/account/password": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": "ChangePasswordRequest",
+      "security": ["csrfToken", "sessionCookie"]
+    },
+    "PUT /api/account/username": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": "ChangeUsernameRequest",
+      "security": ["csrfToken", "sessionCookie"]
+    },
+    "PUT /api/filters/{savedFilterId}": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": "SavedFilterDTO",
+      "security": ["csrfToken", "sessionCookie"]
+    },
+    "PUT /api/items/{id}": {
+      "responses": ["200", "400", "401", "403", "500"],
+      "request": "ItemDTO",
+      "security": ["csrfToken", "sessionCookie"]
+    }
+  },
+  "schemaNames": [
+    "ApiError",
+    "AuthMessageResponse",
+    "ChangePasswordRequest",
+    "ChangeUsernameRequest",
+    "CurrentUserResponse",
+    "HistoryActor",
+    "HistoryRecord",
+    "ItemDTO",
+    "JsonNode",
+    "LoginRequest",
+    "LoginResponse",
+    "PageableObject",
+    "PageItemDTO",
+    "PageSavedFilterDTO",
+    "QueryEngineEntitiesConfig",
+    "QueryEntityDefinition",
+    "QueryEntitySummary",
+    "QueryFieldDefinition",
+    "QueryFilterRelationOption",
+    "QueryFilterRequest",
+    "QueryFilterRow",
+    "QueryRelationOption",
+    "SavedFilterDTO",
+    "SortObject",
+    "UsernameResponse"
+  ],
+  "schemas": {
+    "ApiError": {
+      "required": [],
+      "properties": ["errors", "message", "status", "timestamp"]
+    },
+    "ItemDTO": {
+      "required": ["name", "quantity", "status"],
+      "properties": ["description", "id", "name", "quantity", "status"],
+      "constraints": {
+        "name.maxLength": 255,
+        "description.maxLength": 2000,
+        "quantity.minimum": 0,
+        "status.enum": ["ACTIVE", "ARCHIVED", "DRAFT"]
+      }
+    },
+    "LoginRequest": {
+      "required": ["password", "username"],
+      "properties": ["password", "username"],
+      "constraints": {
+        "username.maxLength": 100,
+        "password.maxLength": 4096
+      }
+    }
+  },
+  "securitySchemes": {
+    "csrfToken": { "type": "apiKey", "in": "header", "name": "X-XSRF-TOKEN" },
+    "sessionCookie": { "type": "apiKey", "in": "cookie", "name": "SESSION" }
+  }
+}
