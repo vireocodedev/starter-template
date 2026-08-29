@@ -190,7 +190,7 @@ export default defineConfig({
             },
             workbox: {
               navigateFallbackDenylist: [/^\/api(?:\/|$)/],
-              runtimeCaching: [{ urlPattern: ({ url }) => url.pathname.startsWith("/api/"), handler: "NetworkOnly" }],
+              runtimeCaching: [{ urlPattern: ({ url }) => /^\/api(?:\/|$)/u.test(url.pathname), handler: "NetworkOnly" }],
             },
           }),
         ]
