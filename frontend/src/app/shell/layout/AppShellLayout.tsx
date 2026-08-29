@@ -37,6 +37,7 @@ import { APP_NAVIGATION_PAGES, APP_PAGES, preloadAppPage, type AppNavigationIcon
 import { AppShellNavigationContext } from "@/app/shell/contexts/AppShellNavigationContext";
 import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences";
 import { useAppAuth } from "@/app/shell/hooks/useAppAuth";
+import { isAppRouteActive } from "@/app/shell/routing/isAppRouteActive";
 import { useAppTranslation } from "@/app/ui/localization/use-app-translation";
 
 const navigationIcons: Record<AppNavigationIcon, React.ReactNode> = {
@@ -69,10 +70,7 @@ export function AppShellLayout() {
     () => navigation.map(item => ({ icon: item.icon, label: item.label, value: item.path })),
     [navigation],
   );
-  const activeNavigationPath =
-    navigation.find(item =>
-      item.path === APP_PAGES.home ? location.pathname === item.path : location.pathname.startsWith(item.path),
-    )?.path ?? false;
+  const activeNavigationPath = navigation.find(item => isAppRouteActive(location.pathname, item.path))?.path ?? false;
 
   const commitNavigationWidth = React.useCallback(
     (width: number) => updatePreference("navigationWidth", width),
@@ -224,11 +222,7 @@ export function AppShellLayout() {
                     key={item.path}
                     icon={item.icon}
                     label={item.label}
-                    selected={
-                      item.path === APP_PAGES.home
-                        ? location.pathname === item.path
-                        : location.pathname.startsWith(item.path)
-                    }
+                    selected={isAppRouteActive(location.pathname, item.path)}
                     onClick={() => navigateTo(item.path)}
                     onFocus={() => preloadAppPage(item.path)}
                     onPointerEnter={() => preloadAppPage(item.path)}
