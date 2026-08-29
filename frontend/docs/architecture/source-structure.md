@@ -5,6 +5,7 @@ src/
 ├── @types/                 ambient declarations and module augmentation only
 ├── app/                    global composition and infrastructure
 ├── features/               reusable application capabilities
+├── generated/              managed generated-capability registry and slices
 ├── pages/                  route entry points and page-private code
 ├── main.css                browser and root-element fundamentals only
 ├── main.tsx                React bootstrap only
@@ -16,6 +17,7 @@ src/
 ```text
 app/
 ├── App.tsx
+├── adapters/               explicit feature-to-app composition boundary
 ├── app.localization.ts
 ├── app.pages.ts
 ├── app.providers.tsx
@@ -25,6 +27,8 @@ app/
 ├── shell/{components,contexts,hooks,layout,providers}/
 └── ui/{assets,localization,preferences,theme}/
 ```
+
+`generated/` is generator-managed application source. Its root registry is consumed only by `app.pages.ts` and `app.localization.ts`; generated slices may import other files within `generated/`. Customize declared extension zones or eject before changing managed regions.
 
 A feature uses only the directories it needs:
 

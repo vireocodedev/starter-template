@@ -29,7 +29,7 @@
     "starter:mode:local": "node scripts/set-starter-typescript-mode.mjs local",
     "starter:mode:published": "node scripts/set-starter-typescript-mode.mjs published",
     "starter:boundary:check": "node scripts/check-published-starter-boundary.mjs",
-    "architecture:check": "node scripts/check-architecture.mjs",
+    "architecture:check": "node --test scripts/architecture-policy.test.mjs && node scripts/check-architecture.mjs",
     "workflow:check": "node ../scripts/workflow-security-policy.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "pretypecheck:local-starter": "corepack npm run starter:mode:local",

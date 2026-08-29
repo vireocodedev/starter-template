@@ -2,6 +2,8 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { mayAppImportFeature, mayImportGeneratedRegistry } from "./architecture-policy.mjs";
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourceRoot = path.join(root, "src");
 const errors = [];
@@ -154,10 +156,23 @@ for (const file of sourceFiles) {
     const isLocalizationRegistryImport =
       relativeFile === "app/app.localization.ts" && importedSuffix.startsWith("/localization/resources/");
 
+    if (relativeFile.startsWith(`app${path.sep}`) && !mayAppImportFeature(relativeFile)) {
+      errors.push(
+        `${relativeFile} makes an undeclared app-to-feature dependency; compose feature APIs only in app adapters or app.localization.ts`,
+      );
+      continue;
+    }
+
     if (!isPublicImport && !isLocalizationRegistryImport) {
       errors.push(
         `${relativeFile} reaches into feature ${importedFeature}; import @/features/${importedFeature}/public`,
       );
+    }
+  }
+
+  for (const _match of source.matchAll(/(?:from\s+|import\s*\()\s*["']@\/generated\/([^"']+)["']/g)) {
+    if (!mayImportGeneratedRegistry(relativeFile)) {
+      errors.push(`${relativeFile} imports the managed generated registry outside app.pages.ts or app.localization.ts`);
     }
   }
 
