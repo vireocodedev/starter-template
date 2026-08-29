@@ -6,8 +6,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -20,8 +18,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(properties = {
         "springdoc.api-docs.enabled=true",
@@ -47,7 +45,8 @@ class OpenApiCompatibilityIntegrationTest {
         String body = mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        JsonNode actual = decodeOpenApi(body);
+        JsonNode actual = objectMapper.readTree(body);
+        assertThat(actual.isObject()).as("OpenAPI response is a JSON object").isTrue();
         JsonNode expected = readContract();
 
         assertThat(normalizeOperations(actual)).isEqualTo(readStringMap(expected.path("operations")));
@@ -56,13 +55,6 @@ class OpenApiCompatibilityIntegrationTest {
         assertSchemaContracts(actual.path("components").path("schemas"), expected.path("schemas"));
         assertThat(normalizeSecuritySchemes(actual.path("components").path("securitySchemes")))
                 .isEqualTo(readStringMap(expected.path("securitySchemes")));
-    }
-
-    private JsonNode decodeOpenApi(String body) throws Exception {
-        JsonNode response = objectMapper.readTree(body);
-        return response.isTextual()
-                ? objectMapper.readTree(Base64.getDecoder().decode(response.textValue()))
-                : response;
     }
 
     private JsonNode readContract() throws Exception {
@@ -76,8 +68,8 @@ class OpenApiCompatibilityIntegrationTest {
 
     private Map<String, Object> normalizeOperations(JsonNode document) {
         Map<String, Object> operations = new TreeMap<>();
-        document.path("paths").fields().forEachRemaining(path ->
-                path.getValue().fields().forEachRemaining(method -> {
+        document.path("paths").properties().forEach(path ->
+                path.getValue().properties().forEach(method -> {
                     JsonNode operation = method.getValue();
                     Map<String, Object> contract = new TreeMap<>();
                     contract.put("request", requestSchema(operation));
@@ -96,13 +88,13 @@ class OpenApiCompatibilityIntegrationTest {
 
     private List<String> securityNames(JsonNode security) {
         List<String> names = new ArrayList<>();
-        security.forEach(requirement -> requirement.fieldNames().forEachRemaining(names::add));
+        security.forEach(requirement -> requirement.propertyNames().forEach(names::add));
         return names.stream().distinct().sorted().toList();
     }
 
     private Map<String, Object> normalizeSecuritySchemes(JsonNode schemes) {
         Map<String, Object> normalized = new TreeMap<>();
-        schemes.fields().forEachRemaining(entry -> {
+        schemes.properties().forEach(entry -> {
             Map<String, Object> values = new TreeMap<>();
             for (String field : List.of("in", "name", "type")) {
                 values.put(field, entry.getValue().path(field).asText());
@@ -113,7 +105,7 @@ class OpenApiCompatibilityIntegrationTest {
     }
 
     private void assertSchemaContracts(JsonNode actualSchemas, JsonNode expectedSchemas) {
-        expectedSchemas.fields().forEachRemaining(entry -> {
+        expectedSchemas.properties().forEach(entry -> {
             JsonNode actual = actualSchemas.path(entry.getKey());
             JsonNode expected = entry.getValue();
             assertThat(readStrings(actual.path("required"))).as("%s required", entry.getKey())
@@ -121,7 +113,7 @@ class OpenApiCompatibilityIntegrationTest {
             assertThat(sortedFieldNames(actual.path("properties"))).as("%s properties", entry.getKey())
                     .isEqualTo(readStrings(expected.path("properties")));
 
-            expected.path("constraints").fields().forEachRemaining(constraint -> {
+            expected.path("constraints").properties().forEach(constraint -> {
                 String[] path = constraint.getKey().split("\\.", 2);
                 JsonNode value = actual.path("properties").path(path[0]).path(path[1]);
                 Object normalized = value.isArray() ? readStrings(value) : value.numberValue();
@@ -146,8 +138,7 @@ class OpenApiCompatibilityIntegrationTest {
 
     private List<String> sortedFieldNames(JsonNode value) {
         List<String> fields = new ArrayList<>();
-        Iterator<String> names = value.fieldNames();
-        names.forEachRemaining(fields::add);
+        value.propertyNames().forEach(fields::add);
         return fields.stream().sorted().toList();
     }
 }
