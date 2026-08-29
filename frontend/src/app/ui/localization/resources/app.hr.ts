@@ -20,6 +20,18 @@ const hr = {
     QUICK: "Brza navigacija",
   },
   account: { OPEN_MENU: "Otvori izbornik računa", SIGN_OUT: "Odjava" },
+  auth: {
+    outcomes: {
+      unauthenticated: "Prijavite se za nastavak.",
+      invalidCredentials: "Korisničko ime ili lozinka nisu ispravni.",
+      forbidden: "Vašem računu nije dopušten pristup ovom radnom prostoru.",
+      expiredSession: "Vaša je sesija istekla. Ponovno se prijavite.",
+      offline: "Usluga prijave nije dostupna. Provjerite vezu i pokušajte ponovno.",
+      server: "Usluga prijave privremeno nije dostupna. Pokušajte ponovno kasnije.",
+      malformedResponse: "Usluga prijave vratila je neočekivan odgovor. Pokušajte ponovno ili kontaktirajte podršku.",
+      logoutFailure: "Odjava nije dovršena. Još ste prijavljeni; pokušajte ponovno.",
+    },
+  },
   actions: { BACK: "Natrag" },
   loading: { application: "Učitavanje aplikacije", page: "Učitavanje stranice" },
   session: { expired: "Vaša je sesija istekla. Ponovno se prijavite." },

@@ -110,7 +110,7 @@ describe("busy action loading-state contract", () => {
     expect(login).toHaveBeenCalledOnce();
 
     await act(async () => submission.reject(new Error("Invalid credentials")));
-    expect(await screen.findByText("The username or password is incorrect.")).toBeVisible();
+    expect(await screen.findByText("The sign-in service is temporarily unavailable. Try again later.")).toBeVisible();
     await waitFor(() => expect(submit).toBeEnabled());
   });
 });

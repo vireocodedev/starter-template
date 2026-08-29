@@ -17,6 +17,18 @@ const en = {
     QUICK: "Quick navigation",
   },
   account: { OPEN_MENU: "Open account menu", SIGN_OUT: "Sign out" },
+  auth: {
+    outcomes: {
+      unauthenticated: "Sign in to continue.",
+      invalidCredentials: "The username or password is incorrect.",
+      forbidden: "Your account is not allowed to access this workspace.",
+      expiredSession: "Your session expired. Sign in again.",
+      offline: "The sign-in service cannot be reached. Check your connection and try again.",
+      server: "The sign-in service is temporarily unavailable. Try again later.",
+      malformedResponse: "The sign-in service returned an unexpected response. Try again or contact support.",
+      logoutFailure: "Sign out could not be completed. You are still signed in; please try again.",
+    },
+  },
   actions: { BACK: "Back" },
   loading: { application: "Loading application", page: "Loading page" },
   session: { expired: "Your session expired. Sign in again." },

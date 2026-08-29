@@ -6,6 +6,7 @@ import type {
 } from "@vireocodedev/query";
 import { configureAppAdapters, type AppAdapters } from "../app.adapters";
 import type { AppAuthApi } from "@/app/data/network/api/app-auth.api";
+import { AppAuthFailureError } from "@/app/data/network/models/AppAuthFailure";
 import type { AuthUser } from "@/app/data/network/models/AuthUser";
 import type { HistoryApi } from "@/features/history/public";
 import type { Item, ItemApi } from "@/features/item/public";
@@ -41,7 +42,9 @@ class MockAuthApi implements AppAuthApi {
   private user: AuthUser | null = null;
 
   async login(username: string, password: string) {
-    if (username !== "demo" || password !== "demo123") throw new Error("Use demo / demo123 in mock mode.");
+    if (username !== "demo" || password !== "demo123") {
+      throw new AppAuthFailureError({ kind: "invalid-credentials" });
+    }
     this.user = { username, role: "SUPERADMIN" };
     return { username, message: "Authenticated by the frontend mock adapter." };
   }
@@ -51,7 +54,7 @@ class MockAuthApi implements AppAuthApi {
   }
 
   async me(): Promise<AuthUser> {
-    if (!this.user) throw new Error("No mock session.");
+    if (!this.user) throw new AppAuthFailureError({ kind: "unauthenticated" });
     return this.user;
   }
 }

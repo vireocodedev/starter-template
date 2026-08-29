@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, Card, CardContent, Typography } from "@mui/material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
 import { Navigate, useNavigate } from "react-router";
 import { useLocation } from "react-router";
@@ -11,6 +11,8 @@ import { APP_PAGES } from "@/app/app.pages";
 import { appConfig } from "@/app/config/app-config";
 import { useAppAuth } from "@/app/shell/hooks/useAppAuth";
 import { useTranslation } from "react-i18next";
+import { AppAuthFailureAlert } from "@/app/shell/components/AppAuthFailureAlert";
+import { classifyAppAuthFailure, type AppAuthFailure } from "@/app/data/network/models/AppAuthFailure";
 import { LOGIN_TRANSLATION_NAMESPACE } from "@/app/app.localization";
 
 const DEVELOPMENT_CREDENTIALS =
@@ -28,21 +30,21 @@ export function AppPageLogin() {
       }),
     [t],
   );
-  const { user, login } = useAppAuth();
+  const { user, login, failure: authFailure } = useAppAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [error, setError] = React.useState<string | null>(null);
+  const [submitFailure, setSubmitFailure] = React.useState<AppAuthFailure | null>(null);
   const form = useVireoForm({
     defaultValues: DEVELOPMENT_CREDENTIALS,
     validationLogic: revalidateLogic(),
     validators: { onDynamic: loginSchema },
     onSubmit: async ({ value }) => {
-      setError(null);
+      setSubmitFailure(null);
       try {
         await login(value.username, value.password);
         navigate(resolvePostLoginPath(location.state, APP_PAGES.home), { replace: true });
-      } catch {
-        setError(t("invalidCredentials"));
+      } catch (error) {
+        setSubmitFailure(classifyAppAuthFailure(error, "login"));
       }
     },
   });
@@ -121,10 +123,8 @@ export function AppPageLogin() {
               {t("description")}
             </Typography>
           </Box>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
+          {(submitFailure ?? authFailure) && (
+            <AppAuthFailureAlert failure={(submitFailure ?? authFailure)!} sx={{ mb: 2 }} />
           )}
           <form.Form layoutWidth="full">
             <form.Section label={null} variant="outlined" layout="stack">
