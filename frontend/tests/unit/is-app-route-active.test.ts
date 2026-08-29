@@ -1,4 +1,5 @@
 import { isAppRouteActive } from "@/app/shell/routing/isAppRouteActive";
+import { describe, expect, it } from "vitest";
 
 describe("isAppRouteActive", () => {
   it("owns the exact route and its nested segments", () => {

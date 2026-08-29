@@ -1,4 +1,5 @@
 import { parallelPlaywrightPolicy, serialPlaywrightPolicy } from "../../playwright.policy";
+import { describe, expect, it } from "vitest";
 
 describe("Playwright execution policy", () => {
   it("fails focused tests and bounds retries, workers, assertions, and test duration", () => {
