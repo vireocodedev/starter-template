@@ -16,6 +16,7 @@ if $silent; then
 fi
 
 steps=(
+  "verification-pipeline|Verification pipeline contract|node scripts/verification-pipeline-policy.mjs"
   "public-contract|Public contract policy|node scripts/public-contract-policy.mjs"
   "flagship-demo|Flagship demo contract|node scripts/flagship-demo-policy.mjs"
   "flagship-proof|Flagship proof material|node scripts/flagship-proof-policy.mjs"

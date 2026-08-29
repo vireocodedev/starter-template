@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -u
+set -uo pipefail
 
 silent=false
 starter_mode="published"
@@ -55,18 +55,18 @@ for index in "${!steps[@]}"; do
   printf '[%d/%d] %s...\n' "$step_number" "$total" "$label"
 
   if $silent; then
-    if ! bash -lc "$command" >"$output_file" 2>&1; then
-      printf 'FAILED: %s\n\n' "$label" >&2
-      cat "$output_file" >&2
-      rm -f "$output_file"
-      exit 1
-    fi
+    bash -lc "$command" >"$output_file" 2>&1
+    step_exit_code=$?
   else
-    if ! bash -lc "$command" 2>&1 | tee "$output_file"; then
-      printf 'FAILED: %s\n' "$label" >&2
-      rm -f "$output_file"
-      exit 1
-    fi
+    bash -lc "$command" 2>&1 | tee "$output_file"
+    step_exit_code=${PIPESTATUS[0]}
+  fi
+
+  if [[ "$step_exit_code" -ne 0 ]]; then
+    printf 'FAILED: %s\n\n' "$label" >&2
+    if $silent; then cat "$output_file" >&2; fi
+    rm -f "$output_file"
+    exit "$step_exit_code"
   fi
 
   step_finished_at=$(date +%s%3N)
