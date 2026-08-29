@@ -5,12 +5,13 @@ import {
   type AppPreferences,
 } from "@/app/ui/preferences/models/AppPreferences";
 import { AppPreferencesContext } from "@/app/ui/preferences/contexts/AppPreferencesContext";
+import { createAppPreferencesStorage } from "@/app/ui/preferences/services/app-preferences-storage";
 
-const STORAGE_KEY = "starter-template:preferences";
+const preferencesStorage = createAppPreferencesStorage();
 
 function readPreferences(): AppPreferences {
   try {
-    return AppPreferencesSchema.parse(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null"));
+    return AppPreferencesSchema.parse(preferencesStorage.read());
   } catch {
     return DEFAULT_APP_PREFERENCES;
   }
@@ -22,14 +23,14 @@ export function AppPreferencesProvider({ children }: React.PropsWithChildren) {
     <TKey extends keyof AppPreferences>(key: TKey, value: AppPreferences[TKey]) => {
       setPreferences(previous => {
         const next = { ...previous, [key]: value };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        preferencesStorage.write(next);
         return next;
       });
     },
     [],
   );
   const resetPreferences = React.useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
+    preferencesStorage.remove();
     setPreferences(DEFAULT_APP_PREFERENCES);
   }, []);
   const value = React.useMemo(

@@ -12,6 +12,8 @@ corepack npm run dev
 
 Open <http://localhost:3000>, sign in with `demo` / `demo123`, then create, edit, filter, and delete an Item. That loop proves the npm packages and JVM modules work across the real HTTP boundary. The `dev` profile alone seeds the public demonstration credentials; never enable it in a public deployment.
 
+The login screen neither pre-fills nor displays credentials by default. Set `VITE_SHOW_DEMO_CREDENTIALS=true` only for an explicitly reviewed local or disposable public-demo build; production builds must leave it false.
+
 The source Template uses H2 for a zero-service first run. `create-vireo` defaults
 generated applications to PostgreSQL and the root `dev` command starts its
 Compose service. The launcher and Doctor share these database modes:

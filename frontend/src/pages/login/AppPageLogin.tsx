@@ -14,11 +14,9 @@ import { useTranslation } from "react-i18next";
 import { AppAuthFailureAlert } from "@/app/shell/components/AppAuthFailureAlert";
 import { classifyAppAuthFailure, type AppAuthFailure } from "@/app/data/network/models/AppAuthFailure";
 import { LOGIN_TRANSLATION_NAMESPACE } from "@/app/app.localization";
+import { resolveDevelopmentCredentials } from "./login-development-credentials";
 
-const DEVELOPMENT_CREDENTIALS =
-  appConfig.apiMode === "mock"
-    ? { username: "demo", password: "demo123" }
-    : { username: "admin", password: "admin123" };
+const DEVELOPMENT_CREDENTIALS = resolveDevelopmentCredentials(appConfig.apiMode, appConfig.showDemoCredentials);
 
 export function AppPageLogin() {
   const { t } = useTranslation(LOGIN_TRANSLATION_NAMESPACE);
@@ -35,7 +33,7 @@ export function AppPageLogin() {
   const navigate = useNavigate();
   const [submitFailure, setSubmitFailure] = React.useState<AppAuthFailure | null>(null);
   const form = useVireoForm({
-    defaultValues: DEVELOPMENT_CREDENTIALS,
+    defaultValues: DEVELOPMENT_CREDENTIALS ?? { username: "", password: "" },
     validationLogic: revalidateLogic(),
     validators: { onDynamic: loginSchema },
     onSubmit: async ({ value }) => {
@@ -156,9 +154,11 @@ export function AppPageLogin() {
               </form.SubmitButton>
             </form.Section>
           </form.Form>
-          <Typography color="text.secondary" variant="caption" sx={{ display: "block", mt: 2, textAlign: "center" }}>
-            {t("developmentCredentials", DEVELOPMENT_CREDENTIALS)}
-          </Typography>
+          {DEVELOPMENT_CREDENTIALS && (
+            <Typography color="text.secondary" variant="caption" sx={{ display: "block", mt: 2, textAlign: "center" }}>
+              {t("developmentCredentials", DEVELOPMENT_CREDENTIALS)}
+            </Typography>
+          )}
         </CardContent>
       </Card>
     </Box>
