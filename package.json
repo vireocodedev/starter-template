@@ -14,7 +14,7 @@
     "doctor": "node scripts/vireo-doctor.mjs",
     "doctor:json": "node scripts/vireo-doctor.mjs --json",
     "test:scripts": "node --test scripts/*.test.mjs",
-    "vireo": "npx --yes --package=create-vireo@0.4.2 vireo",
+    "vireo": "npx --yes --package=create-vireo@0.5.0 vireo",
     "generate:check": "corepack npm run vireo -- check",
     "verify": "bash scripts/verify.sh"
   }

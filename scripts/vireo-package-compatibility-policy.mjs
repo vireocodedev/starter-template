@@ -37,7 +37,7 @@ if (!independentPatch.compatible) {
 }
 
 const unsupportedLine = evaluateVireoPackageCompatibility(
-  { ...frontend.dependencies, "@vireocodedev/ui": "^0.3.0" },
+  { ...frontend.dependencies, "@vireocodedev/ui": "^0.4.0" },
   contract,
 );
 if (unsupportedLine.compatible)

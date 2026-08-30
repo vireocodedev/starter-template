@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "id": "vireo-template-0.4.2",
+  "id": "vireo-template-0.5.0",
   "packages": {
-    "@vireocodedev/history": ["^0.2.1"],
-    "@vireocodedev/infrastructure": ["^0.2.1"],
-    "@vireocodedev/localization": ["^0.2.1"],
-    "@vireocodedev/query": ["^0.2.1"],
-    "@vireocodedev/shell": ["^0.2.1"],
-    "@vireocodedev/sqlite": ["^0.2.1", "^0.2.2"],
-    "@vireocodedev/ui": ["^0.2.1", "^0.2.2"]
+    "@vireocodedev/history": ["^0.2.2"],
+    "@vireocodedev/infrastructure": ["^0.2.2"],
+    "@vireocodedev/localization": ["^0.2.2"],
+    "@vireocodedev/query": ["^0.2.2"],
+    "@vireocodedev/shell": ["^0.2.2"],
+    "@vireocodedev/sqlite": ["^0.2.2", "^0.2.3"],
+    "@vireocodedev/ui": ["^0.3.0"]
   }
 }

@@ -6,13 +6,13 @@ The template's ordinary install, development, test, Storybook, and production-bu
 
 | Package                        | Supported line |
 | ------------------------------ | -------------- |
-| `@vireocodedev/ui`             | `^0.2.1`       |
-| `@vireocodedev/query`          | `^0.2.1`       |
-| `@vireocodedev/shell`          | `^0.2.1`       |
-| `@vireocodedev/history`        | `^0.2.1`       |
-| `@vireocodedev/infrastructure` | `^0.2.1`       |
-| `@vireocodedev/localization`   | `^0.2.1`       |
-| Vireo Starter JVM modules      | `0.2.0`        |
+| `@vireocodedev/ui`             | `^0.3.0`       |
+| `@vireocodedev/query`          | `^0.2.2`       |
+| `@vireocodedev/shell`          | `^0.2.2`       |
+| `@vireocodedev/history`        | `^0.2.2`       |
+| `@vireocodedev/infrastructure` | `^0.2.2`       |
+| `@vireocodedev/localization`   | `^0.2.2`       |
+| Vireo Starter JVM modules      | `0.3.0`        |
 
 The lockfiles are the reproducibility boundary. Updating a supported package range still requires reviewing and committing the resulting lockfile changes and passing the authoritative verification command.
 
