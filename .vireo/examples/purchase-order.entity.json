@@ -9,7 +9,7 @@
   },
   "database": {
     "table": "purchase_order",
-    "migrationVersion": 3
+    "migrationVersion": 4
   },
   "api": {
     "path": "/api/purchase-orders"
@@ -29,6 +29,7 @@
       "type": "string",
       "required": true,
       "unique": true,
+      "example": "PO-1001",
       "constraints": { "min": 3, "max": 40, "pattern": "^[A-Z0-9-]+$" },
       "query": { "filterable": true, "searchable": true, "sortable": true },
       "ui": { "label": "Order number", "list": true }
