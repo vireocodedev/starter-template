@@ -210,7 +210,7 @@ describe("AppShellLayout", () => {
 
     expect(navigationPropsSpy).toHaveBeenLastCalledWith(expect.objectContaining({ locked: true, resizable: false }));
     expect(screen.queryByRole("button", { name: "Expand navigation" })).not.toBeInTheDocument();
-    expect(screen.getByText("V")).toBeVisible();
+    expect(screen.getByText(APP_IDENTITY.shortName.slice(0, 1))).toBeVisible();
   });
 
   it("provides an explicit close action in full-screen mobile navigation", () => {
