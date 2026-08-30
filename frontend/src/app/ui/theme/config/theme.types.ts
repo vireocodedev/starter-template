@@ -5,11 +5,11 @@ type AppMotionTokens = (typeof APP_THEME_TOKENS)["motion"];
 
 declare module "@mui/material/styles" {
   interface Palette {
-    surface: AppSurfacePalette;
+    appSurface: AppSurfacePalette;
   }
 
   interface PaletteOptions {
-    surface?: AppSurfacePalette;
+    appSurface?: AppSurfacePalette;
   }
 
   interface Theme {

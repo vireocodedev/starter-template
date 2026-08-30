@@ -28,7 +28,7 @@ describe("application adapter composition", () => {
 
   it("provides a backend-independent mock CRUD and authentication path", async () => {
     const adapters = createMockAppAdapters();
-    await expect(adapters.auth.me()).rejects.toThrow("No mock session");
+    await expect(adapters.auth.me()).rejects.toMatchObject({ failure: { kind: "unauthenticated" } });
     await adapters.auth.login("demo", "demo123");
     await expect(adapters.auth.me()).resolves.toEqual({ username: "demo", role: "SUPERADMIN" });
 

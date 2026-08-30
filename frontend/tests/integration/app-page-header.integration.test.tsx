@@ -31,7 +31,9 @@ describe("AppPageHeader", () => {
   it("renders one compact mobile app bar with navigation and an icon-only primary action", () => {
     const openNavigation = vi.fn();
     const { onPrimaryAction } = renderHeader({ mobile: true, openNavigation });
+    const header = screen.getByRole("banner");
 
+    expect(header).toHaveStyle({ height: "65px", maxHeight: "65px", minHeight: "65px" });
     expect(screen.getByRole("heading", { name: "Items" })).toBeVisible();
     expect(screen.queryByText("Manage workspace items.")).not.toBeInTheDocument();
     expect(screen.queryByText("Create item")).not.toBeInTheDocument();
@@ -43,7 +45,9 @@ describe("AppPageHeader", () => {
 
   it("keeps the description and labeled primary action on desktop", () => {
     const { onPrimaryAction } = renderHeader({ mobile: false });
+    const header = screen.getByRole("banner");
 
+    expect(header).toHaveStyle({ height: "81px", maxHeight: "81px", minHeight: "81px" });
     expect(screen.queryByRole("button", { name: "Open navigation" })).not.toBeInTheDocument();
     expect(screen.getByText("Manage workspace items.")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Create item" }));

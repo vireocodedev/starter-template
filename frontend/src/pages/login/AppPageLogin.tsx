@@ -1,19 +1,18 @@
-import React from "react";
-import { Box, Card, CardContent, Typography } from "@mui/material";
-import { revalidateLogic } from "@tanstack/react-form";
-import { Navigate, useNavigate } from "react-router";
-import { useLocation } from "react-router";
-import { z } from "zod";
-import { resolvePostLoginPath } from "@vireocodedev/shell";
-import { VireoLabelBox } from "@vireocodedev/ui";
-import { useVireoForm } from "@vireocodedev/ui/forms";
+import { LOGIN_TRANSLATION_NAMESPACE } from "@/app/app.localization";
 import { APP_PAGES } from "@/app/app.pages";
 import { appConfig } from "@/app/config/app-config";
 import { useAppAuth } from "@/app/shell/hooks/useAppAuth";
-import { useTranslation } from "react-i18next";
 import { AppAuthFailureAlert } from "@/app/shell/components/AppAuthFailureAlert";
 import { classifyAppAuthFailure, type AppAuthFailure } from "@/app/data/network/models/AppAuthFailure";
-import { LOGIN_TRANSLATION_NAMESPACE } from "@/app/app.localization";
+import { Box, Card, CardContent, Typography } from "@mui/material";
+import { revalidateLogic } from "@tanstack/react-form";
+import { resolvePostLoginPath } from "@vireocodedev/shell";
+import { VireoLabelBox } from "@vireocodedev/ui";
+import { useVireoForm } from "@vireocodedev/ui/forms";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { Navigate, useLocation, useNavigate } from "react-router";
+import { z } from "zod";
 import { resolveDevelopmentCredentials } from "./login-development-credentials";
 
 const DEVELOPMENT_CREDENTIALS = resolveDevelopmentCredentials(appConfig.apiMode, appConfig.showDemoCredentials);
@@ -54,7 +53,7 @@ export function AppPageLogin() {
       component="main"
       sx={{
         alignItems: "center",
-        bgcolor: "surface.canvas",
+        bgcolor: "appSurface.canvas",
         backgroundImage: theme =>
           `radial-gradient(circle at 50% 28%, color-mix(in srgb, ${theme.palette.primary.main} 14%, transparent), transparent 36%), linear-gradient(color-mix(in srgb, ${theme.palette.divider} 18%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, ${theme.palette.divider} 18%, transparent) 1px, transparent 1px)`,
         backgroundSize: "auto, 28px 28px, 28px 28px",
@@ -125,7 +124,7 @@ export function AppPageLogin() {
             <AppAuthFailureAlert failure={(submitFailure ?? authFailure)!} sx={{ mb: 2 }} />
           )}
           <form.Form layoutWidth="full">
-            <form.Section label={null} variant="outlined" layout="stack">
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <form.Field name="username">
                 {field => (
                   <VireoLabelBox label={t("fields.username")} required>
@@ -152,7 +151,7 @@ export function AppPageLogin() {
               <form.SubmitButton variant="contained" size="large">
                 {t("submit")}
               </form.SubmitButton>
-            </form.Section>
+            </Box>
           </form.Form>
           {DEVELOPMENT_CREDENTIALS && (
             <Typography color="text.secondary" variant="caption" sx={{ display: "block", mt: 2, textAlign: "center" }}>

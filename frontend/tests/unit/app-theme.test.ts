@@ -1,7 +1,9 @@
 import { APP_THEME_COMPONENTS } from "@/app/ui/theme/config/theme.components";
 import { APP_THEME_DARK_COLOR_SCHEME } from "@/app/ui/theme/config/theme.dark";
 import { APP_THEME_LIGHT_COLOR_SCHEME } from "@/app/ui/theme/config/theme.light";
+import { APP_SURFACES_DARK, APP_SURFACES_LIGHT } from "@/app/ui/theme/config/theme.surfaces";
 import { APP_THEME } from "@/app/ui/theme/config/theme";
+import { alertClasses } from "@mui/material";
 import { describe, expect, it } from "vitest";
 
 describe("application themes", () => {
@@ -10,51 +12,51 @@ describe("application themes", () => {
       mode: "light",
       primary: { main: "#006c98" },
       background: {
-        default: "#f7f9fc",
+        default: "#f6f7f9",
         paper: "#ffffff",
       },
-      surface: {
-        canvas: "#f7f9fc",
+      appSurface: {
+        canvas: "#f6f7f9",
         screen: "#ffffff",
-        recessed: "#edf3f8",
+        recessed: "#f0f2f4",
         content: "#ffffff",
-        control: "#f7f9fc",
-        elevated: "#f4f8fc",
+        control: "#f6f7f9",
+        elevated: "#f0f2f4",
         chrome: "#ffffff",
         overlay: "#ffffff",
       },
-      divider: "#cbd8e6",
+      divider: "#d5d8dd",
     });
 
     expect(APP_THEME_DARK_COLOR_SCHEME.palette).toMatchObject({
       mode: "dark",
       primary: { main: "#69d9ff" },
       background: {
-        default: "#07111f",
-        paper: "#0a1728",
+        default: "#0b0c0e",
+        paper: "#111315",
       },
-      surface: {
-        canvas: "#07111f",
-        screen: "#07111f",
-        recessed: "#07111f",
-        content: "#102137",
-        control: "#183552",
-        elevated: "#1e4164",
-        chrome: "#162b45",
-        overlay: "#0a1728",
+      appSurface: {
+        canvas: "#0b0c0e",
+        screen: "#111315",
+        recessed: "#0b0c0e",
+        content: "#111315",
+        control: "#181a1e",
+        elevated: "#1a1c20",
+        chrome: "#1a1c20",
+        overlay: "#111315",
       },
-      divider: "#29435f",
+      divider: "#303238",
     });
   });
 
   it("assembles both schemes into one CSS-variable theme", () => {
     expect(APP_THEME.colorSchemes.light?.palette.background).toMatchObject({
-      default: "#f7f9fc",
+      default: "#f6f7f9",
       paper: "#ffffff",
     });
     expect(APP_THEME.colorSchemes.dark?.palette.background).toMatchObject({
-      default: "#07111f",
-      paper: "#0a1728",
+      default: "#0b0c0e",
+      paper: "#111315",
     });
   });
 
@@ -69,6 +71,7 @@ describe("application themes", () => {
     });
     expect(APP_THEME_COMPONENTS?.MuiButton?.styleOverrides?.root).toBeDefined();
     expect(APP_THEME_COMPONENTS?.MuiIconButton?.styleOverrides?.root).toBeDefined();
+    expect(APP_THEME_COMPONENTS?.MuiDialogActions?.styleOverrides?.root).toBeDefined();
     expect(APP_THEME_COMPONENTS?.MuiTableBody?.styleOverrides?.root).toBeDefined();
     expect(APP_THEME_COMPONENTS?.MuiTableHead?.styleOverrides?.root).toBeDefined();
     expect(APP_THEME_COMPONENTS?.MuiOutlinedInput?.styleOverrides?.root).toBeDefined();
@@ -79,12 +82,14 @@ describe("application themes", () => {
     expect(APP_THEME_COMPONENTS?.VireoActionPreviewButton?.styleOverrides?.preview).toMatchObject({ opacity: 1 });
     expect(APP_THEME_COMPONENTS?.VireoPage?.styleOverrides?.root).toBeDefined();
     expect(APP_THEME_COMPONENTS?.VireoPageHeader?.styleOverrides?.root).toBeDefined();
+    expect(APP_THEME_COMPONENTS?.VireoOverlayHeader?.styleOverrides?.root).toBeDefined();
+    expect(APP_THEME_COMPONENTS?.VireoFormSection?.styleOverrides?.layout).toBeDefined();
     expect(APP_THEME_COMPONENTS?.VireoFormSection?.styleOverrides?.content).toBeDefined();
     expect(APP_THEME_COMPONENTS?.VireoPreferencePanel?.styleOverrides?.item).toBeDefined();
     expect(APP_THEME_COMPONENTS?.VireoPreferencePanel?.styleOverrides?.itemControl).toBeDefined();
     expect(APP_THEME_COMPONENTS?.VireoResponsiveTable?.styleOverrides?.root).toBeDefined();
     expect(Object.keys(APP_THEME.components ?? {})).toEqual(
-      expect.arrayContaining(["VireoPageHeader", "VireoPreferencePanel", "VireoResponsiveTable"]),
+      expect.arrayContaining(["VireoOverlayHeader", "VireoPageHeader", "VireoPreferencePanel", "VireoResponsiveTable"]),
     );
     expect(APP_THEME.components?.MuiCard?.defaultProps).toMatchObject({
       elevation: 0,
@@ -105,10 +110,20 @@ describe("application themes", () => {
 
   it("keeps compatibility surface aliases aligned with the semantic roles", () => {
     for (const scheme of [APP_THEME_LIGHT_COLOR_SCHEME, APP_THEME_DARK_COLOR_SCHEME]) {
-      const surface = scheme.palette?.surface;
+      const surface = scheme.palette?.appSurface;
       expect(surface?.sunken).toBe(surface?.recessed);
       expect(surface?.base).toBe(surface?.content);
       expect(surface?.raised).toBe(surface?.elevated);
+    }
+  });
+
+  it("collapses semantic surface roles onto small neutral ramps", () => {
+    expect(new Set(Object.values(APP_SURFACES_LIGHT))).toHaveLength(3);
+    expect(new Set(Object.values(APP_SURFACES_DARK))).toHaveLength(4);
+
+    for (const color of [...Object.values(APP_SURFACES_LIGHT), ...Object.values(APP_SURFACES_DARK)]) {
+      const channels = color.match(/[0-9a-f]{2}/gi)?.map(channel => Number.parseInt(channel, 16)) ?? [];
+      expect(Math.max(...channels) - Math.min(...channels)).toBeLessThanOrEqual(8);
     }
   });
 
@@ -118,7 +133,7 @@ describe("application themes", () => {
     expect(APP_THEME.transitions.duration.enteringScreen).toBe(APP_THEME.appMotion.duration.enter);
   });
 
-  it("uses a continuous screen surface on compact pages and preserves the desktop canvas", () => {
+  it("uses responsive page surfaces while preserving the canvas grid in every mode", () => {
     const pageRoot = APP_THEME_COMPONENTS?.VireoPage?.styleOverrides?.root;
     expect(typeof pageRoot).toBe("function");
 
@@ -130,14 +145,65 @@ describe("application themes", () => {
       typeof pageRoot === "function"
         ? pageRoot({ ownerState: { mode: "regular" }, theme: APP_THEME } as never)
         : pageRoot;
+    const expectedGrid = `linear-gradient(color-mix(in srgb, ${APP_THEME.palette.divider} 16%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, ${APP_THEME.palette.divider} 16%, transparent) 1px, transparent 1px)`;
 
     expect(compactStyles).toMatchObject({
-      backgroundColor: APP_THEME.palette.surface.screen,
-      backgroundImage: "none",
+      backgroundColor: APP_THEME.palette.appSurface.screen,
+      backgroundImage: expectedGrid,
+      backgroundSize: "24px 24px",
     });
     expect(regularStyles).toMatchObject({
-      backgroundColor: APP_THEME.palette.surface.canvas,
+      backgroundColor: APP_THEME.palette.appSurface.canvas,
+      backgroundImage: expectedGrid,
       backgroundSize: "24px 24px",
+    });
+  });
+
+  it("keeps overlay headers aligned with mobile and desktop page headers", () => {
+    const overlayHeaderRoot = APP_THEME_COMPONENTS?.VireoOverlayHeader?.styleOverrides?.root;
+    expect(typeof overlayHeaderRoot).toBe("function");
+
+    const styles =
+      typeof overlayHeaderRoot === "function" ? overlayHeaderRoot({ theme: APP_THEME } as never) : overlayHeaderRoot;
+
+    expect(styles).toMatchObject({
+      height: 65,
+      maxHeight: 65,
+      minHeight: 65,
+      [APP_THEME.breakpoints.up("md")]: {
+        height: 81,
+        maxHeight: 81,
+        minHeight: 81,
+      },
+    });
+  });
+
+  it("uses compact spacing between form-section fields", () => {
+    const formSectionLayout = APP_THEME_COMPONENTS?.VireoFormSection?.styleOverrides?.layout;
+    expect(typeof formSectionLayout).toBe("function");
+
+    const styles =
+      typeof formSectionLayout === "function" ? formSectionLayout({ theme: APP_THEME } as never) : formSectionLayout;
+
+    expect(styles).toMatchObject({ gap: APP_THEME.spacing(1) });
+  });
+
+  it("keeps desktop dialog and overlay action footers aligned with the navigation footer", () => {
+    const dialogActionsRoot = APP_THEME_COMPONENTS?.MuiDialogActions?.styleOverrides?.root;
+    expect(typeof dialogActionsRoot).toBe("function");
+
+    const styles =
+      typeof dialogActionsRoot === "function" ? dialogActionsRoot({ theme: APP_THEME } as never) : dialogActionsRoot;
+
+    expect(styles).toMatchObject({
+      borderTop: `1px solid ${APP_THEME.palette.divider}`,
+      flexShrink: 0,
+      [APP_THEME.breakpoints.up("md")]: {
+        boxSizing: "border-box",
+        height: 81,
+        maxHeight: 81,
+        minHeight: 81,
+      },
     });
   });
 
@@ -155,15 +221,25 @@ describe("application themes", () => {
         : tableRoot;
 
     expect(mobileStyles).toMatchObject({
-      backgroundColor: APP_THEME.palette.surface.screen,
-      "& .MuiAccordionSummary-root": { backgroundColor: APP_THEME.palette.surface.screen },
-      "& .MuiAccordionDetails-root": { backgroundColor: APP_THEME.palette.surface.screen },
+      backgroundColor: APP_THEME.palette.appSurface.screen,
+      "& .MuiAccordionSummary-root": { backgroundColor: APP_THEME.palette.appSurface.screen },
+      "& .MuiAccordionDetails-root": { backgroundColor: APP_THEME.palette.appSurface.screen },
     });
     expect(desktopStyles).toMatchObject({
-      backgroundColor: APP_THEME.palette.surface.content,
-      "& .MuiTableContainer-root": { backgroundColor: APP_THEME.palette.surface.content },
-      "& .MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root": {
-        backgroundColor: APP_THEME.palette.surface.content,
+      backgroundColor: APP_THEME.palette.appSurface.content,
+      "& .MuiTableContainer-root": { backgroundColor: APP_THEME.palette.appSurface.content },
+    });
+  });
+
+  it("shows a neutral background when hovering table rows", () => {
+    const tableBodyRoot = APP_THEME_COMPONENTS?.MuiTableBody?.styleOverrides?.root;
+    expect(typeof tableBodyRoot).toBe("function");
+
+    const styles = typeof tableBodyRoot === "function" ? tableBodyRoot({ theme: APP_THEME } as never) : tableBodyRoot;
+
+    expect(styles).toMatchObject({
+      "& > .MuiTableRow-root.MuiTableRow-hover:hover": {
+        backgroundColor: `color-mix(in srgb, ${APP_THEME.palette.appSurface.elevated} 72%, ${APP_THEME.palette.appSurface.content})`,
       },
     });
   });
@@ -187,20 +263,64 @@ describe("application themes", () => {
         : preferenceItem;
 
     expect(inputStyles).toMatchObject({
-      backgroundColor: APP_THEME.palette.surface.control,
+      backgroundColor: APP_THEME.palette.appSurface.control,
       "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: APP_THEME.palette.primary.main },
       "&.Mui-error.Mui-focused .MuiOutlinedInput-notchedOutline": {
         borderColor: APP_THEME.palette.error.main,
       },
     });
-    expect(cardStyles).toMatchObject({ backgroundColor: APP_THEME.palette.surface.recessed });
-    expect(preferenceItemStyles).toMatchObject({ backgroundColor: APP_THEME.palette.surface.content });
+    expect(cardStyles).toMatchObject({ backgroundColor: APP_THEME.palette.appSurface.recessed });
+    expect(preferenceItemStyles).toMatchObject({ backgroundColor: APP_THEME.palette.appSurface.content });
     expect(APP_THEME_COMPONENTS?.MuiMenuItem?.styleOverrides?.root).toMatchObject({
       "&&": { minHeight: 48, paddingBlock: 10 },
     });
   });
 
-  it("turns compact preference panels into full-bleed screen sections", () => {
+  it("keeps default chips neutral instead of spending primary emphasis", () => {
+    const chipRoot = APP_THEME_COMPONENTS?.MuiChip?.styleOverrides?.root;
+    expect(typeof chipRoot).toBe("function");
+
+    const styles = typeof chipRoot === "function" ? chipRoot({ theme: APP_THEME } as never) : chipRoot;
+
+    expect(styles).toMatchObject({
+      "&.MuiChip-colorDefault.MuiChip-filled": {
+        backgroundColor: APP_THEME.palette.appSurface.elevated,
+      },
+    });
+  });
+
+  it("keeps light standard alerts distinct from recessed surfaces with severity-colored accents", () => {
+    const alertRoot = APP_THEME_COMPONENTS?.MuiAlert?.styleOverrides?.root;
+    expect(typeof alertRoot).toBe("function");
+
+    const styles = typeof alertRoot === "function" ? alertRoot({ theme: APP_THEME } as never) : alertRoot;
+    const lightStyles = APP_THEME.applyStyles("light", {
+      [`&.${alertClasses.standard}.${alertClasses.colorError}`]: {
+        backgroundColor: `color-mix(in srgb, ${APP_THEME.palette.error.main} 12%, ${APP_THEME.palette.appSurface.content})`,
+      },
+      [`&.${alertClasses.standard}.${alertClasses.colorInfo}`]: {
+        backgroundColor: `color-mix(in srgb, ${APP_THEME.palette.info.main} 12%, ${APP_THEME.palette.appSurface.content})`,
+      },
+      [`&.${alertClasses.standard}.${alertClasses.colorSuccess}`]: {
+        backgroundColor: `color-mix(in srgb, ${APP_THEME.palette.success.main} 12%, ${APP_THEME.palette.appSurface.content})`,
+      },
+      [`&.${alertClasses.standard}.${alertClasses.colorWarning}`]: {
+        backgroundColor: `color-mix(in srgb, ${APP_THEME.palette.warning.main} 12%, ${APP_THEME.palette.appSurface.content})`,
+      },
+    });
+
+    expect(styles).toMatchObject({
+      borderInlineStart: "3px solid transparent",
+      "&.MuiAlert-colorError": { borderInlineStartColor: APP_THEME.palette.error.main },
+      "&.MuiAlert-colorInfo": { borderInlineStartColor: APP_THEME.palette.info.main },
+      "&.MuiAlert-colorSuccess": { borderInlineStartColor: APP_THEME.palette.success.main },
+      "&.MuiAlert-colorWarning": { borderInlineStartColor: APP_THEME.palette.warning.main },
+      ...lightStyles,
+    });
+    expect(styles).not.toHaveProperty("backgroundColor");
+  });
+
+  it("uses compact screen backgrounds without adding panel shadows", () => {
     const panelRoot = APP_THEME_COMPONENTS?.VireoPreferencePanel?.styleOverrides?.root;
     const item = APP_THEME_COMPONENTS?.VireoPreferencePanel?.styleOverrides?.item;
     expect(typeof panelRoot).toBe("function");
@@ -211,13 +331,9 @@ describe("application themes", () => {
       typeof panelRoot === "function" ? panelRoot({ ownerState, theme: APP_THEME } as never) : panelRoot;
     const itemStyles = typeof item === "function" ? item({ ownerState, theme: APP_THEME } as never) : item;
 
-    expect(rootStyles).toMatchObject({
-      backgroundColor: APP_THEME.palette.surface.screen,
-      border: "none",
-      borderRadius: 0,
-      boxShadow: "none",
-    });
-    expect(itemStyles).toMatchObject({ backgroundColor: APP_THEME.palette.surface.screen });
+    expect(rootStyles).toMatchObject({ backgroundColor: APP_THEME.palette.appSurface.screen });
+    expect(rootStyles).not.toHaveProperty("boxShadow");
+    expect(itemStyles).toMatchObject({ backgroundColor: APP_THEME.palette.appSurface.screen });
   });
 
   it("removes tactile transforms and transition time for reduced-motion users", () => {

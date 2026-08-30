@@ -24,13 +24,13 @@ export const APP_THEME_LIGHT_COLOR_SCHEME: ColorSystemOptions = {
       default: APP_SURFACES_LIGHT.canvas,
       paper: APP_SURFACES_LIGHT.overlay,
     },
-    surface: APP_SURFACES_LIGHT,
+    appSurface: APP_SURFACES_LIGHT,
     text: {
       primary: "#172335",
-      secondary: "#5b6d82",
-      disabled: "#8a9aae",
+      secondary: "#606872",
+      disabled: "#9298a1",
     },
-    divider: "#cbd8e6",
+    divider: "#d5d8dd",
     action: {
       hover: "rgba(8, 126, 172, 0.07)",
       selected: "rgba(8, 126, 172, 0.13)",

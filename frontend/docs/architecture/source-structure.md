@@ -25,7 +25,7 @@ app/
 ├── data/network/
 ├── data/query/
 ├── shell/{components,contexts,hooks,layout,providers}/
-└── ui/{assets,localization,preferences,theme}/
+└── ui/{assets,forms,localization,preferences,theme}/
 ```
 
 `generated/` is generator-managed application source. Its root registry is consumed only by `app.pages.ts` and `app.localization.ts`; generated slices may import other files within `generated/`. Customize declared extension zones or eject before changing managed regions.
@@ -51,6 +51,8 @@ features/<feature>/
 ```
 
 Every reusable React component gets a PascalCase directory with its same-named implementation, test, and—when valuable—story. Component-private complexity goes under `internal/`. There are no component `index.ts` barrels.
+
+Entity form-field components live at `features/<feature>/components/forms/<Entity>FormFields/<Entity>FormFields.tsx`. They follow the shared contract in [models-forms-and-validation.md](./models-forms-and-validation.md); form boundaries and actions remain outside them.
 
 Pages use kebab-case route directories. The route component lives directly in the page directory; private collaborators live in `internal/`. Pages do not export `public.ts` and never import other pages. Dev-tool page examples may mirror feature structure locally, without a nested `src/` directory.
 

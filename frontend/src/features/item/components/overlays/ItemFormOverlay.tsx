@@ -1,9 +1,11 @@
+import { AppFormMode } from "@/app/ui/forms/models/AppFormMode";
 import { VireoResponsiveFormOverlay } from "@vireocodedev/ui";
-import { ItemForm, ItemFormActions } from "../forms/ItemForm";
+import { ItemFormActions } from "../forms/ItemFormActions/ItemFormActions";
+import { ItemFormFields } from "../forms/ItemFormFields/ItemFormFields";
 import { useItemCreateMutation } from "../../hooks/useItemCreateMutation";
 import { useItemUpdateMutation } from "../../hooks/useItemUpdateMutation";
 import { useItemForm } from "../../hooks/useItemForm";
-import type { Item } from "../../models/Item";
+import { DEFAULT_ITEM_FORM_VALIDATION_CONTEXT, type Item } from "../../models/Item";
 import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences";
 import { useItemTranslation } from "../../localization/use-item-translation";
 
@@ -14,11 +16,16 @@ export type ItemFormOverlayProps = {
   onExited?: () => void;
 };
 
+function getItemFormMode(item: Item | undefined): AppFormMode {
+  return item ? AppFormMode.enum.UPDATE : AppFormMode.enum.CREATE;
+}
+
 export function ItemFormOverlay({ item, open, onClose, onExited }: ItemFormOverlayProps) {
   const { t } = useItemTranslation();
   const createItem = useItemCreateMutation();
   const updateItem = useItemUpdateMutation();
   const { preferences } = useAppPreferences();
+  const mode = getItemFormMode(item);
   const submit = async (value: Item) => {
     if (item) {
       await updateItem.mutateAsync({ id: item.id, value });
@@ -27,7 +34,12 @@ export function ItemFormOverlay({ item, open, onClose, onExited }: ItemFormOverl
     }
     onClose();
   };
-  const form = useItemForm(item, submit);
+  const form = useItemForm({
+    initialValue: item,
+    mode,
+    onSubmit: submit,
+    validationContext: DEFAULT_ITEM_FORM_VALIDATION_CONTEXT,
+  });
   const savePending = createItem.isPending || updateItem.isPending;
 
   return (
@@ -44,15 +56,25 @@ export function ItemFormOverlay({ item, open, onClose, onExited }: ItemFormOverl
       desktopSidePanelWidth={560}
       maxWidth="md"
       renderForm={children => (
-        <form.Form layoutWidth="full" unsavedChangesGuard>
+        <form.Form
+          layoutWidth="full"
+          readOnly={mode === AppFormMode.enum.READ}
+          readOnlyEmptyValue={t("form.notProvided")}
+          unsavedChangesGuard
+        >
           {children}
         </form.Form>
       )}
       actions={({ requestClose }) => (
-        <ItemFormActions form={form} editing={item !== undefined} onCancel={requestClose} pending={savePending} />
+        <ItemFormActions
+          form={form}
+          editing={mode === AppFormMode.enum.UPDATE}
+          onCancel={requestClose}
+          pending={savePending}
+        />
       )}
     >
-      <ItemForm form={form} />
+      <ItemFormFields form={form} mode={mode} />
     </VireoResponsiveFormOverlay>
   );
 }

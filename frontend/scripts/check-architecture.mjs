@@ -82,6 +82,8 @@ const sourceFiles = (await filesBelow(sourceRoot)).filter(file => /\.[cm]?[jt]sx
 const sourceDirectories = (await filesBelow(sourceRoot)).map(file => path.dirname(file));
 const featureImportPattern = /(?:from\s+|import\s*\()\s*["']@\/features\/([^/"']+)([^"']*)["']/g;
 const pageImportPattern = /(?:from\s+|import\s*\()\s*["']@\/pages\/([^"']+)["']/g;
+const formFieldsExportPattern = /export\s+function\s+([A-Z][A-Za-z0-9]*FormFields)\s*\(/u;
+const legacyEntityFormExportPattern = /export\s+function\s+[A-Z][A-Za-z0-9]*Form\s*\(/u;
 
 for (const directory of new Set(sourceDirectories)) {
   const segments = path.relative(sourceRoot, directory).split(path.sep);
@@ -104,8 +106,54 @@ for (const pageName of await readdir(path.join(sourceRoot, "pages"))) {
 
 for (const file of sourceFiles) {
   const relativeFile = path.relative(sourceRoot, file);
+  const normalizedRelativeFile = relativeFile.replaceAll(path.sep, "/");
   const ownFeature = relativeFile.startsWith(`features${path.sep}`) ? relativeFile.split(path.sep)[1] : undefined;
   const source = await readFile(file, "utf8");
+
+  const formFieldsExport = source.match(formFieldsExportPattern);
+  if (formFieldsExport) {
+    const componentName = formFieldsExport[1];
+    const expectedRelativeFile = `features/${ownFeature}/components/forms/${componentName}/${componentName}.tsx`;
+    if (normalizedRelativeFile !== expectedRelativeFile) {
+      errors.push(`${relativeFile} must place ${componentName} at ${expectedRelativeFile}`);
+    }
+
+    const propsPattern = new RegExp(`export\\s+type\\s+${componentName}Props\\s*=\\s*\\{([\\s\\S]*?)\\n\\};`, "u");
+    const propsBody = source.match(propsPattern)?.[1];
+    if (!propsBody) {
+      errors.push(`${relativeFile} must export ${componentName}Props as an object type`);
+    } else {
+      const propNames = [...propsBody.matchAll(/^\s*([A-Za-z][A-Za-z0-9]*)(\?)?\s*:/gmu)];
+      const declaredNames = propNames.map(match => match[1]).sort();
+      if (declaredNames.join(",") !== "form,mode" || propNames.some(match => match[2] === "?")) {
+        errors.push(`${relativeFile} form-fields props must contain exactly required form and mode properties`);
+      }
+      if (!/\bform:\s*[A-Z][A-Za-z0-9]*FormApi\s*;/u.test(propsBody)) {
+        errors.push(`${relativeFile} form must use the feature's named *FormApi type`);
+      }
+      if (!/\bmode:\s*AppFormMode\s*;/u.test(propsBody)) {
+        errors.push(`${relativeFile} mode must use the shared AppFormMode type`);
+      }
+    }
+
+    if (!source.includes("VireoContainerGrid")) {
+      errors.push(`${relativeFile} must own its layout through VireoContainerGrid`);
+    }
+    if (source.includes('component="section"') || source.includes("aria-labelledby")) {
+      errors.push(`${relativeFile} must render fields only; semantic sections and headings belong to the host`);
+    }
+    if (/<form\.(?:Form|Actions|SubmitButton)\b/u.test(source)) {
+      errors.push(`${relativeFile} may render fields only; form boundaries and actions belong to the host`);
+    }
+  }
+
+  if (
+    normalizedRelativeFile.includes("/components/forms/") &&
+    normalizedRelativeFile.endsWith(".tsx") &&
+    legacyEntityFormExportPattern.test(source)
+  ) {
+    errors.push(`${relativeFile} exports an ambiguous *Form component; entity field components use *FormFields`);
+  }
 
   for (const match of source.matchAll(unsafeNumericBorderShorthandPattern)) {
     const line = source.slice(0, match.index).split("\n").length;

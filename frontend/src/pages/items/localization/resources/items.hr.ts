@@ -33,6 +33,8 @@ const hr = {
   table: {
     table: "Stavke",
     loadingTable: "Učitavanje stavki",
+    loadingNextPage: "Učitavanje dodatnih stavki",
+    loadedNextPage: "Dodatne stavke su učitane",
     refreshing: "Osvježavanje stavki",
     noData: "Nijedna stavka ne odgovara pretraživanju.",
     showMore: "Prikaži više",

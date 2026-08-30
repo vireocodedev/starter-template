@@ -92,6 +92,7 @@ export function EntityQueryFiltersOverlay({
 
   return (
     <VireoResponsiveOverlayFrame
+      aria-label={title}
       open={open}
       onClose={requestClose}
       onExited={onExited}
@@ -104,7 +105,7 @@ export function EntityQueryFiltersOverlay({
       mobileSurface="bottomDrawer"
     >
       <VireoOverlayHeader title={title} closeLabel={t("overlay.close")} onClose={requestClose} />
-      <Box sx={{ bgcolor: "surface.recessed", flex: 1, minHeight: 0, overflowY: "auto", p: 2 }}>
+      <Box sx={{ bgcolor: "appSurface.recessed", flex: 1, minHeight: 0, overflowY: "auto", p: 2 }}>
         <VireoLoadingRegion loading={initialLoading || refreshing} loadingLabel={t("overlay.loading")}>
           {({ loadingVisible }) => (
             <Box
@@ -158,7 +159,7 @@ export function EntityQueryFiltersOverlay({
         direction="row"
         spacing={1}
         sx={{
-          bgcolor: "surface.chrome",
+          bgcolor: "appSurface.chrome",
           borderTopColor: "divider",
           borderTopStyle: "solid",
           borderTopWidth: 1,

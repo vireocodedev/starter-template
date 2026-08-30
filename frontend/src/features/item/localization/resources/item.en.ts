@@ -12,7 +12,7 @@ const itemEn = {
     ARCHIVED: "Archived",
   },
   validation: {
-    name: { min: "Enter at least two characters." },
+    name: { min: "Enter at least {{minimum}} characters." },
     description: { max: "Use at most 2,000 characters." },
     quantity: {
       integer: "Use a whole number.",
@@ -27,6 +27,7 @@ const itemEn = {
     createTitle: "Create item",
     updateTitle: "Edit item",
     close: "Close item form",
+    notProvided: "Not provided",
     namePlaceholder: "Design system audit",
     descriptionPlaceholder: "What needs to be done?",
   },

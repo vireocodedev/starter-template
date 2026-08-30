@@ -1,4 +1,13 @@
 export const APP_THEME_TOKENS = {
+  layout: {
+    footerHeight: {
+      desktop: 81,
+    },
+    headerHeight: {
+      desktop: 81,
+      mobile: 65,
+    },
+  },
   motion: {
     duration: {
       instant: 0,

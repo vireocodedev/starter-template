@@ -39,15 +39,19 @@ vi.mock("@vireocodedev/ui", () => ({
     );
   },
   VireoApplicationNavigationItem: ({
+    "aria-label": ariaLabel,
     icon,
     label,
     onClick,
+    sx,
   }: {
+    "aria-label"?: string;
     icon: React.ReactNode;
     label: string;
-    onClick: () => void;
+    onClick: (event: React.MouseEvent<HTMLElement>) => void;
+    sx?: { height?: number; width?: string };
   }) => (
-    <button onClick={onClick}>
+    <button aria-label={ariaLabel} onClick={event => onClick(event)} style={{ height: sx?.height, width: sx?.width }}>
       {icon}
       {label}
     </button>
@@ -142,18 +146,58 @@ describe("AppShellLayout", () => {
 
   it("lets unlocked desktop navigation resize independently of the overlay resize preference", async () => {
     setDesktop(true);
-    renderShell({ allowSidePanelResize: false, navigationLocked: false, navigationMode: "compact" });
+    const { container } = renderShell({
+      allowSidePanelResize: false,
+      navigationLocked: false,
+      navigationMode: "compact",
+    });
 
     expect(navigationPropsSpy).toHaveBeenLastCalledWith(expect.objectContaining({ locked: false, resizable: true }));
+    expect(container.querySelector("[data-app-navigation-header]")).toHaveStyle({
+      height: "81px",
+      maxHeight: "81px",
+      minHeight: "81px",
+    });
+    expect(container.querySelector("[data-app-navigation-footer]")).toHaveStyle({
+      height: "81px",
+      maxHeight: "81px",
+      minHeight: "81px",
+    });
     expect(screen.getByRole("button", { name: "Expand navigation" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Items" })).toBeVisible();
     expect(screen.queryByText("V")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Open account menu" }));
+    const accountButton = screen.getByRole("button", { name: "Open account menu" });
+    expect(screen.getByText("Account")).toBeVisible();
+    expect(accountButton).toHaveStyle({
+      height: "64px",
+      width: "100%",
+    });
+    fireEvent.click(accountButton);
     await waitFor(() => expect(screen.getByRole("menu")).toBeVisible());
+    expect(screen.getByRole("menu")).toHaveStyle({ marginLeft: "13px" });
     expect(screen.getByText("admin")).toBeVisible();
     expect(screen.getByText("SUPERADMIN")).toBeVisible();
     expect(screen.getByRole("menuitem", { name: "Sign out" })).toBeVisible();
+  });
+
+  it("keeps the expanded desktop brand header aligned with the page header", () => {
+    setDesktop(true);
+    const { container } = renderShell({ navigationLocked: false, navigationMode: "expanded" });
+
+    expect(container.querySelector("[data-app-navigation-header]")).toHaveStyle({
+      height: "81px",
+      maxHeight: "81px",
+      minHeight: "81px",
+    });
+    expect(container.querySelector("[data-app-navigation-footer]")).toHaveStyle({
+      height: "81px",
+      maxHeight: "81px",
+      minHeight: "81px",
+    });
+    expect(screen.getByText("Vireo Starter")).toBeVisible();
+    expect(screen.getByText("System online")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Compact navigation" })).toBeVisible();
   });
 
   it("preserves compact navigation while locked and replaces its caret with the logo", () => {

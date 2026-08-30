@@ -123,6 +123,8 @@ export const AppPageItemsListView = React.memo(function AppPageItemsListView({
     () => ({
       table: t("table.table"),
       loadingTable: t("table.loadingTable"),
+      loadingNextPage: t("table.loadingNextPage"),
+      loadedNextPage: t("table.loadedNextPage"),
       noData: t("table.noData"),
       showMore: t("table.showMore"),
       showLess: t("table.showLess"),
@@ -195,172 +197,137 @@ export const AppPageItemsListView = React.memo(function AppPageItemsListView({
 
   return (
     <Stack spacing={{ xs: 0, sm: 2 }} sx={{ flex: 1, height: "100%", minHeight: 0, overflow: "hidden" }}>
-      <Box
-        data-items-toolbar
-        sx={{
-          bgcolor: { xs: "surface.screen", sm: "surface.content" },
-          borderColor: "divider",
-          borderStyle: { xs: "none", sm: "solid" },
-          borderWidth: { xs: 0, sm: 1 },
-          borderBottomStyle: "solid",
-          borderBottomWidth: 1,
-          borderRadius: { xs: 0, sm: 1 },
-          flex: "0 0 auto",
-          p: { xs: 2, sm: 1.5 },
-        }}
-      >
-        <Stack spacing={1}>
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: { sm: "center" } }}>
-            <TextField
-              fullWidth
-              size="medium"
-              value={search.input}
-              onChange={event => search.setInput(event.target.value)}
-              onKeyDown={event => {
-                if (event.key === "Enter") search.commitNow();
-              }}
-              placeholder={t("search.placeholder")}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchRounded />
-                    </InputAdornment>
-                  ),
-                  endAdornment: search.input ? (
-                    <InputAdornment position="end">
-                      <IconButton aria-label={t("search.clear")} edge="end" onClick={search.clear}>
-                        <CloseRounded />
-                      </IconButton>
-                    </InputAdornment>
-                  ) : undefined,
-                },
-              }}
-              sx={{ maxWidth: 520 }}
-            />
-            <ButtonGroup
-              size="medium"
-              variant="outlined"
-              sx={{ display: { xs: "none", sm: "inline-flex" }, height: ITEM_COMMAND_CONTROL_HEIGHT }}
-            >
-              <Button startIcon={<FilterAltOutlined />} onClick={onOpenFilters}>
-                {t("filters.open")}
-                {structuredFilterCount > 0 ? ` (${structuredFilterCount})` : ""}
-              </Button>
-              {structuredFilterCount > 0 && (
-                <Tooltip title={t("filters.clearAllLabel")}>
-                  <Button
-                    aria-label={t("filters.clearAllLabel")}
-                    onClick={onClearQueryFilters}
-                    sx={{ minWidth: 44, px: 1 }}
-                  >
-                    <CloseRounded />
-                  </Button>
-                </Tooltip>
-              )}
-            </ButtonGroup>
-            <Chip
-              aria-hidden={totalResults == null ? true : undefined}
-              color={result.isRefreshing ? "primary" : "default"}
-              data-items-result-count="desktop"
-              data-items-result-count-state={totalResults == null ? "reserved" : "resolved"}
-              label={resultCountLabel}
-              size="small"
-              sx={{
-                display: { xs: "none", sm: "inline-flex" },
-                justifyContent: "center",
-                ml: { sm: "auto !important" },
-                minWidth: "11ch",
-                visibility: totalResults == null ? "hidden" : "visible",
-                whiteSpace: "nowrap",
-              }}
-              variant="outlined"
-            />
-          </Stack>
+      <Stack spacing={1} sx={{ flex: "0 0 auto", p: { xs: 2, sm: 0 } }}>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: { sm: "center" } }}>
+          <TextField
+            data-items-search
+            fullWidth
+            size="medium"
+            value={search.input}
+            onChange={event => search.setInput(event.target.value)}
+            onKeyDown={event => {
+              if (event.key === "Enter") search.commitNow();
+            }}
+            placeholder={t("search.placeholder")}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchRounded />
+                  </InputAdornment>
+                ),
+                endAdornment: search.input ? (
+                  <InputAdornment position="end">
+                    <IconButton aria-label={t("search.clear")} edge="end" onClick={search.clear}>
+                      <CloseRounded />
+                    </IconButton>
+                  </InputAdornment>
+                ) : undefined,
+              },
+            }}
+            sx={{ maxWidth: 520 }}
+          />
+          <ButtonGroup
+            size="medium"
+            variant="outlined"
+            sx={{ display: { xs: "none", sm: "inline-flex" }, height: ITEM_COMMAND_CONTROL_HEIGHT }}
+          >
+            <Button startIcon={<FilterAltOutlined />} onClick={onOpenFilters}>
+              {t("filters.open")}
+              {structuredFilterCount > 0 ? ` (${structuredFilterCount})` : ""}
+            </Button>
+            {structuredFilterCount > 0 && (
+              <Tooltip title={t("filters.clearAllLabel")}>
+                <Button
+                  aria-label={t("filters.clearAllLabel")}
+                  onClick={onClearQueryFilters}
+                  sx={{ minWidth: 44, px: 1 }}
+                >
+                  <CloseRounded />
+                </Button>
+              </Tooltip>
+            )}
+          </ButtonGroup>
+        </Stack>
+        <Box
+          sx={{
+            display: { xs: "grid", sm: "none" },
+            gridTemplateColumns: "minmax(0, 1fr) auto",
+            columnGap: 0.5,
+            minWidth: 0,
+            alignItems: "center",
+          }}
+        >
+          <ButtonGroup
+            size="medium"
+            variant="outlined"
+            sx={{ gridColumn: 1, height: ITEM_COMMAND_CONTROL_HEIGHT, justifySelf: "start" }}
+          >
+            <Button startIcon={<FilterAltOutlined />} onClick={onOpenFilters}>
+              {t("filters.open")}
+              {structuredFilterCount > 0 ? ` (${structuredFilterCount})` : ""}
+            </Button>
+            {structuredFilterCount > 0 && (
+              <Tooltip title={t("filters.clearAllLabel")}>
+                <Button
+                  aria-label={t("filters.clearAllLabel")}
+                  onClick={onClearQueryFilters}
+                  sx={{ minWidth: 44, px: 1 }}
+                >
+                  <CloseRounded />
+                </Button>
+              </Tooltip>
+            )}
+          </ButtonGroup>
+          <Chip
+            aria-hidden={totalResults == null ? true : undefined}
+            color={result.isRefreshing ? "primary" : "default"}
+            data-items-result-count="mobile"
+            data-items-result-count-state={totalResults == null ? "reserved" : "resolved"}
+            label={resultCountLabel}
+            size="small"
+            sx={{
+              gridColumn: 2,
+              justifyContent: "center",
+              minWidth: "11ch",
+              visibility: totalResults == null ? "hidden" : "visible",
+              whiteSpace: "nowrap",
+            }}
+            variant="outlined"
+          />
+        </Box>
+        {queryFilters && (
           <Box
             sx={{
-              display: { xs: "grid", sm: "none" },
-              gridTemplateColumns: "minmax(0, 1fr) auto",
-              columnGap: 0.5,
+              display: { xs: "block", sm: "none" },
               minWidth: 0,
-              alignItems: "center",
+              overflowX: "auto",
+              overscrollBehaviorX: "contain",
+              scrollbarWidth: "none",
+              touchAction: "pan-x",
+              "&::-webkit-scrollbar": { display: "none" },
             }}
           >
-            <ButtonGroup
-              size="medium"
-              variant="outlined"
-              sx={{ gridColumn: 1, height: ITEM_COMMAND_CONTROL_HEIGHT, justifySelf: "start" }}
-            >
-              <Button startIcon={<FilterAltOutlined />} onClick={onOpenFilters}>
-                {t("filters.open")}
-                {structuredFilterCount > 0 ? ` (${structuredFilterCount})` : ""}
-              </Button>
-              {structuredFilterCount > 0 && (
-                <Tooltip title={t("filters.clearAllLabel")}>
-                  <Button
-                    aria-label={t("filters.clearAllLabel")}
-                    onClick={onClearQueryFilters}
-                    sx={{ minWidth: 44, px: 1 }}
-                  >
-                    <CloseRounded />
-                  </Button>
-                </Tooltip>
-              )}
-            </ButtonGroup>
-            <Chip
-              aria-hidden={totalResults == null ? true : undefined}
-              color={result.isRefreshing ? "primary" : "default"}
-              data-items-result-count="mobile"
-              data-items-result-count-state={totalResults == null ? "reserved" : "resolved"}
-              label={resultCountLabel}
-              size="small"
-              sx={{
-                gridColumn: 2,
-                justifyContent: "center",
-                minWidth: "11ch",
-                visibility: totalResults == null ? "hidden" : "visible",
-                whiteSpace: "nowrap",
-              }}
-              variant="outlined"
+            <EntityQueryFilterSummary
+              value={queryFilters}
+              presentation={presentation}
+              onRemove={onRemoveQueryFilter}
+              singleLine
             />
           </Box>
-          {queryFilters && (
-            <Box
-              sx={{
-                display: { xs: "block", sm: "none" },
-                minWidth: 0,
-                overflowX: "auto",
-                overscrollBehaviorX: "contain",
-                scrollbarWidth: "none",
-                touchAction: "pan-x",
-                "&::-webkit-scrollbar": { display: "none" },
-              }}
-            >
-              <EntityQueryFilterSummary
-                value={queryFilters}
-                presentation={presentation}
-                onRemove={onRemoveQueryFilter}
-                singleLine
-              />
-            </Box>
-          )}
-          {queryFilters && (
-            <Box sx={{ display: { xs: "none", sm: "block" } }}>
-              <EntityQueryFilterSummary
-                value={queryFilters}
-                presentation={presentation}
-                onRemove={onRemoveQueryFilter}
-              />
-            </Box>
-          )}
-        </Stack>
-      </Box>
+        )}
+        {queryFilters && (
+          <Box sx={{ display: { xs: "none", sm: "block" } }}>
+            <EntityQueryFilterSummary value={queryFilters} presentation={presentation} onRemove={onRemoveQueryFilter} />
+          </Box>
+        )}
+      </Stack>
       <VireoLoadingRegion
         loading={result.isRefreshing}
         loadingLabel={t("table.refreshing")}
         data-items-data-state={dataState}
         sx={{
-          bgcolor: { xs: "surface.screen", sm: "surface.content" },
+          bgcolor: { xs: "appSurface.screen", sm: "appSurface.content" },
           borderColor: "divider",
           display: "flex",
           flex: 1,

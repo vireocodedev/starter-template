@@ -1,9 +1,10 @@
 import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences";
+import { createHistoryTimestampFormatter, type HistoryTimestampFormatter } from "@/features/history/public";
 import { useItemHistory } from "../../hooks/useItemHistory";
 import type { Item } from "../../models/Item";
 import { createItemHistoryDefinition } from "../../models/ItemHistory";
 import { HistoryOutlined } from "@mui/icons-material";
-import { Alert, Box, Button, Fade, LinearProgress, Stack, Typography, useMediaQuery } from "@mui/material";
+import { Alert, Box, Button, Fade, LinearProgress, Stack, Tooltip, Typography, useMediaQuery } from "@mui/material";
 import {
   VireoHistoryEntry,
   VireoLoadingRegion,
@@ -22,15 +23,63 @@ export type ItemHistoryOverlayProps = {
   onExited?: () => void;
 };
 
+type ItemHistoryMetaProps = {
+  actorLabel?: string;
+  formatter: HistoryTimestampFormatter;
+  now: number;
+  systemActor: string;
+  timestamp: string | number;
+};
+
+function ItemHistoryMeta({ actorLabel, formatter, now, systemActor, timestamp }: ItemHistoryMetaProps) {
+  const formattedTimestamp = formatter(timestamp, now);
+
+  return (
+    <>
+      <Tooltip title={formattedTimestamp.exact}>
+        <Box
+          component="time"
+          dateTime={formattedTimestamp.dateTime}
+          sx={{ cursor: formattedTimestamp.relative ? "help" : "inherit" }}
+        >
+          {formattedTimestamp.display}
+        </Box>
+      </Tooltip>
+      {` · ${actorLabel ?? systemActor}`}
+    </>
+  );
+}
+
+function useHistoryClock(open: boolean) {
+  const [now, setNow] = React.useState(() => Date.now());
+
+  React.useEffect(() => {
+    if (!open) return;
+
+    setNow(Date.now());
+    const interval = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(interval);
+  }, [open]);
+
+  return now;
+}
+
 function formatHistoryMeta(
   timestamp: string | number,
-  dateTimeFormatter: Intl.DateTimeFormat,
+  timestampFormatter: HistoryTimestampFormatter,
+  now: number,
   systemActor: string,
   actorLabel?: string,
 ) {
-  const date = new Date(timestamp);
-  const formattedTimestamp = Number.isNaN(date.getTime()) ? String(timestamp) : dateTimeFormatter.format(date);
-  return `${formattedTimestamp} · ${actorLabel ?? systemActor}`;
+  return (
+    <ItemHistoryMeta
+      actorLabel={actorLabel}
+      formatter={timestampFormatter}
+      now={now}
+      systemActor={systemActor}
+      timestamp={timestamp}
+    />
+  );
 }
 
 export function ItemHistoryOverlay({ item, open, onClose, onExited }: ItemHistoryOverlayProps) {
@@ -40,10 +89,8 @@ export function ItemHistoryOverlay({ item, open, onClose, onExited }: ItemHistor
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const records = history.data ?? [];
   const locale = i18n.resolvedLanguage;
-  const dateTimeFormatter = React.useMemo(
-    () => new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }),
-    [locale],
-  );
+  const timestampFormatter = React.useMemo(() => createHistoryTimestampFormatter(locale), [locale]);
+  const now = useHistoryClock(open);
   const definition = React.useMemo(() => createItemHistoryDefinition(t, locale), [locale, t]);
   const historyLabels = React.useMemo<Partial<VireoHistoryEntryLabels>>(
     () => ({
@@ -73,6 +120,7 @@ export function ItemHistoryOverlay({ item, open, onClose, onExited }: ItemHistor
 
   return (
     <VireoResponsiveOverlayFrame
+      aria-label={t("history.title", { name: item.name })}
       open={open}
       onClose={onClose}
       onExited={onExited}
@@ -89,7 +137,7 @@ export function ItemHistoryOverlay({ item, open, onClose, onExited }: ItemHistor
         closeLabel={t("history.close")}
         onClose={onClose}
       />
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", bgcolor: "surface.recessed", p: 2 }}>
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", bgcolor: "appSurface.recessed", p: 2 }}>
         <VireoLoadingRegion loading={initialLoading || refreshing} loadingLabel={t("history.loading")}>
           {({ loadingVisible }) => (
             <Box
@@ -154,7 +202,8 @@ export function ItemHistoryOverlay({ item, open, onClose, onExited }: ItemHistor
                         previous={record.snapshotPrevious}
                         rootMeta={formatHistoryMeta(
                           record.timestamp,
-                          dateTimeFormatter,
+                          timestampFormatter,
+                          now,
                           t("history.systemActor"),
                           record.actor?.label,
                         )}

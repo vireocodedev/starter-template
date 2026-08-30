@@ -16,7 +16,7 @@ const en = {
     OPEN: "Open navigation",
     QUICK: "Quick navigation",
   },
-  account: { OPEN_MENU: "Open account menu", SIGN_OUT: "Sign out" },
+  account: { LABEL: "Account", OPEN_MENU: "Open account menu", SIGN_OUT: "Sign out" },
   auth: {
     outcomes: {
       unauthenticated: "Sign in to continue.",

@@ -1,10 +1,11 @@
 import { useAppShellNavigation } from "@/app/shell/hooks/useAppShellNavigation";
+import { useAppTranslation } from "@/app/ui/localization/use-app-translation";
+import { APP_THEME_TOKENS } from "@/app/ui/theme/config/theme.tokens";
 import { ArrowBackRounded, MenuRounded } from "@mui/icons-material";
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { VireoActionPreviewButton, VireoPageHeader } from "@vireocodedev/ui";
 import type React from "react";
 import { useNavigate } from "react-router";
-import { useAppTranslation } from "@/app/ui/localization/use-app-translation";
 
 export type AppPageHeaderPrimaryAction = {
   disabled?: boolean;
@@ -38,6 +39,9 @@ export function AppPageHeader({
   const { t } = useAppTranslation();
   const { mobile, openNavigation } = useAppShellNavigation();
   const navigate = useNavigate();
+  const headerHeight = mobile
+    ? APP_THEME_TOKENS.layout.headerHeight.mobile
+    : APP_THEME_TOKENS.layout.headerHeight.desktop;
   const resolvedBackLabel = backLabel ?? t("actions.BACK");
   const leading = (
     <>
@@ -115,6 +119,7 @@ export function AppPageHeader({
       actions={responsiveActions}
       leading={mobile || backTo || onBack ? leading : undefined}
       slotProps={{ title: { component: "div" } }}
+      sx={{ boxSizing: "border-box", height: headerHeight, maxHeight: headerHeight, minHeight: headerHeight }}
       title={
         <Box sx={{ alignItems: "stretch", display: "flex", gap: mobile ? 1 : 1.5, minWidth: 0 }}>
           <Box
@@ -122,7 +127,7 @@ export function AppPageHeader({
             sx={{
               bgcolor: "primary.main",
               borderRadius: 0.5,
-              boxShadow: theme => `0 0 12px color-mix(in srgb, ${theme.palette.primary.main} 38%, transparent)`,
+              //boxShadow: theme => `0 0 12px color-mix(in srgb, ${theme.palette.primary.main} 38%, transparent)`,
               flex: "0 0 auto",
               my: 0.25,
               width: 4,

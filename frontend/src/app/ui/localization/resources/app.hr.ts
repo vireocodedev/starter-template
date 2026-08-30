@@ -19,7 +19,7 @@ const hr = {
     OPEN: "Otvori navigaciju",
     QUICK: "Brza navigacija",
   },
-  account: { OPEN_MENU: "Otvori izbornik računa", SIGN_OUT: "Odjava" },
+  account: { LABEL: "Račun", OPEN_MENU: "Otvori izbornik računa", SIGN_OUT: "Odjava" },
   auth: {
     outcomes: {
       unauthenticated: "Prijavite se za nastavak.",

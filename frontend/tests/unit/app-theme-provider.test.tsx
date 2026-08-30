@@ -1,6 +1,7 @@
 import { DEFAULT_APP_PREFERENCES } from "@/app/ui/preferences/models/AppPreferences";
 import { AppPreferencesProvider } from "@/app/ui/preferences/providers/AppPreferencesProvider";
 import { AppThemeProvider } from "@/app/ui/theme/AppThemeProvider";
+import { Alert, alertClasses } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -37,7 +38,19 @@ describe("AppThemeProvider", () => {
     );
 
     expect(screen.getByTestId("theme")).toHaveAttribute("data-mode", "dark");
-    expect(screen.getByTestId("theme")).toHaveAttribute("data-background", "#07111f");
-    expect(document.head.querySelector('meta[name="theme-color"]')).toHaveAttribute("content", "#0a1728");
+    expect(screen.getByTestId("theme")).toHaveAttribute("data-background", "#0b0c0e");
+    expect(document.head.querySelector('meta[name="theme-color"]')).toHaveAttribute("content", "#111315");
+  });
+
+  it("renders light standard info alerts with the classes targeted by the contrast override", () => {
+    render(
+      <AppPreferencesProvider>
+        <AppThemeProvider>
+          <Alert severity="info">Information</Alert>
+        </AppThemeProvider>
+      </AppPreferencesProvider>,
+    );
+
+    expect(screen.getByRole("alert")).toHaveClass(alertClasses.standard, alertClasses.colorInfo);
   });
 });

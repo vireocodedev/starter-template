@@ -23,30 +23,32 @@ export type AppSurfacePalette = {
   raised: string;
 };
 
+// Semantic roles intentionally share a small neutral ramp. Components keep
+// meaningful role names without turning every structural layer into a new hue.
 export const APP_SURFACES_LIGHT: AppSurfacePalette = {
-  canvas: "#f7f9fc",
+  canvas: "#f6f7f9",
   screen: "#ffffff",
-  recessed: "#edf3f8",
+  recessed: "#f0f2f4",
   content: "#ffffff",
-  control: "#f7f9fc",
-  elevated: "#f4f8fc",
+  control: "#f6f7f9",
+  elevated: "#f0f2f4",
   chrome: "#ffffff",
   overlay: "#ffffff",
-  sunken: "#edf3f8",
+  sunken: "#f0f2f4",
   base: "#ffffff",
-  raised: "#f4f8fc",
+  raised: "#f0f2f4",
 };
 
 export const APP_SURFACES_DARK: AppSurfacePalette = {
-  canvas: "#07111f",
-  screen: "#07111f",
-  recessed: "#07111f",
-  content: "#102137",
-  control: "#183552",
-  elevated: "#1e4164",
-  chrome: "#162b45",
-  overlay: "#0a1728",
-  sunken: "#07111f",
-  base: "#102137",
-  raised: "#1e4164",
+  canvas: "#0b0c0e",
+  screen: "#111315",
+  recessed: "#0b0c0e",
+  content: "#111315",
+  control: "#181a1e",
+  elevated: "#1a1c20",
+  chrome: "#1a1c20",
+  overlay: "#111315",
+  sunken: "#0b0c0e",
+  base: "#111315",
+  raised: "#1a1c20",
 };

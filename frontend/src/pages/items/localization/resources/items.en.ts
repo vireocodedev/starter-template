@@ -31,6 +31,8 @@ const en = {
   table: {
     table: "Items",
     loadingTable: "Loading items",
+    loadingNextPage: "Loading more items",
+    loadedNextPage: "More items loaded",
     refreshing: "Refreshing items",
     noData: "No items match this search.",
     showMore: "Show more",

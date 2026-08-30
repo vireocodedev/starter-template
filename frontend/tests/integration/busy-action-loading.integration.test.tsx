@@ -1,9 +1,11 @@
 import React from "react";
 import { AppAuthContext } from "@/app/shell/contexts/AppAuthContext";
 import { AppStorybookProvider } from "@/app/storybook/AppStorybookProvider";
-import { ItemForm, ItemFormActions } from "@/features/item/components/forms/ItemForm";
+import { AppFormMode } from "@/app/ui/forms/models/AppFormMode";
+import { ItemFormActions } from "@/features/item/components/forms/ItemFormActions/ItemFormActions";
+import { ItemFormFields } from "@/features/item/components/forms/ItemFormFields/ItemFormFields";
 import { useItemForm } from "@/features/item/hooks/useItemForm";
-import type { Item } from "@/features/item/models/Item";
+import { DEFAULT_ITEM_FORM_VALIDATION_CONTEXT, type Item } from "@/features/item/models/Item";
 import { AppPageLogin } from "@/pages/login/AppPageLogin";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
@@ -28,18 +30,23 @@ function deferred<T>() {
 
 function ItemFormHarness({ onSubmit }: { onSubmit: (value: Item) => Promise<void> }) {
   const [pending, setPending] = React.useState(false);
-  const form = useItemForm(item, async value => {
-    setPending(true);
-    try {
-      await onSubmit(value);
-    } finally {
-      setPending(false);
-    }
+  const form = useItemForm({
+    initialValue: item,
+    mode: AppFormMode.enum.UPDATE,
+    onSubmit: async value => {
+      setPending(true);
+      try {
+        await onSubmit(value);
+      } finally {
+        setPending(false);
+      }
+    },
+    validationContext: DEFAULT_ITEM_FORM_VALIDATION_CONTEXT,
   });
 
   return (
     <form.Form layoutWidth="full">
-      <ItemForm form={form} />
+      <ItemFormFields form={form} mode={AppFormMode.enum.UPDATE} />
       <ItemFormActions editing form={form} onCancel={vi.fn()} pending={pending} />
     </form.Form>
   );
@@ -65,7 +72,6 @@ describe("busy action loading-state contract", () => {
       expect(cancel).toBeDisabled();
     });
     expect(screen.getByDisplayValue("Starter audit")).toBeVisible();
-    expect(screen.getByText("Item details")).toBeVisible();
     expect(onSubmit).toHaveBeenCalledOnce();
 
     fireEvent.click(save);
@@ -98,12 +104,18 @@ describe("busy action loading-state contract", () => {
       </AppStorybookProvider>,
     );
 
+    const username = screen.getByRole("textbox", { name: "Username" });
+    const password = screen.getByLabelText("Password");
+    fireEvent.change(username, { target: { value: "admin" } });
+    fireEvent.change(password, { target: { value: "admin123" } });
+
     const submit = screen.getByRole("button", { name: "Sign in" });
     fireEvent.click(submit);
 
     await waitFor(() => expect(submit).toBeDisabled());
     expect(screen.getByRole("heading", { name: "Welcome back" })).toBeVisible();
-    expect(screen.getByDisplayValue("admin")).toBeVisible();
+    expect(username).toHaveValue("admin");
+    expect(password).toHaveValue("admin123");
     expect(login).toHaveBeenCalledOnce();
 
     fireEvent.click(submit);

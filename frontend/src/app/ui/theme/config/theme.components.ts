@@ -1,5 +1,5 @@
 import { APP_THEME_TOKENS } from "@/app/ui/theme/config/theme.tokens";
-import { type Theme } from "@mui/material";
+import { alertClasses, type Theme } from "@mui/material";
 import type {} from "@vireocodedev/ui";
 
 export const APP_THEME_COMPONENTS: Theme["components"] = {
@@ -16,7 +16,7 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
     styleOverrides: {
       surface: ({ theme }) => ({
         "& .MuiDrawer-paper": {
-          backgroundColor: theme.palette.surface.content,
+          backgroundColor: theme.palette.appSurface.content,
           borderColor: theme.palette.divider,
         },
       }),
@@ -42,7 +42,7 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
   VireoMobileBottomNavigation: {
     styleOverrides: {
       root: ({ theme }) => ({
-        backgroundColor: theme.palette.surface.chrome,
+        backgroundColor: theme.palette.appSurface.chrome,
         borderColor: theme.palette.divider,
         boxShadow: `0 -8px 24px color-mix(in srgb, ${theme.palette.common.black} 12%, transparent)`,
       }),
@@ -56,61 +56,54 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
   VireoPage: {
     styleOverrides: {
       root: ({ ownerState, theme }) => ({
-        backgroundColor: ownerState.mode === "compact" ? theme.palette.surface.screen : theme.palette.surface.canvas,
-        backgroundImage:
-          ownerState.mode === "compact"
-            ? "none"
-            : `linear-gradient(color-mix(in srgb, ${theme.palette.divider} 16%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, ${theme.palette.divider} 16%, transparent) 1px, transparent 1px)`,
-        backgroundSize: ownerState.mode === "compact" ? undefined : "24px 24px",
+        backgroundColor:
+          ownerState.mode === "compact" ? theme.palette.appSurface.screen : theme.palette.appSurface.canvas,
+        backgroundImage: `linear-gradient(color-mix(in srgb, ${theme.palette.divider} 16%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, ${theme.palette.divider} 16%, transparent) 1px, transparent 1px)`,
+        backgroundSize: "24px 24px",
       }),
     },
   },
   VireoPageHeader: {
     styleOverrides: {
       root: ({ ownerState, theme }) => ({
-        backgroundColor: theme.palette.surface.chrome,
+        backgroundColor: theme.palette.appSurface.chrome,
         borderColor: theme.palette.divider,
-        boxShadow: `0 6px 20px color-mix(in srgb, ${theme.palette.common.black} 8%, transparent), inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 8%, transparent)`,
         gap: theme.spacing(ownerState.mode === "compact" ? 0.5 : 2),
         paddingInline: theme.spacing(ownerState.mode === "compact" ? 1 : 3),
-        position: "relative",
-        "&::after": {
-          backgroundColor: theme.palette.primary.main,
-          bottom: -1,
-          content: '""',
-          height: 3,
-          insetInlineStart: ownerState.mode === "compact" ? 16 : 24,
-          position: "absolute",
-          width: ownerState.mode === "compact" ? 36 : 56,
+      }),
+    },
+  },
+  VireoOverlayHeader: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        height: APP_THEME_TOKENS.layout.headerHeight.mobile,
+        maxHeight: APP_THEME_TOKENS.layout.headerHeight.mobile,
+        minHeight: APP_THEME_TOKENS.layout.headerHeight.mobile,
+        [theme.breakpoints.up("md")]: {
+          height: APP_THEME_TOKENS.layout.headerHeight.desktop,
+          maxHeight: APP_THEME_TOKENS.layout.headerHeight.desktop,
+          minHeight: APP_THEME_TOKENS.layout.headerHeight.desktop,
         },
-        ...theme.applyStyles("light", {
-          boxShadow: `0 8px 24px color-mix(in srgb, ${theme.palette.common.black} 10%, transparent), inset 0 -1px 0 color-mix(in srgb, ${theme.palette.primary.main} 10%, transparent)`,
-        }),
       }),
     },
   },
   VireoPreferencePanel: {
     styleOverrides: {
       root: ({ ownerState, theme }) => ({
-        backgroundColor: ownerState.isCompact ? theme.palette.surface.screen : theme.palette.surface.content,
-        ...(ownerState.isCompact
-          ? { border: "none", borderRadius: 0, boxShadow: "none" }
-          : theme.applyStyles("light", {
-              boxShadow: `0 14px 36px color-mix(in srgb, ${theme.palette.common.black} 8%, transparent)`,
-            })),
+        backgroundColor: ownerState.isCompact ? theme.palette.appSurface.screen : theme.palette.appSurface.content,
       }),
       section: ({ ownerState, theme }) => ({
-        backgroundColor: ownerState.isCompact ? theme.palette.surface.screen : theme.palette.surface.content,
+        backgroundColor: ownerState.isCompact ? theme.palette.appSurface.screen : theme.palette.appSurface.content,
         ...(ownerState.isCompact && {
           "& + &": { borderColor: theme.palette.divider },
         }),
       }),
       sectionHeader: ({ ownerState, theme }) => ({
-        backgroundColor: ownerState.isCompact ? theme.palette.surface.content : theme.palette.surface.elevated,
+        backgroundColor: ownerState.isCompact ? theme.palette.appSurface.content : theme.palette.appSurface.elevated,
         ...(ownerState.isCompact && { borderColor: theme.palette.divider }),
       }),
       item: ({ ownerState, theme }) => ({
-        backgroundColor: ownerState.isCompact ? theme.palette.surface.screen : theme.palette.surface.content,
+        backgroundColor: ownerState.isCompact ? theme.palette.appSurface.screen : theme.palette.appSurface.content,
         ...(ownerState.isCompact && {
           "& + &": { borderColor: theme.palette.divider },
         }),
@@ -119,7 +112,7 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
         },
         "@media (hover: none)": {
           "&:hover": {
-            backgroundColor: ownerState.isCompact ? theme.palette.surface.screen : theme.palette.surface.content,
+            backgroundColor: ownerState.isCompact ? theme.palette.appSurface.screen : theme.palette.appSurface.content,
           },
         },
       }),
@@ -131,16 +124,14 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
   VireoResponsiveTable: {
     styleOverrides: {
       root: ({ ownerState, theme }) => ({
-        backgroundColor: ownerState.layout === "mobile" ? theme.palette.surface.screen : theme.palette.surface.content,
+        backgroundColor:
+          ownerState.layout === "mobile" ? theme.palette.appSurface.screen : theme.palette.appSurface.content,
         "& .MuiTableContainer-root": {
-          backgroundColor: theme.palette.surface.content,
-        },
-        "& .MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root": {
-          backgroundColor: theme.palette.surface.content,
+          backgroundColor: theme.palette.appSurface.content,
         },
         "& .MuiAccordionSummary-root": {
           backgroundColor:
-            ownerState.layout === "mobile" ? theme.palette.surface.screen : theme.palette.surface.content,
+            ownerState.layout === "mobile" ? theme.palette.appSurface.screen : theme.palette.appSurface.content,
         },
         ...(ownerState.layout === "mobile"
           ? {
@@ -150,7 +141,7 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
                 borderRadius: 0,
                 boxShadow: "none",
               },
-              "& .MuiAccordionDetails-root": { backgroundColor: theme.palette.surface.screen },
+              "& .MuiAccordionDetails-root": { backgroundColor: theme.palette.appSurface.screen },
               "& .MuiAccordion-root, & .MuiAccordionDetails-root": {
                 borderColor: theme.palette.divider,
               },
@@ -163,10 +154,13 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
   },
   VireoFormSection: {
     styleOverrides: {
+      layout: ({ theme }) => ({
+        gap: theme.spacing(1),
+      }),
       content: ({ ownerState, theme }) =>
         ownerState.variant === "outlined"
           ? {
-              backgroundColor: theme.palette.surface.recessed,
+              backgroundColor: theme.palette.appSurface.recessed,
               borderColor: theme.palette.divider,
             }
           : {},
@@ -182,11 +176,8 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
   MuiTableBody: {
     styleOverrides: {
       root: ({ theme }) => ({
-        "& > .MuiTableRow-root:nth-of-type(odd)": {
-          backgroundColor: `color-mix(in srgb, ${theme.palette.action.hover} 50%, transparent)`,
-        },
         "& > .MuiTableRow-root.MuiTableRow-hover:hover": {
-          backgroundColor: theme.palette.action.hover,
+          backgroundColor: `color-mix(in srgb, ${theme.palette.appSurface.elevated} 72%, ${theme.palette.appSurface.content})`,
         },
       }),
     },
@@ -194,7 +185,7 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
   MuiTableHead: {
     styleOverrides: {
       root: ({ theme }) => ({
-        backgroundColor: theme.palette.surface.elevated,
+        backgroundColor: theme.palette.appSurface.elevated,
         boxShadow: `inset 0 -1px 0 ${theme.palette.divider}`,
       }),
     },
@@ -228,20 +219,37 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
     styleOverrides: {
       root: ({ ownerState, theme }) => ({
         backgroundColor:
-          ownerState.variant === "inset" ? theme.palette.surface.recessed : theme.palette.surface.content,
+          ownerState.variant === "inset" ? theme.palette.appSurface.recessed : theme.palette.appSurface.content,
         ...(ownerState.variant === "inset" && { border: `1px solid ${theme.palette.divider}` }),
         borderColor: theme.palette.divider,
         boxShadow: `inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 8%, transparent)`,
       }),
     },
   },
+  MuiDialogActions: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        borderTop: `1px solid ${theme.palette.divider}`,
+        flexShrink: 0,
+        [theme.breakpoints.up("md")]: {
+          boxSizing: "border-box",
+          height: APP_THEME_TOKENS.layout.footerHeight.desktop,
+          maxHeight: APP_THEME_TOKENS.layout.footerHeight.desktop,
+          minHeight: APP_THEME_TOKENS.layout.footerHeight.desktop,
+        },
+      }),
+    },
+  },
   MuiChip: {
     styleOverrides: {
-      root: {
+      root: ({ theme }) => ({
         borderRadius: 4,
         fontWeight: 750,
         letterSpacing: "0.015em",
-      },
+        "&.MuiChip-colorDefault.MuiChip-filled": {
+          backgroundColor: theme.palette.appSurface.elevated,
+        },
+      }),
     },
   },
   MuiButton: {
@@ -291,7 +299,7 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
   MuiOutlinedInput: {
     styleOverrides: {
       root: ({ theme }) => ({
-        backgroundColor: theme.palette.surface.control,
+        backgroundColor: theme.palette.appSurface.control,
         borderRadius: 5,
         boxShadow: `inset 0 1px 2px color-mix(in srgb, ${theme.palette.common.black} 5%, transparent)`,
         "& .MuiOutlinedInput-notchedOutline": {
@@ -305,15 +313,15 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
         },
         ...theme.applyStyles("light", {
           "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: `color-mix(in srgb, ${theme.palette.text.secondary} 72%, ${theme.palette.surface.control})`,
+            borderColor: `color-mix(in srgb, ${theme.palette.text.secondary} 72%, ${theme.palette.appSurface.control})`,
           },
           "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: `color-mix(in srgb, ${theme.palette.text.primary} 72%, ${theme.palette.surface.control})`,
+            borderColor: `color-mix(in srgb, ${theme.palette.text.primary} 72%, ${theme.palette.appSurface.control})`,
           },
         }),
         ...theme.applyStyles("dark", {
           "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: `color-mix(in srgb, ${theme.palette.text.secondary} 55%, ${theme.palette.surface.control})`,
+            borderColor: `color-mix(in srgb, ${theme.palette.text.secondary} 55%, ${theme.palette.appSurface.control})`,
           },
           "&:hover .MuiOutlinedInput-notchedOutline": {
             borderColor: theme.palette.text.secondary,
@@ -333,10 +341,28 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
   },
   MuiAlert: {
     styleOverrides: {
-      root: {
-        borderInlineStart: "3px solid currentColor",
+      root: ({ theme }) => ({
+        borderInlineStart: "3px solid transparent",
         borderRadius: 4,
-      },
+        "&.MuiAlert-colorError": { borderInlineStartColor: theme.palette.error.main },
+        "&.MuiAlert-colorInfo": { borderInlineStartColor: theme.palette.info.main },
+        "&.MuiAlert-colorSuccess": { borderInlineStartColor: theme.palette.success.main },
+        "&.MuiAlert-colorWarning": { borderInlineStartColor: theme.palette.warning.main },
+        ...theme.applyStyles("light", {
+          [`&.${alertClasses.standard}.${alertClasses.colorError}`]: {
+            backgroundColor: `color-mix(in srgb, ${theme.palette.error.main} 12%, ${theme.palette.appSurface.content})`,
+          },
+          [`&.${alertClasses.standard}.${alertClasses.colorInfo}`]: {
+            backgroundColor: `color-mix(in srgb, ${theme.palette.info.main} 12%, ${theme.palette.appSurface.content})`,
+          },
+          [`&.${alertClasses.standard}.${alertClasses.colorSuccess}`]: {
+            backgroundColor: `color-mix(in srgb, ${theme.palette.success.main} 12%, ${theme.palette.appSurface.content})`,
+          },
+          [`&.${alertClasses.standard}.${alertClasses.colorWarning}`]: {
+            backgroundColor: `color-mix(in srgb, ${theme.palette.warning.main} 12%, ${theme.palette.appSurface.content})`,
+          },
+        }),
+      }),
     },
   },
   MuiTooltip: {
@@ -345,12 +371,12 @@ export const APP_THEME_COMPONENTS: Theme["components"] = {
         backgroundColor: theme.palette.text.primary,
         border: `1px solid ${theme.palette.divider}`,
         borderRadius: 4,
-        color: theme.palette.surface.overlay,
+        color: theme.palette.appSurface.overlay,
         fontSize: "0.75rem",
         fontWeight: 650,
         boxShadow: `0 8px 24px color-mix(in srgb, ${theme.palette.common.black} 24%, transparent)`,
         ...theme.applyStyles("dark", {
-          backgroundColor: theme.palette.surface.elevated,
+          backgroundColor: theme.palette.appSurface.elevated,
           color: theme.palette.text.primary,
         }),
       }),

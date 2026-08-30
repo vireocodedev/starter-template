@@ -76,6 +76,7 @@ describe("Item history overlay loading-state contract", () => {
 
     expect(screen.getByText("Quantity")).toBeVisible();
     expect(document.querySelector(".VireoHistoryEntry-loading")).toBeNull();
+    expect(document.querySelector('time[datetime="2026-08-24T18:30:00.000Z"]')).not.toBeNull();
     expect(document.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
     expect(await screen.findByRole("status")).toHaveTextContent("Loading item history");
     expect(screen.getByRole("progressbar", { hidden: true })).toHaveAttribute("aria-hidden", "true");

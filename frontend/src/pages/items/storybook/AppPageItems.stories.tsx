@@ -143,7 +143,8 @@ export const Loaded: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText("Design system audit")).toBeVisible();
-    await expect(canvasElement.querySelector('[data-items-result-count="desktop"]')).toHaveTextContent("3 results");
+    await expect(canvasElement.querySelector('[data-items-result-count="desktop"]')).toBeNull();
+    await expect(canvasElement.querySelector('[data-items-result-count="mobile"]')).toHaveTextContent("3 results");
   },
 };
 
@@ -194,10 +195,9 @@ export const RefreshError: Story = {
 
 const alignmentSelectors = [
   "[data-app-page-scroll-region]",
-  "[data-items-toolbar]",
+  "[data-items-search]",
   "[data-items-data-state]",
   "[data-items-table]",
-  '[data-items-result-count="desktop"]',
 ] as const;
 
 function measureAlignmentAnchors(canvasElement: HTMLElement) {

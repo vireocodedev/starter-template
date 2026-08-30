@@ -68,84 +68,84 @@ const localStarterAliases = USE_LOCAL_STARTER
   ? [
       // Match declared subpath exports before their package roots.
       {
-        find: /^@vireocodedev\/starter-infrastructure\/network-status$/,
+        find: /^@vireocodedev\/infrastructure\/network-status$/,
         replacement: localStarterEntry("infrastructure", "network/appNetworkStatus.js", "network/appNetworkStatus.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-infrastructure\/pagination$/,
+        find: /^@vireocodedev\/infrastructure\/pagination$/,
         replacement: localStarterEntry("infrastructure", "http/pagination.js", "http/pagination.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-sqlite\/offline$/,
+        find: /^@vireocodedev\/sqlite\/offline$/,
         replacement: localStarterEntry("sqlite", "offline/index.js", "offline/index.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/country$/,
+        find: /^@vireocodedev\/ui\/country$/,
         replacement: localStarterUiEntry("capabilities/country/public.js", "capabilities/country/public.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/forms$/,
+        find: /^@vireocodedev\/ui\/forms$/,
         replacement: localStarterUiEntry("capabilities/forms/public.js", "capabilities/forms/public.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/event-source$/,
+        find: /^@vireocodedev\/ui\/event-source$/,
         replacement: localStarterUiEntry("integrations/event-source/public.js", "integrations/event-source/public.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/hello-pangea-dnd$/,
+        find: /^@vireocodedev\/ui\/hello-pangea-dnd$/,
         replacement: localStarterUiEntry(
           "integrations/hello-pangea-dnd/public.js",
           "integrations/hello-pangea-dnd/public.ts",
         ),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/localization$/,
+        find: /^@vireocodedev\/ui\/localization$/,
         replacement: localStarterUiEntry("integrations/localization/public.js", "integrations/localization/public.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/react-i18next$/,
+        find: /^@vireocodedev\/ui\/react-i18next$/,
         replacement: localStarterUiEntry(
           "integrations/react-i18next/public.js",
           "integrations/react-i18next/public.ts",
         ),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/sonner$/,
+        find: /^@vireocodedev\/ui\/sonner$/,
         replacement: localStarterUiEntry("integrations/sonner/public.js", "integrations/sonner/public.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/tanstack-query$/,
+        find: /^@vireocodedev\/ui\/tanstack-query$/,
         replacement: localStarterUiEntry(
           "integrations/tanstack-query/public.js",
           "integrations/tanstack-query/public.ts",
         ),
       },
       {
-        find: /^@vireocodedev\/starter-history$/,
+        find: /^@vireocodedev\/history$/,
         replacement: localStarterEntry("history", "index.js", "index.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-infrastructure$/,
+        find: /^@vireocodedev\/infrastructure$/,
         replacement: localStarterEntry("infrastructure", "index.js", "index.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-localization$/,
+        find: /^@vireocodedev\/localization$/,
         replacement: localStarterEntry("localization", "index.js", "index.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-queryengine$/,
+        find: /^@vireocodedev\/query$/,
         replacement: localStarterEntry("queryengine", "index.js", "index.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-shell$/,
+        find: /^@vireocodedev\/shell$/,
         replacement: localStarterEntry("shell", "index.js", "index.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-sqlite$/,
+        find: /^@vireocodedev\/sqlite$/,
         replacement: localStarterEntry("sqlite", "index.js", "index.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui$/,
+        find: /^@vireocodedev\/ui$/,
         replacement: localStarterEntry("ui", "index.js", "index.ts"),
       },
     ]
@@ -182,15 +182,17 @@ export default defineConfig({
               name: "Vireo Starter App",
               short_name: "Vireo",
               description: "A production-oriented full-stack PWA built on Vireo Starter.",
-              theme_color: "#07111f",
-              background_color: "#07111f",
+              theme_color: "#0b0c0e",
+              background_color: "#0b0c0e",
               display: "standalone",
               start_url: "/",
               icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any maskable" }],
             },
             workbox: {
               navigateFallbackDenylist: [/^\/api(?:\/|$)/],
-              runtimeCaching: [{ urlPattern: ({ url }) => /^\/api(?:\/|$)/u.test(url.pathname), handler: "NetworkOnly" }],
+              runtimeCaching: [
+                { urlPattern: ({ url }) => /^\/api(?:\/|$)/u.test(url.pathname), handler: "NetworkOnly" },
+              ],
             },
           }),
         ]

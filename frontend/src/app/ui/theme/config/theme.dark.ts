@@ -24,13 +24,13 @@ export const APP_THEME_DARK_COLOR_SCHEME: ColorSystemOptions = {
       default: APP_SURFACES_DARK.canvas,
       paper: APP_SURFACES_DARK.overlay,
     },
-    surface: APP_SURFACES_DARK,
+    appSurface: APP_SURFACES_DARK,
     text: {
-      primary: "#f5f8fc",
-      secondary: "#a9bad0",
-      disabled: "#6f8299",
+      primary: "#f4f5f6",
+      secondary: "#a9adb5",
+      disabled: "#70757d",
     },
-    divider: "#29435f",
+    divider: "#303238",
     action: {
       hover: "rgba(105, 217, 255, 0.09)",
       selected: "rgba(105, 217, 255, 0.16)",

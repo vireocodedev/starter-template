@@ -39,6 +39,7 @@ import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences"
 import { useAppAuth } from "@/app/shell/hooks/useAppAuth";
 import { isAppRouteActive } from "@/app/shell/routing/isAppRouteActive";
 import { useAppTranslation } from "@/app/ui/localization/use-app-translation";
+import { APP_THEME_TOKENS } from "@/app/ui/theme/config/theme.tokens";
 
 const navigationIcons: Record<AppNavigationIcon, React.ReactNode> = {
   OVERVIEW: <DashboardOutlined />,
@@ -109,6 +110,7 @@ export function AppShellLayout() {
   return (
     <Box sx={{ display: "flex", height: "100dvh", minHeight: 0, overflow: "hidden" }}>
       <VireoApplicationNavigation
+        navigationLabel={t("navigation.PRIMARY")}
         variant={desktop ? "permanent" : "temporary"}
         open={mobileOpen}
         onClose={closeMobileNavigation}
@@ -126,92 +128,109 @@ export function AppShellLayout() {
           return (
             <>
               <Box
+                data-app-navigation-header
                 sx={{
-                  alignItems: "center",
+                  bgcolor: "appSurface.chrome",
                   display: "flex",
-                  flexDirection: "row",
-                  gap: 1.5,
-                  justifyContent: compact ? "center" : "flex-start",
-                  minHeight: compact ? 72 : 89,
-                  px: compact ? 1 : 2.25,
-                  py: compact ? 1 : 2.5,
+                  flexDirection: "column",
+                  flexShrink: 0,
+                  ...(desktop && {
+                    height: APP_THEME_TOKENS.layout.headerHeight.desktop,
+                    maxHeight: APP_THEME_TOKENS.layout.headerHeight.desktop,
+                    minHeight: APP_THEME_TOKENS.layout.headerHeight.desktop,
+                  }),
                 }}
               >
-                {showBrandMark && (
-                  <Avatar
-                    variant="rounded"
-                    sx={{
-                      bgcolor: "primary.main",
-                      borderColor: "primary.light",
-                      borderStyle: "solid",
-                      borderWidth: 1,
-                      borderRadius: 1,
-                      boxShadow: theme =>
-                        `inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 30%, transparent), 0 4px 12px color-mix(in srgb, ${theme.palette.primary.main} 24%, transparent)`,
-                      color: "primary.contrastText",
-                      flex: "0 0 auto",
-                      fontWeight: 900,
-                    }}
-                  >
-                    V
-                  </Avatar>
-                )}
-                {!compact && (
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography noWrap sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-                      {t("brand.name")}
-                    </Typography>
-                    <Box sx={{ alignItems: "center", display: "flex", gap: 0.75, mt: 0.25 }}>
-                      <Box
-                        aria-hidden
-                        sx={{
-                          bgcolor: online ? "success.main" : "warning.main",
-                          borderRadius: "50%",
-                          boxShadow: theme =>
-                            `0 0 8px color-mix(in srgb, ${online ? theme.palette.success.main : theme.palette.warning.main} 55%, transparent)`,
-                          height: 6,
-                          width: 6,
-                        }}
-                      />
-                      <Typography
-                        color="text.secondary"
-                        sx={{
-                          fontSize: "0.625rem",
-                          fontWeight: 750,
-                          letterSpacing: "0.08em",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        {online ? t("brand.online") : t("brand.offline")}
+                <Box
+                  sx={{
+                    alignItems: "center",
+                    boxSizing: "border-box",
+                    display: "flex",
+                    flex: desktop ? "1 1 0" : undefined,
+                    flexDirection: "row",
+                    gap: 1.5,
+                    justifyContent: compact ? "center" : "flex-start",
+                    minHeight: desktop ? 0 : compact ? 72 : 89,
+                    px: compact ? 1 : 2.25,
+                    py: compact ? 1 : 2.5,
+                  }}
+                >
+                  {showBrandMark && (
+                    <Avatar
+                      variant="rounded"
+                      sx={{
+                        bgcolor: "primary.main",
+                        borderColor: "primary.light",
+                        borderStyle: "solid",
+                        borderWidth: 1,
+                        borderRadius: 1,
+                        boxShadow: theme =>
+                          `inset 0 1px 0 color-mix(in srgb, ${theme.palette.common.white} 30%, transparent), 0 4px 12px color-mix(in srgb, ${theme.palette.primary.main} 24%, transparent)`,
+                        color: "primary.contrastText",
+                        flex: "0 0 auto",
+                        fontWeight: 900,
+                      }}
+                    >
+                      V
+                    </Avatar>
+                  )}
+                  {!compact && (
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography noWrap sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                        {t("brand.name")}
                       </Typography>
+                      <Box sx={{ alignItems: "center", display: "flex", gap: 0.75, mt: 0.25 }}>
+                        <Box
+                          aria-hidden
+                          sx={{
+                            bgcolor: online ? "success.main" : "warning.main",
+                            borderRadius: "50%",
+                            boxShadow: theme =>
+                              `0 0 8px color-mix(in srgb, ${online ? theme.palette.success.main : theme.palette.warning.main} 55%, transparent)`,
+                            height: 6,
+                            width: 6,
+                          }}
+                        />
+                        <Typography
+                          color="text.secondary"
+                          sx={{
+                            fontSize: "0.625rem",
+                            fontWeight: 750,
+                            letterSpacing: "0.08em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          {online ? t("brand.online") : t("brand.offline")}
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
-                )}
-                {desktop && !preferences.navigationLocked && (
-                  <Tooltip title={compact ? t("navigation.EXPAND") : t("navigation.COMPACT")}>
-                    <IconButton
-                      aria-label={compact ? t("navigation.EXPAND") : t("navigation.COMPACT")}
-                      onClick={toggleMode}
-                      size="small"
-                    >
-                      {compact ? <ChevronRightRounded /> : <ChevronLeftRounded />}
-                    </IconButton>
-                  </Tooltip>
-                )}
-                {!desktop && (
-                  <Tooltip title={t("navigation.CLOSE")}>
-                    <IconButton
-                      aria-label={t("navigation.CLOSE")}
-                      onClick={closeMobileNavigation}
-                      size="small"
-                      sx={{ ml: "auto" }}
-                    >
-                      <CloseRounded />
-                    </IconButton>
-                  </Tooltip>
-                )}
+                  )}
+                  {desktop && !preferences.navigationLocked && (
+                    <Tooltip title={compact ? t("navigation.EXPAND") : t("navigation.COMPACT")}>
+                      <IconButton
+                        aria-label={compact ? t("navigation.EXPAND") : t("navigation.COMPACT")}
+                        onClick={toggleMode}
+                        size="small"
+                      >
+                        {compact ? <ChevronRightRounded /> : <ChevronLeftRounded />}
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {!desktop && (
+                    <Tooltip title={t("navigation.CLOSE")}>
+                      <IconButton
+                        aria-label={t("navigation.CLOSE")}
+                        onClick={closeMobileNavigation}
+                        size="small"
+                        sx={{ ml: "auto" }}
+                      >
+                        <CloseRounded />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </Box>
+                <Divider sx={{ flexShrink: 0 }} />
               </Box>
-              <Divider />
               <List
                 aria-label={t("navigation.PRIMARY")}
                 component="nav"
@@ -220,78 +239,136 @@ export function AppShellLayout() {
                 {navigation.map(item => (
                   <VireoApplicationNavigationItem
                     key={item.path}
+                    href={item.path}
                     icon={item.icon}
                     label={item.label}
                     selected={isAppRouteActive(location.pathname, item.path)}
-                    onClick={() => navigateTo(item.path)}
+                    onClick={event => {
+                      event.preventDefault();
+                      navigateTo(item.path);
+                    }}
                     onFocus={() => preloadAppPage(item.path)}
                     onPointerEnter={() => preloadAppPage(item.path)}
                     sx={{ mb: 0.5 }}
                   />
                 ))}
               </List>
-              <Divider />
-              {compact ? (
-                <Box sx={{ alignItems: "center", display: "flex", justifyContent: "center", p: 1 }}>
-                  <Tooltip placement="right" title={t("account.OPEN_MENU")}>
-                    <IconButton
-                      aria-label={t("account.OPEN_MENU")}
-                      onClick={event => setAccountAnchor(event.currentTarget)}
-                      size="large"
-                    >
-                      <AccountCircleRounded fontSize="inherit" />
-                    </IconButton>
-                  </Tooltip>
-                  <Popover
-                    anchorEl={accountAnchor}
-                    anchorOrigin={{ horizontal: "right", vertical: "center" }}
-                    onClose={() => setAccountAnchor(null)}
-                    open={Boolean(accountAnchor)}
-                    transformOrigin={{ horizontal: "left", vertical: "center" }}
-                    slotProps={{ paper: { role: "menu", sx: { ml: 1, minWidth: 240, p: 1 } } }}
+              <Box
+                data-app-navigation-footer
+                sx={{
+                  bgcolor: "appSurface.chrome",
+                  display: "flex",
+                  flexDirection: "column",
+                  flexShrink: 0,
+                  ...(desktop && {
+                    height: APP_THEME_TOKENS.layout.footerHeight.desktop,
+                    maxHeight: APP_THEME_TOKENS.layout.footerHeight.desktop,
+                    minHeight: APP_THEME_TOKENS.layout.footerHeight.desktop,
+                  }),
+                }}
+              >
+                <Divider sx={{ flexShrink: 0 }} />
+                {compact ? (
+                  <Box
+                    sx={{
+                      alignItems: "center",
+                      display: "flex",
+                      flex: desktop ? "1 1 0" : undefined,
+                      justifyContent: "center",
+                      minHeight: desktop ? 0 : undefined,
+                      px: 0.75,
+                      py: 1,
+                    }}
                   >
-                    <Box sx={{ alignItems: "center", display: "flex", gap: 1.25, p: 1 }}>
-                      <Avatar sx={{ height: 36, width: 36 }}>{user?.username.slice(0, 1).toUpperCase()}</Avatar>
-                      <Box sx={{ minWidth: 0 }}>
-                        <Typography noWrap variant="body2" sx={{ fontWeight: 700 }}>
-                          {user?.username}
-                        </Typography>
-                        <Typography color="text.secondary" variant="caption">
-                          {user?.role}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Divider />
-                    <Button
-                      color="inherit"
-                      fullWidth
-                      onClick={signOut}
-                      role="menuitem"
-                      startIcon={<LogoutOutlined />}
-                      sx={{ justifyContent: "flex-start", mt: 0.5 }}
+                    <Tooltip title={t("account.OPEN_MENU")}>
+                      <Button
+                        aria-controls={accountAnchor ? "app-account-menu" : undefined}
+                        aria-expanded={accountAnchor ? true : undefined}
+                        aria-haspopup="menu"
+                        aria-label={t("account.OPEN_MENU")}
+                        color="inherit"
+                        onClick={event => setAccountAnchor(event.currentTarget)}
+                        startIcon={<AccountCircleRounded />}
+                        sx={{
+                          borderRadius: 1,
+                          flexDirection: "column",
+                          fontSize: "0.625rem",
+                          gap: 0.25,
+                          height: 64,
+                          minWidth: 0,
+                          width: "100%",
+                          "& .MuiButton-startIcon": { m: 0 },
+                        }}
+                      >
+                        {t("account.LABEL")}
+                      </Button>
+                    </Tooltip>
+                    <Popover
+                      id="app-account-menu"
+                      anchorEl={accountAnchor}
+                      anchorOrigin={{ horizontal: "right", vertical: "center" }}
+                      onClose={() => setAccountAnchor(null)}
+                      open={Boolean(accountAnchor)}
+                      transformOrigin={{ horizontal: "left", vertical: "center" }}
+                      slotProps={{
+                        paper: {
+                          role: "menu",
+                          sx: { ml: "13px", minWidth: 240, p: 1 },
+                        },
+                      }}
                     >
-                      {t("account.SIGN_OUT")}
-                    </Button>
-                  </Popover>
-                </Box>
-              ) : (
-                <Box sx={{ alignItems: "center", bgcolor: "surface.chrome", display: "flex", gap: 1.25, p: 2 }}>
-                  <Avatar sx={{ height: 36, width: 36 }}>{user?.username.slice(0, 1).toUpperCase()}</Avatar>
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography noWrap variant="body2" sx={{ fontWeight: 700 }}>
-                      {user?.username}
-                    </Typography>
-                    <Typography color="text.secondary" variant="caption">
-                      {user?.role}
-                    </Typography>
+                      <Box sx={{ alignItems: "center", display: "flex", gap: 1.25, p: 1 }}>
+                        <Avatar sx={{ height: 36, width: 36 }}>{user?.username.slice(0, 1).toUpperCase()}</Avatar>
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography noWrap variant="body2" sx={{ fontWeight: 700 }}>
+                            {user?.username}
+                          </Typography>
+                          <Typography color="text.secondary" variant="caption">
+                            {user?.role}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Divider />
+                      <Button
+                        color="inherit"
+                        fullWidth
+                        onClick={signOut}
+                        role="menuitem"
+                        startIcon={<LogoutOutlined />}
+                        sx={{ justifyContent: "flex-start", mt: 0.5 }}
+                      >
+                        {t("account.SIGN_OUT")}
+                      </Button>
+                    </Popover>
                   </Box>
-                  <Tooltip title={t("account.SIGN_OUT")}>
-                    <IconButton aria-label={t("account.SIGN_OUT")} onClick={signOut} size="small">
-                      <LogoutOutlined />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-              )}
+                ) : (
+                  <Box
+                    sx={{
+                      alignItems: "center",
+                      display: "flex",
+                      flex: desktop ? "1 1 0" : undefined,
+                      gap: 1.25,
+                      minHeight: desktop ? 0 : undefined,
+                      p: 2,
+                    }}
+                  >
+                    <Avatar sx={{ height: 36, width: 36 }}>{user?.username.slice(0, 1).toUpperCase()}</Avatar>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography noWrap variant="body2" sx={{ fontWeight: 700 }}>
+                        {user?.username}
+                      </Typography>
+                      <Typography color="text.secondary" variant="caption">
+                        {user?.role}
+                      </Typography>
+                    </Box>
+                    <Tooltip title={t("account.SIGN_OUT")}>
+                      <IconButton aria-label={t("account.SIGN_OUT")} onClick={signOut} size="small">
+                        <LogoutOutlined />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                )}
+              </Box>
             </>
           );
         }}

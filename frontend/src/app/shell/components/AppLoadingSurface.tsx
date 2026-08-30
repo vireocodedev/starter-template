@@ -20,7 +20,7 @@ function AppApplicationProgressFallback({ label }: { label: string }) {
       data-app-route-fallback-policy="progress"
       sx={{
         alignItems: "center",
-        bgcolor: "surface.canvas",
+        bgcolor: "appSurface.canvas",
         display: "flex",
         flexDirection: "column",
         gap: 1.5,

@@ -2,6 +2,7 @@ import { AddRounded, DeleteOutlineRounded } from "@mui/icons-material";
 import { Alert, Box, Button, IconButton, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/ui";
 import type { AppQueryEntityKey } from "@/app/data/query/models/AppQueryEntityKey";
+import { VireoContainerGrid } from "@/app/ui/toolkit/components/layout/VireoContainerGrid";
 import type { QueryFilterCandidate, QueryFilterRuleDraft } from "../models/EntityQueryFilters";
 import {
   createQueryFilterRule,
@@ -42,7 +43,7 @@ export function EntityQueryFiltersForm({
           <Box
             key={rule.id}
             sx={{
-              bgcolor: "surface.elevated",
+              bgcolor: "appSurface.elevated",
               borderColor: errors[rule.id] ? "error.main" : "divider",
               borderStyle: "solid",
               borderWidth: 1,
@@ -61,44 +62,48 @@ export function EntityQueryFiltersForm({
                   <DeleteOutlineRounded />
                 </IconButton>
               </Stack>
-              <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
-                <VireoLabelBox label={t("form.field")}>
-                  <Select
-                    fullWidth
-                    value={rule.candidateId}
-                    onChange={event => {
-                      const next = candidates.find(item => item.id === event.target.value);
-                      if (next) update(rule.id, current => updateQueryFilterRuleCandidate(current, next));
-                    }}
-                  >
-                    {!candidate && <MenuItem value={rule.candidateId}>{t("form.unavailableField")}</MenuItem>}
-                    {candidates.map(item => (
-                      <MenuItem key={item.id} value={item.id}>
-                        {item.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </VireoLabelBox>
-                {candidate && !candidate.relation && (
-                  <VireoLabelBox label={t("form.operator")}>
+              <VireoContainerGrid container spacing={1.5}>
+                <VireoContainerGrid size={candidate && !candidate.relation ? { xs: 12, sm: 6 } : 12}>
+                  <VireoLabelBox label={t("form.field")}>
                     <Select
                       fullWidth
-                      value={rule.operator ?? ""}
-                      onChange={event =>
-                        update(rule.id, current =>
-                          updateQueryFilterRuleOperator(current, candidate, event.target.value as never),
-                        )
-                      }
+                      value={rule.candidateId}
+                      onChange={event => {
+                        const next = candidates.find(item => item.id === event.target.value);
+                        if (next) update(rule.id, current => updateQueryFilterRuleCandidate(current, next));
+                      }}
                     >
-                      {candidate.operators.map(operator => (
-                        <MenuItem key={operator} value={operator}>
-                          {getQueryFilterOperatorLabel(t, operator)}
+                      {!candidate && <MenuItem value={rule.candidateId}>{t("form.unavailableField")}</MenuItem>}
+                      {candidates.map(item => (
+                        <MenuItem key={item.id} value={item.id}>
+                          {item.label}
                         </MenuItem>
                       ))}
                     </Select>
                   </VireoLabelBox>
+                </VireoContainerGrid>
+                {candidate && !candidate.relation && (
+                  <VireoContainerGrid size={{ xs: 12, sm: 6 }}>
+                    <VireoLabelBox label={t("form.operator")}>
+                      <Select
+                        fullWidth
+                        value={rule.operator ?? ""}
+                        onChange={event =>
+                          update(rule.id, current =>
+                            updateQueryFilterRuleOperator(current, candidate, event.target.value as never),
+                          )
+                        }
+                      >
+                        {candidate.operators.map(operator => (
+                          <MenuItem key={operator} value={operator}>
+                            {getQueryFilterOperatorLabel(t, operator)}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </VireoLabelBox>
+                  </VireoContainerGrid>
                 )}
-              </Box>
+              </VireoContainerGrid>
               {candidate && (
                 <QueryFilterValueEditor
                   entityKey={entityKey}

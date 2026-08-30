@@ -5,6 +5,7 @@ import type { QueryEngineRelationOption } from "@vireocodedev/query";
 import { VireoLabelBox, VireoLoadingRegion } from "@vireocodedev/ui";
 import { queryEngineApi } from "@/app/data/query/api/queryEngine.api";
 import type { AppQueryEntityKey } from "@/app/data/query/models/AppQueryEntityKey";
+import { VireoContainerGrid } from "@/app/ui/toolkit/components/layout/VireoContainerGrid";
 import type { QueryFilterCandidate, QueryFilterRuleDraft } from "../models/EntityQueryFilters";
 import { useEntityQueryFiltersTranslation } from "../localization/use-entity-query-filters-translation";
 
@@ -69,24 +70,28 @@ export function QueryFilterValueEditor({ entityKey, candidate, rule, onChange }:
   if (rule.value.kind === "dateRange") {
     const dateRange = rule.value;
     return (
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-        <VireoLabelBox label={t("form.from")}>
-          <TextField
-            fullWidth
-            type="date"
-            value={dateRange.from}
-            onChange={event => onChange({ ...dateRange, from: event.target.value })}
-          />
-        </VireoLabelBox>
-        <VireoLabelBox label={t("form.to")}>
-          <TextField
-            fullWidth
-            type="date"
-            value={dateRange.to}
-            onChange={event => onChange({ ...dateRange, to: event.target.value })}
-          />
-        </VireoLabelBox>
-      </Stack>
+      <VireoContainerGrid container spacing={1}>
+        <VireoContainerGrid size={{ xs: 12, sm: 6 }}>
+          <VireoLabelBox label={t("form.from")}>
+            <TextField
+              fullWidth
+              type="date"
+              value={dateRange.from}
+              onChange={event => onChange({ ...dateRange, from: event.target.value })}
+            />
+          </VireoLabelBox>
+        </VireoContainerGrid>
+        <VireoContainerGrid size={{ xs: 12, sm: 6 }}>
+          <VireoLabelBox label={t("form.to")}>
+            <TextField
+              fullWidth
+              type="date"
+              value={dateRange.to}
+              onChange={event => onChange({ ...dateRange, to: event.target.value })}
+            />
+          </VireoLabelBox>
+        </VireoContainerGrid>
+      </VireoContainerGrid>
     );
   }
 

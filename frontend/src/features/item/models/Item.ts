@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { ValidatedSchemaFactory } from "@/app/ui/localization/validated-schema";
+import { AppFormMode } from "@/app/ui/forms/models/AppFormMode";
 
 export const ItemStatus = z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]);
 export type ItemStatus = z.infer<typeof ItemStatus>;
@@ -27,9 +28,29 @@ export function getDefaultItem(): Item {
   };
 }
 
-export const buildValidatedItemSchema: ValidatedSchemaFactory<Item, "item"> = t =>
-  Item.extend({
-    name: Item.shape.name.trim().min(2, t("validation.name.min")),
+export type ItemFormValidationContext = Readonly<{
+  nameMinimumLength: number;
+}>;
+
+export type ItemValidatedSchemaContext = ItemFormValidationContext &
+  Readonly<{
+    mode: AppFormMode;
+  }>;
+
+export const DEFAULT_ITEM_FORM_VALIDATION_CONTEXT: ItemFormValidationContext = Object.freeze({
+  nameMinimumLength: 2,
+});
+
+export const buildValidatedItemSchema: ValidatedSchemaFactory<Item, "item", ItemValidatedSchemaContext> = (
+  t,
+  context,
+) => {
+  if (context.mode === AppFormMode.enum.READ) return Item as z.ZodType<Item, Item>;
+
+  return Item.extend({
+    name: Item.shape.name
+      .trim()
+      .min(context.nameMinimumLength, t("validation.name.min", { minimum: context.nameMinimumLength })),
     description: Item.shape.description.refine(value => value.length <= 2000, {
       message: t("validation.description.max"),
     }),
@@ -37,3 +58,4 @@ export const buildValidatedItemSchema: ValidatedSchemaFactory<Item, "item"> = t 
       .int(t("validation.quantity.integer"))
       .nonnegative(t("validation.quantity.nonnegative")),
   }) as z.ZodType<Item, Item>;
+};

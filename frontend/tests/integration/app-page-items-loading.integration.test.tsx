@@ -116,7 +116,9 @@ describe("Items loading-state contract", () => {
 
     expect(screen.getByPlaceholderText("Search by name, description or status")).toBeVisible();
     expect(screen.getAllByRole("button", { name: "Filters" }).length).toBeGreaterThan(0);
-    expect(view.container.querySelectorAll('[data-items-result-count-state="reserved"]')).toHaveLength(2);
+    expect(view.container.querySelectorAll('[data-items-result-count-state="reserved"]')).toHaveLength(1);
+    expect(view.container.querySelector('[data-items-result-count="desktop"]')).toBeNull();
+    expect(view.container.querySelector('[data-items-result-count="mobile"]')).not.toBeNull();
     expect(view.container.querySelector('[data-items-data-state="loading"]')).not.toBeNull();
     expect(view.container.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
     expect(await screen.findByRole("status")).toHaveTextContent("Loading items");
@@ -172,7 +174,8 @@ describe("Items loading-state contract", () => {
     const view = renderItems(itemListState({ data: undefined, isLoading: true, layout: "mobile" }), "small");
 
     expect(view.container.querySelector('[data-items-table][data-container-layout="mobile"]')).not.toBeNull();
-    expect(view.container.querySelector("[data-items-toolbar]")).not.toBeNull();
+    expect(view.container.querySelector("[data-items-toolbar]")).toBeNull();
+    expect(view.container.querySelector("[data-items-search]")).not.toBeNull();
     expect(view.container.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
     expect(await screen.findByRole("status")).toHaveTextContent("Loading items");
   });

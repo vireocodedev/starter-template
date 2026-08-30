@@ -15,7 +15,7 @@ const itemHr = {
     ARCHIVED: "Arhivirano",
   },
   validation: {
-    name: { min: "Unesite najmanje dva znaka." },
+    name: { min: "Unesite najmanje {{minimum}} znaka." },
     description: { max: "Upotrijebite najviše 2.000 znakova." },
     quantity: {
       integer: "Upotrijebite cijeli broj.",
@@ -30,6 +30,7 @@ const itemHr = {
     createTitle: "Kreiraj stavku",
     updateTitle: "Uredi stavku",
     close: "Zatvori obrazac stavke",
+    notProvided: "Nije navedeno",
     namePlaceholder: "Revizija sustava dizajna",
     descriptionPlaceholder: "Što je potrebno napraviti?",
   },

@@ -208,7 +208,7 @@ export function AppPageSettings() {
           data-settings-compact-command-section
           sx={{
             borderBottom: "1px solid var(--mui-palette-divider)",
-            bgcolor: "surface.screen",
+            bgcolor: "appSurface.screen",
             p: 2,
           }}
         >
