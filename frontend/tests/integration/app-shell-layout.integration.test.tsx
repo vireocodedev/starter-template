@@ -8,6 +8,7 @@ import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
 import { AppPreferencesContext } from "@/app/ui/preferences/contexts/AppPreferencesContext";
 import { DEFAULT_APP_PREFERENCES, type AppPreferences } from "@/app/ui/preferences/models/AppPreferences";
 import { AppAuthContext } from "@/app/shell/contexts/AppAuthContext";
+import en from "@/app/ui/localization/resources/app.en";
 
 const navigationPropsSpy = vi.hoisted(() => vi.fn());
 const onlineStatusSpy = vi.hoisted(() => vi.fn(() => true));
@@ -195,7 +196,7 @@ describe("AppShellLayout", () => {
       maxHeight: "81px",
       minHeight: "81px",
     });
-    expect(screen.getByText("Vireo Starter")).toBeVisible();
+    expect(screen.getByText(en.brand.name)).toBeVisible();
     expect(screen.getByText("System online")).toBeVisible();
     expect(screen.getByRole("button", { name: "Compact navigation" })).toBeVisible();
   });
@@ -215,7 +216,7 @@ describe("AppShellLayout", () => {
 
     expect(screen.getByRole("heading", { name: "Overview" })).toBeVisible();
     expect(screen.queryByText("Page description")).not.toBeInTheDocument();
-    expect(screen.queryByText("Vireo Starter")).not.toBeInTheDocument();
+    expect(screen.queryByText(en.brand.name)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Close navigation" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Open navigation" }));
     expect(screen.getByRole("button", { name: "Close navigation" })).toBeVisible();
