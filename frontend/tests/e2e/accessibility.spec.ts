@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import axe from "axe-core";
+import { authenticateAsDevelopmentAdministrator } from "./support/authentication";
 
 async function expectNoSeriousAccessibilityViolations(page: Page): Promise<void> {
   await page.addScriptTag({ content: axe.source });
@@ -34,9 +35,7 @@ test("login has no serious WCAG 2.2 automated violations", async ({ page }) => {
 });
 
 test("authenticated Item list and create dialog have no serious automated violations", async ({ page }) => {
-  await page.goto("/login");
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await authenticateAsDevelopmentAdministrator(page);
 
   await page.goto("/items");
   await expect(page.getByRole("button", { name: "Create item" })).toBeVisible();

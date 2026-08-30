@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { authenticateAsDevelopmentAdministrator } from "./support/authentication";
 
 test("the mobile filters drawer settles closed after a handle swipe", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "mobile-chromium", "The bottom drawer is the mobile overlay presentation.");
@@ -6,9 +7,7 @@ test("the mobile filters drawer settles closed after a handle swipe", async ({ p
   const runtimeErrors: Error[] = [];
   page.on("pageerror", error => runtimeErrors.push(error));
 
-  await page.goto("/login");
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await authenticateAsDevelopmentAdministrator(page);
   await page.goto("/items");
   await page.getByRole("button", { name: "Filters" }).click();
 
