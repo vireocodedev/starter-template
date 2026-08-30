@@ -37,7 +37,7 @@ On the host:
 cd /opt/apps/vireo-flagship-demo
 cp deploy/hetzner/vireo-flagship-demo.env.example .env
 chmod 600 .env
-# Replace the placeholder POSTGRES_PASSWORD with a dedicated random value.
+# Replace both password placeholders with distinct, dedicated random values.
 ./deploy/hetzner/deploy.sh
 ```
 

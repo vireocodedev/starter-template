@@ -5,19 +5,7 @@ set -euo pipefail
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repository_root"
 
-database_name="${POSTGRES_DB:-starter_template}"
-database_user="${POSTGRES_USER:-starter_template}"
-backup_path="${1:-backups/${database_name}-$(date -u +%Y%m%dT%H%M%SZ).dump}"
-
-if [[ ! "$database_name" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
-  printf 'POSTGRES_DB must be a simple PostgreSQL identifier.\n' >&2
-  exit 1
-fi
-
-if [[ -e "$backup_path" ]]; then
-  printf 'Refusing to overwrite existing backup: %s\n' "$backup_path" >&2
-  exit 1
-fi
+source "$repository_root/scripts/compose-database-contract.sh"
 
 if docker compose version >/dev/null 2>&1; then
   compose_command=(docker compose)
@@ -25,6 +13,24 @@ elif command -v docker-compose >/dev/null 2>&1 && docker-compose version >/dev/n
   compose_command=(docker-compose)
 else
   printf 'Docker Compose is required.\n' >&2
+  exit 1
+fi
+
+select_compose_database_environment
+if [[ -n "$VIREO_DATABASE_ENV_FILE_RESOLVED" ]]; then
+  compose_command+=(--env-file "$VIREO_DATABASE_ENV_FILE_RESOLVED")
+fi
+if [[ -n "${VIREO_DATABASE_COMPOSE_PROJECT:-${VIREO_DEMO_COMPOSE_PROJECT:-}}" ]]; then
+  compose_command+=(--project-name "${VIREO_DATABASE_COMPOSE_PROJECT:-${VIREO_DEMO_COMPOSE_PROJECT}}")
+fi
+
+resolve_compose_database_contract
+database_name="$VIREO_DATABASE_NAME"
+database_user="$VIREO_DATABASE_OWNER_USER"
+backup_path="${1:-backups/${database_name}-$(date -u +%Y%m%dT%H%M%SZ).dump}"
+
+if [[ -e "$backup_path" ]]; then
+  printf 'Refusing to overwrite existing backup: %s\n' "$backup_path" >&2
   exit 1
 fi
 

@@ -104,6 +104,75 @@ if (!baseCompose.includes("127.0.0.1:${FRONTEND_PORT:-3000}:8080")) {
   problems.push("the canonical frontend must bind to host loopback");
 }
 
+export function hostEnvironmentContractProblems(hostEnvironment) {
+  const contractProblems = [];
+  const hostEnvironmentValues = new Map();
+  for (const rawLine of hostEnvironment.split(/\r?\n/)) {
+    if (/^\s*(?:#.*)?$/.test(rawLine)) continue;
+    const assignment = rawLine.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+    if (!assignment) {
+      contractProblems.push(
+        "the host environment template contains a malformed assignment",
+      );
+      continue;
+    }
+    const [, variable, value] = assignment;
+    if (hostEnvironmentValues.has(variable)) {
+      contractProblems.push(`the host environment template duplicates ${variable}`);
+      continue;
+    }
+    hostEnvironmentValues.set(variable, value);
+  }
+  for (const variable of [
+    "POSTGRES_OWNER_USER",
+    "POSTGRES_OWNER_PASSWORD",
+    "POSTGRES_RUNTIME_USER",
+    "POSTGRES_RUNTIME_PASSWORD",
+  ]) {
+  if (!hostEnvironmentValues.get(variable)) {
+    contractProblems.push(`the host environment template must define ${variable}`);
+  }
+}
+if (hostEnvironmentValues.get("SESSION_COOKIE_SECURE") !== "true") {
+  contractProblems.push(
+    "the host environment template must set SESSION_COOKIE_SECURE=true",
+  );
+}
+if (
+    hostEnvironmentValues.has("POSTGRES_USER") ||
+    hostEnvironmentValues.has("POSTGRES_PASSWORD")
+  ) {
+    contractProblems.push(
+      "the host environment template must not use the legacy single database identity",
+    );
+  }
+  const ownerUser = hostEnvironmentValues.get("POSTGRES_OWNER_USER");
+  const runtimeUser = hostEnvironmentValues.get("POSTGRES_RUNTIME_USER");
+  const ownerPassword = hostEnvironmentValues.get("POSTGRES_OWNER_PASSWORD");
+  const runtimePassword = hostEnvironmentValues.get("POSTGRES_RUNTIME_PASSWORD");
+  if (
+    ownerUser &&
+    runtimeUser &&
+    ownerUser.toLowerCase() === runtimeUser.toLowerCase()
+  ) {
+    contractProblems.push(
+      "the host environment template must use distinct owner and runtime database users",
+    );
+  }
+  if (ownerPassword && runtimePassword && ownerPassword === runtimePassword) {
+    contractProblems.push(
+      "the host environment template must use distinct owner and runtime database secrets",
+    );
+  }
+  return contractProblems;
+}
+
+const hostEnvironment = readFileSync(
+  join(root, "deploy/hetzner/vireo-flagship-demo.env.example"),
+  "utf8",
+);
+problems.push(...hostEnvironmentContractProblems(hostEnvironment));
+
 const developmentCompose = readFileSync(join(root, "compose.dev.yaml"), "utf8");
 if (!developmentCompose.includes("127.0.0.1:${POSTGRES_PORT:-5432}:5432")) {
   problems.push(

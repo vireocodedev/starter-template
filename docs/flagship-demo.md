@@ -19,7 +19,7 @@ host template, then deploy with both Compose descriptors:
 ```bash
 cp deploy/hetzner/vireo-flagship-demo.env.example .env
 chmod 600 .env
-# Replace the placeholder POSTGRES_PASSWORD before continuing.
+# Replace both password placeholders with distinct random values before continuing.
 ./deploy/hetzner/deploy.sh
 ```
 

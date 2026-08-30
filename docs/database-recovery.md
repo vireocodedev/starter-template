@@ -15,6 +15,14 @@ With the canonical Compose PostgreSQL service running:
 ./scripts/db-backup.sh backups/before-release.dump
 ```
 
+The helpers resolve the effective `POSTGRES_DB` and `POSTGRES_OWNER_USER` from an
+explicit `VIREO_DATABASE_ENV_FILE`, then `VIREO_DEMO_ENV_FILE`, then the canonical
+repository `.env`; they parse that file as Compose assignments and never source it.
+They pass the selected file to Compose as `--env-file`, so the helper and Compose
+resolve the same deployment contract. Without a selected file, the helpers retain
+the canonical `starter_template` defaults; supply an environment file for any
+deployment using different database or owner names.
+
 The helper creates a custom-format `pg_dump`, uses owner/ACL-independent output,
 restricts the file to the current user, and refuses to overwrite an existing path.
 Copy the result to access-controlled, encrypted storage outside the deployment's
