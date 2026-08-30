@@ -31,8 +31,72 @@ npx --yes --package=create-vireo@0.5.0 vireo upgrade --to 0.3.0 \
 
 `--accept-application-owned` acknowledges that the CLI cannot decide how upstream
 Template changes fit the application's domain and deployment. It does not claim
-those changes were merged. Review and port the source-to-target Template diff,
-including security, operations, frontend, backend, schema, and deployment changes.
+those changes were merged or completed. A managed apply can therefore leave the
+application unable to compile until the pending actions below have been completed.
+Review and port the source-to-target Template diff, including security, operations,
+frontend, backend, schema, and deployment changes.
+
+## Application-owned 0.2.0 to 0.3.0 checklist
+
+Complete each item in the application that is being upgraded. These are intentionally
+not automated: they require a decision about the application's routes, language
+catalogues, component composition, and visual identity.
+
+### `navigation-landmark-and-links`
+
+- Update each `AppShellLayout` use to pass the 0.3 navigation contract.
+- In both `en` and `hr`, provide a `navigation.PRIMARY` string appropriate to the
+  application's primary navigation and pass its translated value as the
+  `navigationLabel` prop.
+- Replace placeholder navigation destinations with real `href` values. If a route is
+  handled by client-side navigation, keep the real `href` for native link behaviour
+  and use `preventDefault` before invoking the application's navigation handler.
+
+### `responsive-table-live-announcements`
+
+- Update every `AppPageItems` use for the 0.3 responsive-table contract.
+- Add localized `loadingNextPage` and `loadedNextPage` strings to both the `en` and
+  `hr` catalogues. They must describe the page-load state without relying on visual
+  table changes alone.
+
+### `accessible-name-contracts`
+
+- Resolve every overlay and frame call site reported by the compiler after upgrading
+  `@vireocodedev/ui`.
+- Provide a localized `aria-label`, or connect each surface to visible localized
+  text with `aria-labelledby`, according to that surface's API.
+- Do not rely on a library default name: the application owns names that distinguish
+  its dialogs, drawers, frames, and other overlays.
+
+### `surface-palette-ownership`
+
+- Remove any conflicting application `Palette.surface` definition.
+- Adopt the UI 0.3 surface contract for canvas and overlay surfaces. Where the
+  application's intended palette differs, use the target Template's `appSurface`
+  pattern instead of overriding UI-owned surface tokens.
+- Review default, elevated, and overlay states in both colour schemes so text,
+  separators, focus rings, and scrims retain their intended contrast.
+
+### `full-frontend-verification`
+
+- Refresh the frontend lockfile after the dependency updates in the accepted plan.
+- Run the frontend typecheck, then the complete application verification suite.
+- Resolve the contract errors above before treating the upgrade as complete; a
+  successful managed apply is not a substitute for this verification.
+
+## Minimal and full Template migrations
+
+A minimal migration accepts only the CLI-managed release-pair edits, completes the
+checklist above, and preserves unrelated application customisations. It is suitable
+when the project has intentionally diverged from the Template and the team has
+reviewed the corresponding compatibility impact.
+
+A full Template migration additionally ports the reviewed 0.2.0-to-0.3.0 Template
+diff across the application's chosen frontend, backend, database, operational, and
+deployment surfaces. Use it when the project remains close to the Template or when a
+target change is needed for security, operational, or product consistency. In either
+case, review the resulting diff, rehearse deployment and data recovery, and retain a
+rollback path before production.
 
 Then refresh dependencies if the printed plan requires it, run `corepack npm run
 setup`, `corepack npm run generate:check`, `./scripts/verify.sh`, the deployment
