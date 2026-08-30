@@ -173,6 +173,7 @@ export function checkPwaSourceContract({ frontendRoot, requireNginx = false } = 
       for (const required of [
         "location = /sw.js",
         "location = /manifest.webmanifest",
+        "default_type application/manifest+json;",
         'Cache-Control "no-cache"',
         "/actuator/health/",
       ]) {

@@ -37,6 +37,23 @@ describe("PWA contract checker", () => {
     expect(problems).toContain("index.html must contain __VIREO_APP_NAME__");
   });
 
+  it("requires the deployment server to emit the manifest MIME type", async () => {
+    const frontendRoot = await temporaryFrontend();
+    await writeFile(
+      resolve(frontendRoot, "nginx.conf"),
+      `location = /sw.js {}
+location = /manifest.webmanifest {
+  add_header Cache-Control "no-cache";
+}
+location ~ ^/actuator/health/ {}
+`,
+    );
+
+    const problems = checkPwaSourceContract({ frontendRoot, requireNginx: true });
+
+    expect(problems).toContain("nginx.conf must contain default_type application/manifest+json;");
+  });
+
   it("reports malformed emitted metadata and a missing worker", async () => {
     const frontendRoot = await temporaryFrontend();
     const distRoot = resolve(frontendRoot, "dist");

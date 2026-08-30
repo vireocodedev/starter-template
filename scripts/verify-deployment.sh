@@ -63,6 +63,11 @@ for pwa_asset in /sw.js /manifest.webmanifest; do
     printf 'Frontend deployment is missing no-cache PWA metadata policy for %s.\n' "$pwa_asset" >&2
     exit 1
   fi
+  if [[ "$pwa_asset" == "/manifest.webmanifest" ]] &&
+    ! grep --ignore-case --fixed-strings --quiet "content-type: application/manifest+json" <<<"$pwa_headers"; then
+    printf 'Frontend deployment is missing the manifest MIME type.\n' >&2
+    exit 1
+  fi
 done
 
 api_status="$(curl --silent --output /dev/null --write-out '%{http_code}' "http://127.0.0.1:${frontend_port}/api/auth/me")"
