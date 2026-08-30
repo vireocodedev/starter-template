@@ -3,12 +3,15 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, normalizePath, searchForWorkspaceRoot } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { APP_IDENTITY, PWA_POLICY, createPwaManifest } from "./pwa-policy.mjs";
+import { transformAppIdentityHtml } from "./scripts/app-identity-html.mjs";
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const USE_LOCAL_STARTER_DIST = process.env.USE_LOCAL_STARTER === "true";
 const USE_LOCAL_STARTER_SOURCE = process.env.USE_LOCAL_STARTER_SOURCE === "true";
 const USE_LOCAL_STARTER = USE_LOCAL_STARTER_DIST || USE_LOCAL_STARTER_SOURCE;
 const IS_STORYBOOK = process.env.STORYBOOK === "true";
+const BUILD_REVISION = process.env.VIREO_BUILD_REVISION ?? "development";
 
 /**
  * Expected workspace layout:
@@ -159,6 +162,13 @@ const localStarterUiInternalAliases = USE_LOCAL_STARTER
     }))
   : [];
 
+const appIdentityHtmlPlugin = {
+  name: "vireo-app-identity-html",
+  transformIndexHtml(html: string) {
+    return transformAppIdentityHtml(html, APP_IDENTITY, BUILD_REVISION);
+  },
+};
+
 export default defineConfig({
   build: {
     rolldownOptions: {
@@ -174,24 +184,21 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    appIdentityHtmlPlugin,
     ...(!IS_STORYBOOK
       ? [
           VitePWA({
             registerType: "prompt",
-            manifest: {
-              name: "Vireo Starter App",
-              short_name: "Vireo",
-              description: "A production-oriented full-stack PWA built on Vireo Starter.",
-              theme_color: "#0b0c0e",
-              background_color: "#0b0c0e",
-              display: "standalone",
-              start_url: "/",
-              icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any maskable" }],
-            },
+            manifest: createPwaManifest(),
             workbox: {
-              navigateFallbackDenylist: [/^\/api(?:\/|$)/],
+              navigateFallbackDenylist: [new RegExp(PWA_POLICY.workbox.navigationDenylistPathPatternSource, "u")],
               runtimeCaching: [
-                { urlPattern: ({ url }) => /^\/api(?:\/|$)/u.test(url.pathname), handler: "NetworkOnly" },
+                {
+                  // Workbox RegExpRoute matches against the absolute URL. A leading
+                  // anchor would therefore prevent same-origin pathname matches.
+                  urlPattern: new RegExp(PWA_POLICY.workbox.runtimeUrlPatternSource, "u"),
+                  handler: PWA_POLICY.workbox.runtimeHandler,
+                },
               ],
             },
           }),
@@ -243,6 +250,9 @@ export default defineConfig({
           },
         }
       : {}),
-    proxy: { "/api": { target: "http://127.0.0.1:8080", changeOrigin: true } },
+    proxy: {
+      "/api": { target: "http://127.0.0.1:8080", changeOrigin: true },
+      [PWA_POLICY.readinessPath]: { target: "http://127.0.0.1:8080", changeOrigin: true },
+    },
   },
 });

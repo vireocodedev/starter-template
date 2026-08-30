@@ -8,13 +8,12 @@ import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
 import { AppPreferencesContext } from "@/app/ui/preferences/contexts/AppPreferencesContext";
 import { DEFAULT_APP_PREFERENCES, type AppPreferences } from "@/app/ui/preferences/models/AppPreferences";
 import { AppAuthContext } from "@/app/shell/contexts/AppAuthContext";
-import en from "@/app/ui/localization/resources/app.en";
+import { APP_IDENTITY } from "../../pwa-policy.mjs";
 
 const navigationPropsSpy = vi.hoisted(() => vi.fn());
-const onlineStatusSpy = vi.hoisted(() => vi.fn(() => true));
+const connectivitySpy = vi.hoisted(() => vi.fn(() => ({ status: "reachable", browserOnline: true })));
 
 vi.mock("@vireocodedev/ui", () => ({
-  useVireoOnlineStatus: onlineStatusSpy,
   VireoApplicationNavigation: ({
     children,
     mode,
@@ -96,6 +95,10 @@ vi.mock("@vireocodedev/ui", () => ({
   ),
 }));
 
+vi.mock("@/app/connectivity/useAppConnectivity", () => ({
+  useAppConnectivity: connectivitySpy,
+}));
+
 function setDesktop(desktop: boolean) {
   Object.defineProperty(window, "matchMedia", {
     configurable: true,
@@ -142,7 +145,7 @@ function renderShell(preferenceOverrides: Partial<AppPreferences> = {}) {
 describe("AppShellLayout", () => {
   beforeEach(() => {
     navigationPropsSpy.mockClear();
-    onlineStatusSpy.mockReturnValue(true);
+    connectivitySpy.mockReturnValue({ status: "reachable", browserOnline: true });
   });
 
   it("lets unlocked desktop navigation resize independently of the overlay resize preference", async () => {
@@ -196,8 +199,8 @@ describe("AppShellLayout", () => {
       maxHeight: "81px",
       minHeight: "81px",
     });
-    expect(screen.getByText(en.brand.name)).toBeVisible();
-    expect(screen.getByText("System online")).toBeVisible();
+    expect(screen.getByText(APP_IDENTITY.name)).toBeVisible();
+    expect(screen.getByText("Service reachable")).toBeVisible();
     expect(screen.getByRole("button", { name: "Compact navigation" })).toBeVisible();
   });
 
@@ -216,7 +219,7 @@ describe("AppShellLayout", () => {
 
     expect(screen.getByRole("heading", { name: "Overview" })).toBeVisible();
     expect(screen.queryByText("Page description")).not.toBeInTheDocument();
-    expect(screen.queryByText(en.brand.name)).not.toBeInTheDocument();
+    expect(screen.queryByText(APP_IDENTITY.name)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Close navigation" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Open navigation" }));
     expect(screen.getByRole("button", { name: "Close navigation" })).toBeVisible();
@@ -225,11 +228,28 @@ describe("AppShellLayout", () => {
   });
 
   it("shows a calm status message without replacing page content while offline", () => {
-    onlineStatusSpy.mockReturnValue(false);
+    connectivitySpy.mockReturnValue({ status: "browser-offline", browserOnline: false });
     setDesktop(false);
     renderShell();
 
-    expect(screen.getByRole("status")).toHaveTextContent("You are offline");
+    expect(screen.getByRole("status")).toHaveTextContent("Your browser reports no network connection");
     expect(screen.getByRole("heading", { name: "Overview" })).toBeVisible();
   });
+
+  it.each([
+    ["checking", "Checking service", "Checking whether the server can be reached."],
+    ["unavailable", "Service unavailable", "The server cannot be reached."],
+    ["mock", "Mock service", null],
+  ] as const)(
+    "describes %s connectivity without treating browser online as backend reachability",
+    (status, label, message) => {
+      connectivitySpy.mockReturnValue({ status, browserOnline: true });
+      setDesktop(true);
+      renderShell({ navigationLocked: false, navigationMode: "expanded" });
+
+      expect(screen.getByText(label)).toBeVisible();
+      if (message) expect(screen.getByRole("status")).toHaveTextContent(message);
+      else expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    },
+  );
 });

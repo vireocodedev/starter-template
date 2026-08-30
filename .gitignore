@@ -15,6 +15,7 @@ out/
 !frontend/.env.example
 frontend/dist/
 frontend/node_modules/
+frontend/.pwa-update-fixture/
 frontend/playwright-report/
 frontend/storybook-static/
 frontend/test-results/

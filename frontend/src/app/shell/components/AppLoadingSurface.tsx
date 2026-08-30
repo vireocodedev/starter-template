@@ -6,13 +6,12 @@ import {
 import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
 import { AppPageLayout } from "@/app/shell/layout/AppPageLayout";
 import { useAppTranslation } from "@/app/ui/localization/use-app-translation";
+import { appConfig } from "@/app/config/app-config";
 import { Avatar, Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { VireoLoadingRegion } from "@vireocodedev/ui";
 import { useTranslation } from "react-i18next";
 
 function AppApplicationProgressFallback({ label }: { label: string }) {
-  const { t } = useAppTranslation();
-
   return (
     <VireoLoadingRegion
       loading
@@ -35,9 +34,9 @@ function AppApplicationProgressFallback({ label }: { label: string }) {
             variant="rounded"
             sx={{ bgcolor: "primary.main", color: "primary.contrastText", fontSize: 24, fontWeight: 800 }}
           >
-            V
+            {appConfig.identity.shortName.slice(0, 1)}
           </Avatar>
-          <Typography sx={{ fontWeight: 800 }}>{t("brand.name")}</Typography>
+          <Typography sx={{ fontWeight: 800 }}>{appConfig.name}</Typography>
           <Box sx={{ alignItems: "center", display: "flex", height: 28, justifyContent: "center" }}>
             {loadingVisible ? <CircularProgress aria-hidden size={28} /> : null}
           </Box>

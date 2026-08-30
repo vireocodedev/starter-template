@@ -1,9 +1,17 @@
 const en = {
-  brand: {
-    name: "Vireo Starter",
-    tagline: "Full-stack PWA",
-    online: "System online",
-    offline: "Connection offline",
+  connectivity: {
+    "browser-offline": "Browser offline",
+    checking: "Checking service",
+    reachable: "Service reachable",
+    unavailable: "Service unavailable",
+    mock: "Mock service",
+    message: {
+      "browser-offline": "Your browser reports no network connection. Server-backed data may be unavailable.",
+      checking: "Checking whether the server can be reached.",
+      reachable: "The server is reachable.",
+      unavailable: "The server cannot be reached. Server-backed data may be unavailable.",
+      mock: "This browser is using the local mock service.",
+    },
   },
   navigation: {
     PRIMARY: "Primary navigation",
@@ -34,10 +42,12 @@ const en = {
   session: { expired: "Your session expired. Sign in again." },
   pwa: {
     later: "Later",
-    offline: "You are offline. Server-backed data may be unavailable.",
     offlineReady: "The app shell is ready for limited offline use. Server data still requires a connection.",
+    registrationUnavailable:
+      "Offline support could not be enabled. Reload the page or contact support if this persists.",
     update: "Update",
     updateReady: "A new version is ready.",
+    updateUnavailable: "The update could not be applied. Keep working, then reload when it is safe.",
   },
   unsavedChanges: {
     title: "Discard unsaved changes?",

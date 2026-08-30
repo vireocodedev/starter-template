@@ -29,7 +29,6 @@ import {
   VireoApplicationNavigation,
   VireoApplicationNavigationItem,
   VireoMobileBottomNavigation,
-  useVireoOnlineStatus,
   type VireoApplicationNavigationMode,
 } from "@vireocodedev/ui";
 import { Outlet, useLocation, useNavigate } from "react-router";
@@ -40,6 +39,8 @@ import { useAppAuth } from "@/app/shell/hooks/useAppAuth";
 import { isAppRouteActive } from "@/app/shell/routing/isAppRouteActive";
 import { useAppTranslation } from "@/app/ui/localization/use-app-translation";
 import { APP_THEME_TOKENS } from "@/app/ui/theme/config/theme.tokens";
+import { appConfig } from "@/app/config/app-config";
+import { useAppConnectivity, type AppConnectivityStatus } from "@/app/connectivity/useAppConnectivity";
 
 const navigationIcons: Record<AppNavigationIcon, React.ReactNode> = {
   OVERVIEW: <DashboardOutlined />,
@@ -47,6 +48,23 @@ const navigationIcons: Record<AppNavigationIcon, React.ReactNode> = {
   SETTINGS: <SettingsOutlined />,
   GENERATED: <ExtensionOutlined />,
 };
+
+const connectivityPalette: Record<AppConnectivityStatus, "error" | "info" | "success" | "warning"> = {
+  "browser-offline": "warning",
+  checking: "info",
+  reachable: "success",
+  unavailable: "error",
+  mock: "info",
+};
+
+const connectivitySeverity: Record<AppConnectivityStatus, "error" | "info" | "warning"> = {
+  "browser-offline": "warning",
+  checking: "info",
+  reachable: "info",
+  unavailable: "error",
+  mock: "info",
+};
+
 export function AppShellLayout() {
   const { t } = useAppTranslation();
   const theme = useTheme();
@@ -57,7 +75,7 @@ export function AppShellLayout() {
   const { preferences, updatePreference } = useAppPreferences();
   const location = useLocation();
   const navigate = useNavigate();
-  const online = useVireoOnlineStatus();
+  const connectivity = useAppConnectivity();
   const navigation = React.useMemo(
     () =>
       APP_NAVIGATION_PAGES.map(item => ({
@@ -171,22 +189,22 @@ export function AppShellLayout() {
                         fontWeight: 900,
                       }}
                     >
-                      V
+                      {appConfig.identity.shortName.slice(0, 1)}
                     </Avatar>
                   )}
                   {!compact && (
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography noWrap sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-                        {t("brand.name")}
+                        {appConfig.name}
                       </Typography>
                       <Box sx={{ alignItems: "center", display: "flex", gap: 0.75, mt: 0.25 }}>
                         <Box
                           aria-hidden
                           sx={{
-                            bgcolor: online ? "success.main" : "warning.main",
+                            bgcolor: `${connectivityPalette[connectivity.status]}.main`,
                             borderRadius: "50%",
                             boxShadow: theme =>
-                              `0 0 8px color-mix(in srgb, ${online ? theme.palette.success.main : theme.palette.warning.main} 55%, transparent)`,
+                              `0 0 8px color-mix(in srgb, ${theme.palette[connectivityPalette[connectivity.status]].main} 55%, transparent)`,
                             height: 6,
                             width: 6,
                           }}
@@ -200,7 +218,7 @@ export function AppShellLayout() {
                             textTransform: "uppercase",
                           }}
                         >
-                          {online ? t("brand.online") : t("brand.offline")}
+                          {t(`connectivity.${connectivity.status}`)}
                         </Typography>
                       </Box>
                     </Box>
@@ -387,9 +405,14 @@ export function AppShellLayout() {
             overflow: "hidden",
           }}
         >
-          <Collapse in={!online}>
-            <Alert role="status" severity="warning" square sx={{ borderRadius: 0, py: 0.25 }}>
-              {t("pwa.offline")}
+          <Collapse in={connectivity.status !== "reachable" && connectivity.status !== "mock"}>
+            <Alert
+              role="status"
+              severity={connectivitySeverity[connectivity.status]}
+              square
+              sx={{ borderRadius: 0, py: 0.25 }}
+            >
+              {t(`connectivity.message.${connectivity.status}`)}
             </Alert>
           </Collapse>
           <Box

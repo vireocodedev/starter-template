@@ -57,6 +57,14 @@ for expected_header in \
   fi
 done
 
+for pwa_asset in /sw.js /manifest.webmanifest; do
+  pwa_headers="$(curl --fail --silent --show-error --head "http://127.0.0.1:${frontend_port}${pwa_asset}")"
+  if ! grep --ignore-case --fixed-strings --quiet "cache-control: no-cache" <<<"$pwa_headers"; then
+    printf 'Frontend deployment is missing no-cache PWA metadata policy for %s.\n' "$pwa_asset" >&2
+    exit 1
+  fi
+done
+
 api_status="$(curl --silent --output /dev/null --write-out '%{http_code}' "http://127.0.0.1:${frontend_port}/api/auth/me")"
 if [[ "$api_status" != "401" ]]; then
   printf 'Frontend API proxy returned HTTP %s; expected the backend authentication boundary (401).\n' "$api_status" >&2

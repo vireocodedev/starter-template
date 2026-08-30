@@ -56,10 +56,16 @@ when the compatibility command fails.
 These jobs provide recurring compatibility evidence; they do not by themselves prove
 the complete public support promise. Playwright's bundled engines sample Firefox and
 WebKit rather than proving two branded Firefox releases or Safari on macOS.
-Production Chromium verifies manifest metadata, service-worker registration,
-offline shell launch, NetworkOnly API behavior, and the absence of API entries in
-service-worker caches. Physical installation/update behavior, branded browsers,
-Ubuntu 26.04, macOS, and Windows/WSL remain separate manual evidence requirements.
+Production Chromium verifies identity-driven manifest metadata, service-worker
+registration, deep-link offline-shell launch, reconnect, NetworkOnly API behavior,
+and the absence of API entries in service-worker caches. Source and built PWA
+contract checks also validate policy, PNG dimensions, generated metadata, worker
+output, and the declared Nginx cache/header configuration; the deployment smoke
+checks the emitted service-worker and manifest no-cache headers. The PWA fixture
+also produces two sequential production builds and proves waiting-worker discovery,
+the update prompt, activation, reload, and revision-B control without a production
+control endpoint. Physical installation/update behavior, branded browsers, Ubuntu
+26.04, macOS, and Windows/WSL remain separate manual evidence requirements.
 
 ## Local focused checks
 

@@ -45,7 +45,7 @@ If a preflight fails, every stable diagnostic code has a remedy in [troubleshoot
 | --------------------- | ------------- | ------------------- |
 | `SPRING_DATASOURCE_*` | JVM runtime   | Root workflow       |
 | `VITE_API_BASE_URL`   | Browser build | `/api`              |
-| `VITE_APP_NAME`       | Browser build | `Vireo Starter`     |
+| Product identity      | `frontend/pwa-policy.mjs` | `Vireo Starter` |
 
 Vite values are public build-time configuration. Do not put secrets in variables prefixed with `VITE_`.
 

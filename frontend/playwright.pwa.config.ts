@@ -13,9 +13,9 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   webServer: {
-    command: "corepack npm run preview -- --host 127.0.0.1 --port 4173 --strictPort",
+    command: "node scripts/serve-pwa-update-fixture.mjs",
     url: "http://127.0.0.1:4173",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 30_000,
     stdout: process.env.CI ? "pipe" : "ignore",
   },

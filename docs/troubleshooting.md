@@ -14,6 +14,6 @@ Run `corepack npm run doctor` for readable output or `corepack npm run doctor:js
 | `VIR-PORT-001`    | Port 8080 is occupied.                      | Stop or reconfigure the existing backend.                                                                                                            |
 | `VIR-PORT-002`    | Port 3000 is occupied.                      | Stop or reconfigure the existing frontend.                                                                                                           |
 | `VIR-DB-001`      | The selected database mode is incomplete.   | Use `h2`, install either Compose launcher for `compose`, or supply all three `SPRING_DATASOURCE_*` variables for `external`.                         |
-| `VIR-PWA-001`     | PWA configuration is incomplete.            | Restore `VitePWA` configuration in `frontend/vite.config.ts`.                                                                                        |
+| `VIR-PWA-001`     | PWA policy, metadata, icons, or hosting configuration is incomplete. | Run `cd frontend && corepack npm run pwa:check:source`; restore the shared `pwa-policy.mjs` contract and referenced assets. |
 
 After applying a remedy, rerun doctor. If the same code remains, include the JSON report in a support request; review it before sharing as you would any diagnostic output.

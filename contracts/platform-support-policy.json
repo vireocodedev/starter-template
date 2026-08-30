@@ -242,7 +242,7 @@
     {
       "id": "installed-pwa",
       "surface": "Installed PWA",
-      "target": "Automated manifest, worker, offline-shell, and cache lifecycle; physical install/update manual",
+      "target": "Automated manifest, worker, deep-link/offline shell, reconnect, API cache exclusion, and two-build update activation/reload; physical install/update manual",
       "status": "experimental",
       "evidence": {
         "requirement": "advisory",

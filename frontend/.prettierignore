@@ -1,4 +1,5 @@
 dist/
+.pwa-update-fixture/
 node_modules/
 coverage/
 playwright-report/

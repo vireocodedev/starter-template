@@ -52,7 +52,7 @@ jobs:
 
       - name: Verify production PWA lifecycle
         working-directory: frontend
-        run: corepack npm exec -- playwright test --config=playwright.pwa.config.ts
+        run: corepack npm run test:pwa
 
       - name: Enforce Lighthouse production budgets
         working-directory: frontend

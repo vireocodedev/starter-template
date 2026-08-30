@@ -11,6 +11,7 @@ import {
 } from "./database-development.mjs";
 import { evaluateVireoPackageCompatibility } from "./vireo-package-compatibility.mjs";
 import { inspectVerificationHost } from "./verification-host.mjs";
+import { checkPwaSourceContract } from "../frontend/scripts/pwa-contract.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const jsonMode = process.argv.includes("--json");
@@ -278,21 +279,22 @@ export async function runDoctor() {
     results.push(result("VIR-DB-001", "pass", "H2 development mode selected"));
   }
 
-  const vitePath = resolve(root, "frontend/vite.config.ts");
-  const pwa =
-    existsSync(vitePath) && readFileSync(vitePath, "utf8").includes("VitePWA(");
+  const pwaProblems = checkPwaSourceContract({
+    frontendRoot: resolve(root, "frontend"),
+    requireNginx: metadata.profile !== "frontend",
+  });
   results.push(
-    pwa
+    pwaProblems.length === 0
       ? result(
           "VIR-PWA-001",
           "pass",
-          "PWA plugin and generated manifest configuration are present",
+          "PWA source policy, icons, and deployment configuration are valid",
         )
       : result(
           "VIR-PWA-001",
           "fail",
-          "PWA plugin configuration is missing",
-          "Restore the VitePWA configuration in frontend/vite.config.ts.",
+          pwaProblems[0],
+          "Run `corepack npm run pwa:check:source` from frontend and restore the shared PWA policy.",
         ),
   );
 

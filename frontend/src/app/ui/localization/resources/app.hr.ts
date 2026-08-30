@@ -2,11 +2,19 @@ import type { WidenLeaves } from "@vireocodedev/localization";
 import type en from "./app.en";
 
 const hr = {
-  brand: {
-    name: "Vireo Starter",
-    tagline: "Full-stack PWA",
-    online: "Sustav je povezan",
-    offline: "Veza je prekinuta",
+  connectivity: {
+    "browser-offline": "Preglednik je izvan mreže",
+    checking: "Provjera usluge",
+    reachable: "Usluga je dostupna",
+    unavailable: "Usluga nije dostupna",
+    mock: "Lažna usluga",
+    message: {
+      "browser-offline": "Preglednik javlja da nema mrežne veze. Podaci s poslužitelja možda nisu dostupni.",
+      checking: "Provjerava se može li se dosegnuti poslužitelj.",
+      reachable: "Poslužitelj je dostupan.",
+      unavailable: "Poslužitelj nije dostupan. Podaci s poslužitelja možda nisu dostupni.",
+      mock: "Preglednik koristi lokalnu lažnu uslugu.",
+    },
   },
   navigation: {
     PRIMARY: "Glavna navigacija",
@@ -37,11 +45,13 @@ const hr = {
   session: { expired: "Vaša je sesija istekla. Ponovno se prijavite." },
   pwa: {
     later: "Kasnije",
-    offline: "Izvan mreže ste. Podaci s poslužitelja možda nisu dostupni.",
     offlineReady:
       "Aplikacijska ljuska spremna je za ograničeni izvanmrežni rad. Podaci s poslužitelja i dalje zahtijevaju vezu.",
+    registrationUnavailable:
+      "Izvanmrežna podrška nije omogućena. Osvježite stranicu ili se obratite podršci ako se ovo ponovi.",
     update: "Ažuriraj",
     updateReady: "Nova verzija je spremna.",
+    updateUnavailable: "Ažuriranje nije primijenjeno. Nastavite raditi pa osvježite stranicu kada to bude sigurno.",
   },
   unsavedChanges: {
     title: "Odbaciti nespremljene promjene?",

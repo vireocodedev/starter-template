@@ -34,11 +34,13 @@ steps=(
   "Workflow security|corepack npm run workflow:check"
   "Published Starter boundary|corepack npm run starter:boundary:check"
   "Architecture|corepack npm run architecture:check"
+  "PWA source contract|corepack npm run pwa:check:source"
   "Formatting|corepack npm run format:check"
   "Lint|corepack npm run lint"
   "Unit and integration tests|${test_command}"
   "Storybook tests|${storybook_test_command}"
   "Application build|${application_build_command}"
+  "PWA build contract|corepack npm run pwa:check:built"
   "Storybook build|${storybook_build_command}"
 )
 
