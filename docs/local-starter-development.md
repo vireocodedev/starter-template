@@ -143,7 +143,7 @@ Use the normal verification workflow when validating a release-compatible templa
 corepack npm run verify
 ```
 
-`verify` always selects and exercises published packages. `verify:local-starter` is the explicit integration suite for an adjacent Starter checkout.
+`verify` always selects and exercises published packages. `verify:local-starter` is the explicit integration suite for an adjacent `vireo` checkout.
 
 ## Command summary
 

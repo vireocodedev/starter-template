@@ -18,14 +18,14 @@ const BUILD_REVISION = process.env.VIREO_BUILD_REVISION ?? "development";
  *
  * vireocode/
  * ├── starter/
- * └── starter-template/
+ * └── vireo-template/
  *     └── frontend/
  *
  * Source mode is the normal local-development path: Vite consumes Starter's
  * public TypeScript entry points directly and owns the only required watcher.
  * Dist mode remains available for explicitly testing emitted package output.
  */
-const STARTER_ROOT = path.resolve(directory, "../../starter");
+const STARTER_ROOT = path.resolve(directory, "../../vireo");
 const STARTER_PACKAGES_ROOT = path.resolve(STARTER_ROOT, "packages");
 
 const LOCAL_STARTER_PACKAGE_DIRECTORIES = [

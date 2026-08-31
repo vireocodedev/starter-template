@@ -6,26 +6,26 @@
       "@/*": ["./src/*"],
       "@mui/material": ["./node_modules/@mui/material/index.d.ts"],
       "@mui/material/*": ["./node_modules/@mui/material/*"],
-      "@vireocodedev/history": ["../../starter/packages/history/dist/index.d.ts"],
-      "@vireocodedev/infrastructure": ["../../starter/packages/infrastructure/dist/index.d.ts"],
+      "@vireocodedev/history": ["../../vireo/packages/history/dist/index.d.ts"],
+      "@vireocodedev/infrastructure": ["../../vireo/packages/infrastructure/dist/index.d.ts"],
       "@vireocodedev/infrastructure/network-status": [
-        "../../starter/packages/infrastructure/dist/network/appNetworkStatus.d.ts"
+        "../../vireo/packages/infrastructure/dist/network/appNetworkStatus.d.ts"
       ],
-      "@vireocodedev/infrastructure/pagination": ["../../starter/packages/infrastructure/dist/http/pagination.d.ts"],
-      "@vireocodedev/localization": ["../../starter/packages/localization/dist/index.d.ts"],
-      "@vireocodedev/query": ["../../starter/packages/queryengine/dist/index.d.ts"],
-      "@vireocodedev/shell": ["../../starter/packages/shell/dist/index.d.ts"],
-      "@vireocodedev/sqlite": ["../../starter/packages/sqlite/dist/index.d.ts"],
-      "@vireocodedev/sqlite/offline": ["../../starter/packages/sqlite/dist/offline/index.d.ts"],
-      "@vireocodedev/ui": ["../../starter/packages/ui/dist/index.d.ts"],
-      "@vireocodedev/ui/country": ["../../starter/packages/ui/dist/capabilities/country/public.d.ts"],
-      "@vireocodedev/ui/event-source": ["../../starter/packages/ui/dist/integrations/event-source/public.d.ts"],
-      "@vireocodedev/ui/forms": ["../../starter/packages/ui/dist/capabilities/forms/public.d.ts"],
-      "@vireocodedev/ui/hello-pangea-dnd": ["../../starter/packages/ui/dist/integrations/hello-pangea-dnd/public.d.ts"],
-      "@vireocodedev/ui/localization": ["../../starter/packages/ui/dist/integrations/localization/public.d.ts"],
-      "@vireocodedev/ui/react-i18next": ["../../starter/packages/ui/dist/integrations/react-i18next/public.d.ts"],
-      "@vireocodedev/ui/sonner": ["../../starter/packages/ui/dist/integrations/sonner/public.d.ts"],
-      "@vireocodedev/ui/tanstack-query": ["../../starter/packages/ui/dist/integrations/tanstack-query/public.d.ts"]
+      "@vireocodedev/infrastructure/pagination": ["../../vireo/packages/infrastructure/dist/http/pagination.d.ts"],
+      "@vireocodedev/localization": ["../../vireo/packages/localization/dist/index.d.ts"],
+      "@vireocodedev/query": ["../../vireo/packages/queryengine/dist/index.d.ts"],
+      "@vireocodedev/shell": ["../../vireo/packages/shell/dist/index.d.ts"],
+      "@vireocodedev/sqlite": ["../../vireo/packages/sqlite/dist/index.d.ts"],
+      "@vireocodedev/sqlite/offline": ["../../vireo/packages/sqlite/dist/offline/index.d.ts"],
+      "@vireocodedev/ui": ["../../vireo/packages/ui/dist/index.d.ts"],
+      "@vireocodedev/ui/country": ["../../vireo/packages/ui/dist/capabilities/country/public.d.ts"],
+      "@vireocodedev/ui/event-source": ["../../vireo/packages/ui/dist/integrations/event-source/public.d.ts"],
+      "@vireocodedev/ui/forms": ["../../vireo/packages/ui/dist/capabilities/forms/public.d.ts"],
+      "@vireocodedev/ui/hello-pangea-dnd": ["../../vireo/packages/ui/dist/integrations/hello-pangea-dnd/public.d.ts"],
+      "@vireocodedev/ui/localization": ["../../vireo/packages/ui/dist/integrations/localization/public.d.ts"],
+      "@vireocodedev/ui/react-i18next": ["../../vireo/packages/ui/dist/integrations/react-i18next/public.d.ts"],
+      "@vireocodedev/ui/sonner": ["../../vireo/packages/ui/dist/integrations/sonner/public.d.ts"],
+      "@vireocodedev/ui/tanstack-query": ["../../vireo/packages/ui/dist/integrations/tanstack-query/public.d.ts"]
     }
   }
 }

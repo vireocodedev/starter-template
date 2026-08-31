@@ -5,16 +5,16 @@ import { configDefaults, defineConfig } from "vitest/config";
 
 const useLocalStarter = process.env.USE_LOCAL_STARTER === "true";
 const useLocalStarterSource = process.env.USE_LOCAL_STARTER_SOURCE === "true";
-const localStarterUiEntry = path.resolve(import.meta.dirname, "../../starter/packages/ui/dist/index.js");
+const localStarterUiEntry = path.resolve(import.meta.dirname, "../../vireo/packages/ui/dist/index.js");
 const localStarterUiFormsEntry = path.resolve(
   import.meta.dirname,
-  "../../starter/packages/ui/dist/capabilities/forms/public.js",
+  "../../vireo/packages/ui/dist/capabilities/forms/public.js",
 );
 const localStarterUiLocalizationEntry = path.resolve(
   import.meta.dirname,
-  "../../starter/packages/ui/dist/integrations/localization/public.js",
+  "../../vireo/packages/ui/dist/integrations/localization/public.js",
 );
-const localStarterUiSource = path.resolve(import.meta.dirname, "../../starter/packages/ui/src");
+const localStarterUiSource = path.resolve(import.meta.dirname, "../../vireo/packages/ui/src");
 const frontendNodeModules = path.resolve(import.meta.dirname, "node_modules");
 
 const localRuntimeAliases =
