@@ -7,19 +7,38 @@ migrations, deployment files, or an adopted/ejected generated capability.
 
 ## Supported path
 
-The current `0.6.0` Template source and `create-vireo` 0.6.0 CLI still ship only
-the historical 0.2.0-to-0.3.0 declared transform documented below. They do not
-declare an upgrade path for applications created by `0.6.0`; no adjacent path for
-0.6.0-created applications is declared yet. The historic transform applies only to
-a project created by `create-vireo` 0.2.0 from its pinned Template commit. Unknown
-commits, dependency edits, lockfile drift, duplicate migration versions, and
-generated/wire-contract drift are refusals rather than guesses.
+The public graph retains the historical 0.2.0-to-0.3.0 transform and declares the
+supported 0.6.0-to-0.7.0 adjacent edge. Releases 0.4 and 0.5 are historical/EOL:
+they are not retroactively admitted as upgrade sources. The 0.7 release is terminal
+until a later release declares its own adjacent edge.
+
+Start with a read-only inventory. It reports the recorded CLI and Template revision,
+the next declared hop, managed-file drift, pending application-owned work, and
+generated capabilities that remain managed or have been ejected:
+
+```bash
+npx --yes --package=create-vireo@0.7.0 vireo status --project .
+```
+
+For a 0.6.0-created application, use the target CLI and review the non-writing plan:
+
+```bash
+npx --yes --package=create-vireo@0.7.0 vireo upgrade --to 0.7.0 --dry-run
+```
+
+The CLI updates only the declared managed edge. It refuses unknown Template commits
+and managed-file customizations, preserves application-owned files and ejected
+generated capabilities, and never fabricates resolved package-lock entries.
+After an accepted apply, refresh the real lockfile with
+`corepack npm install --package-lock-only --prefix frontend` for full-stack
+applications, or `corepack npm install --package-lock-only` at a frontend-only
+project root, before verification.
 
 Start from a clean branch and create a recoverable database backup. Install or invoke
 the target CLI version, then review the non-writing plan:
 
 ```bash
-npx --yes --package=create-vireo@0.6.0 vireo upgrade --to 0.3.0 --dry-run
+npx --yes --package=create-vireo@0.7.0 vireo upgrade --to 0.7.0 --dry-run
 ```
 
 The plan distinguishes Vireo-managed edits from required application-owned work.
@@ -27,7 +46,7 @@ After reviewing the target Template diff and all affected changelogs, apply only
 managed migration:
 
 ```bash
-npx --yes --package=create-vireo@0.6.0 vireo upgrade --to 0.3.0 \
+npx --yes --package=create-vireo@0.7.0 vireo upgrade --to 0.7.0 \
   --apply --accept-application-owned
 ```
 

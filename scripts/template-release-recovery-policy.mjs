@@ -15,10 +15,8 @@ export function validateTemplateReleaseRecovery({
 
   if (recovery?.schemaVersion !== 1)
     problems.push("template release recovery schemaVersion must equal 1");
-  if (recovery?.tag !== templateReleasePolicy?.tag)
-    problems.push(
-      "template release recovery tag must match the current template release policy",
-    );
+  if (!/^starter-template@0\.6\.0$/u.test(recovery?.tag ?? ""))
+    problems.push("template release recovery may target only the protected immutable 0.6.0 tag");
   if (!commitPattern.test(recovery?.expectedCommit ?? ""))
     problems.push(
       "template release recovery expectedCommit must be a lowercase 40-hex Git SHA",

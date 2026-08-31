@@ -24,9 +24,11 @@ defines artifact SemVer, public-contract boundaries, deprecation windows, and
 release-line support.
 
 Only the latest Template release and `main` receive fixes and security updates.
-Older tags remain reference points, but no backports are promised. A dependency
-range permits compatible releases under SemVer; it does not claim that every
-possible transitive combination has been tested.
+The immediately prior release remains an admitted source for its one declared
+adjacent upgrade, but that upgrade-source window is not a backport or a promise of
+ongoing fixes. Older tags remain reference points. A dependency range permits
+compatible releases under SemVer; it does not claim that every possible transitive
+combination has been tested.
 
 ## Application upgrade contract
 

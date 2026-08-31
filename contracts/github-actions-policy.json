@@ -17,6 +17,7 @@
     }
   },
   "canonicalRunner": "ubuntu-24.04",
+  "requirePinnedActions": true,
   "requiredConcurrencyWorkflows": {
     "ci.yml": {
       "group": "verify-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}",

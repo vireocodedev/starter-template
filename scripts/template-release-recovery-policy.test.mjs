@@ -8,10 +8,10 @@ import {
   writeTemplateReleaseRecoveryOutputs,
 } from "./template-release-recovery-policy.mjs";
 
-const templateReleasePolicy = { tag: "starter-template@0.6.0" };
+const templateReleasePolicy = { tag: "starter-template@0.7.0" };
 const recovery = {
   schemaVersion: 1,
-  tag: templateReleasePolicy.tag,
+  tag: "starter-template@0.6.0",
   expectedCommit: "5b123e60bd1ce733ae70711796552a17aaa60fe3",
 };
 
@@ -43,6 +43,17 @@ test("validates and writes the trusted template release recovery target", () => 
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
+});
+
+test("keeps historical recovery independent from the current release policy", () => {
+  assert.deepEqual(
+    validateTemplateReleaseRecovery({
+      recovery,
+      templateReleasePolicy,
+      explicitTag: recovery.tag,
+    }),
+    [],
+  );
 });
 
 test("rejects recovery contract and explicit-input drift", () => {
