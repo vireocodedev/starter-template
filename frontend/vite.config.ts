@@ -17,7 +17,7 @@ const BUILD_REVISION = process.env.VIREO_BUILD_REVISION ?? "development";
  * Expected workspace layout:
  *
  * vireocode/
- * ├── starter/
+ * ├── vireo/
  * └── vireo-template/
  *     └── frontend/
  *

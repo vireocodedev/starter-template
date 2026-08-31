@@ -34,7 +34,7 @@ This mode:
 - selects the published Starter TypeScript project automatically;
 - makes VS Code and command-line TypeScript validate the published API.
 
-Normal tests, Storybook, E2E, builds, and `corepack npm run verify` follow the same published-package rule. The presence of an adjacent `starter` checkout never changes a default command implicitly.
+Normal tests, Storybook, E2E, builds, and `corepack npm run verify` follow the same published-package rule. The presence of an adjacent `vireo` checkout never changes a default command implicitly.
 
 The JVM build resolves published Vireo artifacts anonymously from Maven Central. No Gradle credentials are required. A plain Gradle command never reads artifacts from Maven Local.
 
