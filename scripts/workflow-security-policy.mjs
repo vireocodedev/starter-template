@@ -15,6 +15,9 @@ const workflowFiles = readdirSync(workflowRoot)
   .sort();
 const observed = new Set();
 const problems = [];
+if (policy.requirePinnedActions !== true) {
+  problems.push("GitHub Actions policy must explicitly require immutable action pins");
+}
 
 function parseJobs(lines) {
   const jobs = [];

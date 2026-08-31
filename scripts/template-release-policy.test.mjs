@@ -12,13 +12,13 @@ import {
 
 const policy = {
   schemaVersion: 1,
-  version: "0.6.0",
-  tag: "starter-template@0.6.0",
-  createVireoVersion: "0.6.0",
-  ecosystemRelease: "npm-0.6.0_jvm-0.3.0",
+  version: "0.7.0",
+  tag: "starter-template@0.7.0",
+  createVireoVersion: "0.7.0",
+  ecosystemRelease: "npm-0.7.0_jvm-0.3.0",
   repository: "vireocodedev/starter-template",
   releaseUrl:
-    "https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.6.0",
+    "https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.7.0",
   immutableReleasesRequired: true,
 };
 const validInputs = {
@@ -27,7 +27,7 @@ const validInputs = {
     name: "starter-template",
     private: true,
     version: policy.version,
-    scripts: { vireo: "npx --yes --package=create-vireo@0.6.0 vireo" },
+    scripts: { vireo: "npx --yes --package=create-vireo@0.7.0 vireo" },
   },
   template: {
     schemaVersion: 1,
@@ -38,7 +38,7 @@ const validInputs = {
     createVireoVersion: policy.createVireoVersion,
     ecosystemRelease: policy.ecosystemRelease,
   },
-  compatibility: { schemaVersion: 1, id: "vireo-template-0.6.0" },
+  compatibility: { schemaVersion: 1, id: "vireo-template-0.7.0" },
 };
 
 test("validates canonical template release coordinates", () => {
@@ -110,7 +110,7 @@ test("rejects each release-coordinate mismatch", () => {
     ["version", "1.0.0"],
     ["tag", "starter-template@0.5.0"],
     ["createVireoVersion", "0.5.0"],
-    ["ecosystemRelease", "npm-0.6.0_jvm-0.2.0"],
+    ["ecosystemRelease", "npm-0.7.0_jvm-0.2.0"],
     ["repository", "example/template"],
     ["releaseUrl", "https://example.test/release"],
     ["immutableReleasesRequired", false],

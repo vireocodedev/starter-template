@@ -12,7 +12,17 @@ const templateReleaseRecovery = JSON.parse(
     "utf8",
   ),
 );
-const templateReleaseTagRuleset = JSON.parse(
+const currentTemplateReleaseTagRuleset = JSON.parse(
+  readFileSync(
+    join(
+      root,
+      ".github/rulesets",
+      `starter-template-${templateReleasePolicy.version}.json`,
+    ),
+    "utf8",
+  ),
+);
+const historicalTemplateReleaseTagRuleset = JSON.parse(
   readFileSync(
     join(root, ".github/rulesets/starter-template-0.6.0.json"),
     "utf8",
@@ -27,6 +37,7 @@ const templateReleaseEnvironment = JSON.parse(
 const templateReleaseTag = templateReleasePolicy.tag;
 const templateReleaseContract = "template-release-policy.json";
 const templateReleaseContractUrl = `https://github.com/${templateReleasePolicy.repository}/blob/${encodeURIComponent(templateReleaseTag)}/contracts/${templateReleaseContract}`;
+const currentTemplateReleaseTagRulesetPath = `.github/rulesets/starter-template-${templateReleasePolicy.version}.json`;
 const requiredFiles = [
   "README.md",
   "LICENSE",
@@ -58,6 +69,8 @@ const requiredFiles = [
   "docs/verification-performance.md",
   "contracts/template-release-policy.json",
   "contracts/template-release-recovery.json",
+  "contracts/project-upgrade-policy.json",
+  currentTemplateReleaseTagRulesetPath,
   ".github/rulesets/starter-template-0.6.0.json",
   ".github/environments/template-release.json",
   "scripts/template-release-policy.mjs",
@@ -128,49 +141,57 @@ requireText("SUPPORT.md", [
 ]);
 if (templateReleaseRecovery.schemaVersion !== 1)
   problems.push("template release recovery schemaVersion must equal 1");
-if (templateReleaseRecovery.tag !== templateReleasePolicy.tag)
-  problems.push(
-    "template release recovery tag must match template release policy tag",
-  );
+if (!/^starter-template@0\.6\.0$/u.test(templateReleaseRecovery.tag ?? ""))
+  problems.push("template release recovery must retain the protected immutable 0.6.0 tag");
 if (!/^[0-9a-f]{40}$/u.test(templateReleaseRecovery.expectedCommit ?? ""))
   problems.push(
     "template release recovery expectedCommit must be a lowercase 40-hex Git SHA",
   );
-const expectedRulesetRef = `refs/tags/${templateReleaseRecovery.tag}`;
-if (templateReleaseTagRuleset.name !== `Protect ${templateReleaseRecovery.tag}`)
-  problems.push("template release tag ruleset name must match recovery tag");
-if (templateReleaseTagRuleset.target !== "tag")
-  problems.push("template release tag ruleset target must equal tag");
-if (templateReleaseTagRuleset.enforcement !== "active")
-  problems.push("template release tag ruleset enforcement must equal active");
-if (
-  !Array.isArray(templateReleaseTagRuleset.bypass_actors) ||
-  templateReleaseTagRuleset.bypass_actors.length !== 0
-)
-  problems.push("template release tag ruleset bypass_actors must be empty");
-const tagRulesetRefName = templateReleaseTagRuleset.conditions?.ref_name;
-if (
-  !Array.isArray(tagRulesetRefName?.include) ||
-  tagRulesetRefName.include.length !== 1 ||
-  tagRulesetRefName.include[0] !== expectedRulesetRef ||
-  !Array.isArray(tagRulesetRefName.exclude) ||
-  tagRulesetRefName.exclude.length !== 0
-)
-  problems.push(
-    "template release tag ruleset must include exactly the recovery tag and exclude no refs",
-  );
-const tagRules = templateReleaseTagRuleset.rules;
-if (
-  !Array.isArray(tagRules) ||
-  tagRules.length !== 2 ||
-  new Set(tagRules.map((rule) => rule?.type)).size !== 2 ||
-  !["update", "deletion"].every((type) =>
-    tagRules.some((rule) => rule?.type === type),
+function validateImmutableTagRuleset({ ruleset, tag, role }) {
+  const expectedRulesetRef = `refs/tags/${tag}`;
+  if (ruleset.name !== `Protect ${tag}`)
+    problems.push(`${role} release tag ruleset name must match ${tag}`);
+  if (ruleset.target !== "tag")
+    problems.push(`${role} release tag ruleset target must equal tag`);
+  if (ruleset.enforcement !== "active")
+    problems.push(`${role} release tag ruleset enforcement must equal active`);
+  if (!Array.isArray(ruleset.bypass_actors) || ruleset.bypass_actors.length !== 0)
+    problems.push(`${role} release tag ruleset bypass_actors must be empty`);
+  const refName = ruleset.conditions?.ref_name;
+  if (
+    !Array.isArray(refName?.include) ||
+    refName.include.length !== 1 ||
+    refName.include[0] !== expectedRulesetRef ||
+    !Array.isArray(refName.exclude) ||
+    refName.exclude.length !== 0
   )
-)
-  problems.push(
-    "template release tag ruleset must contain exactly update and deletion rules",
-  );
+    problems.push(
+      `${role} release tag ruleset must include exactly ${tag} and exclude no refs`,
+    );
+  const rules = ruleset.rules;
+  if (
+    !Array.isArray(rules) ||
+    rules.length !== 2 ||
+    new Set(rules.map((rule) => rule?.type)).size !== 2 ||
+    !["update", "deletion"].every((type) =>
+      rules.some((rule) => rule?.type === type),
+    )
+  )
+    problems.push(
+      `${role} release tag ruleset must contain exactly update and deletion rules`,
+    );
+}
+
+validateImmutableTagRuleset({
+  ruleset: currentTemplateReleaseTagRuleset,
+  tag: templateReleasePolicy.tag,
+  role: "current",
+});
+validateImmutableTagRuleset({
+  ruleset: historicalTemplateReleaseTagRuleset,
+  tag: templateReleaseRecovery.tag,
+  role: "historical recovery",
+});
 if (templateReleaseEnvironment.wait_timer !== 0)
   problems.push("template release environment wait_timer must equal 0");
 if (templateReleaseEnvironment.prevent_self_review !== false)
@@ -196,9 +217,39 @@ requireText("docs/generated-capabilities.md", [
   templateReleaseContractUrl,
   `create-vireo@${templateReleasePolicy.createVireoVersion}`,
 ]);
+const projectUpgradeContract = JSON.parse(
+  readFileSync(join(root, "contracts/project-upgrade-policy.json"), "utf8"),
+);
+if (
+  projectUpgradeContract.schemaVersion !== 1 ||
+  projectUpgradeContract.contractId !== "vireo-template-project-upgrades" ||
+  projectUpgradeContract.publicRelease !== templateReleasePolicy.version ||
+  projectUpgradeContract.candidateRelease !== undefined ||
+  projectUpgradeContract.previousRelease !== "0.6.0" ||
+  projectUpgradeContract.publicationState !== "final" ||
+  !projectUpgradeContract.supportedEdges?.some(
+    (edge) =>
+      edge.from === projectUpgradeContract.previousRelease &&
+      edge.to === templateReleasePolicy.version &&
+      edge.status === "supported",
+  )
+) {
+  problems.push("project upgrade contract must declare the final adjacent upgrade coordinate");
+}
+if (
+  projectUpgradeContract.targetTemplateCommit !== undefined ||
+  projectUpgradeContract.finalization !== undefined ||
+  projectUpgradeContract.lockfileRefreshCommands?.["full-stack"] !==
+    "corepack npm install --package-lock-only --prefix frontend" ||
+  projectUpgradeContract.lockfileRefreshCommands?.frontend !==
+    "corepack npm install --package-lock-only"
+) {
+  problems.push("final project upgrade contract must derive profile-correct lock refresh commands without a self-referential Template SHA");
+}
 requireText("docs/project-upgrades.md", [
-  "no adjacent path",
-  "is declared yet",
+  "0.6.0-to-0.7.0",
+  "vireo status",
+  "package-lock-only",
 ]);
 requireText("GOVERNANCE.md", [
   ".github/CODEOWNERS",
@@ -376,9 +427,34 @@ for (const fragment of [
     );
 }
 
+const currentReleasePolicyStep = templateReleaseWorkflow.match(
+  /- name: Validate current release policy[\s\S]*?(?=\n      - name:|$)/u,
+)?.[0];
+if (
+  !currentReleasePolicyStep?.includes("if: github.event_name == 'push'") ||
+  !currentReleasePolicyStep.includes(
+    'node scripts/template-release-policy.mjs "$RELEASE_TAG"',
+  )
+)
+  problems.push(
+    "template release workflow must validate the current release policy only for a tag push",
+  );
+const recoveryTargetStep = templateReleaseWorkflow.match(
+  /- name: Resolve exact release target[\s\S]*?(?=\n      - name:|$)/u,
+)?.[0];
+if (
+  !recoveryTargetStep?.includes(
+    'node scripts/template-release-recovery-policy.mjs "$RUNNER_TEMP/template-release-recovery-target" "$RELEASE_TAG"',
+  ) ||
+  !recoveryTargetStep.includes('if [ "${{ github.event_name }}" = "push" ]; then')
+)
+  problems.push(
+    "template release workflow must validate a trusted historical dispatch directly against the recovery contract after checkout",
+  );
+
 for (const fragment of [
   "explicit recovery tag must exactly match the recovery contract",
-  "template release recovery tag must match the current template release policy",
+  "template release recovery may target only the protected immutable 0.6.0 tag",
   "template release recovery expectedCommit must be a lowercase 40-hex Git SHA",
   "`tag=${recovery.tag}\\ncommit=${recovery.expectedCommit}\\n`",
 ]) {

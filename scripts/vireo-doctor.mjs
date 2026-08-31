@@ -1,7 +1,14 @@
 import { spawnSync } from "node:child_process";
-import { accessSync, constants, existsSync, readFileSync } from "node:fs";
+import {
+  accessSync,
+  constants,
+  existsSync,
+  lstatSync,
+  readFileSync,
+  realpathSync,
+} from "node:fs";
 import { createConnection } from "node:net";
-import { resolve } from "node:path";
+import { isAbsolute, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import {
   DATABASE_MODES,
@@ -80,6 +87,76 @@ function checkPort(port) {
 
 function readJson(path) {
   return JSON.parse(readFileSync(resolve(root, path), "utf8"));
+}
+
+function isCanonicalProjectPath(path) {
+  if (typeof path !== "string" || path.length === 0 || path.includes("\\"))
+    return false;
+  if (isAbsolute(path) || path.startsWith("/")) return false;
+  const segments = path.split("/");
+  return segments.every((segment) => segment !== "" && segment !== "." && segment !== "..");
+}
+
+function isContainedPath(base, candidate) {
+  const pathFromBase = relative(base, candidate);
+  return (
+    pathFromBase !== "" &&
+    !isAbsolute(pathFromBase) &&
+    pathFromBase !== ".." &&
+    !pathFromBase.startsWith(`..${sep}`)
+  );
+}
+
+function hasOnlyContainedNonSymlinkComponents(path) {
+  if (!isCanonicalProjectPath(path)) return false;
+
+  const realRoot = realpathSync(root);
+  let current = root;
+  for (const segment of path.split("/")) {
+    current = resolve(current, segment);
+    if (!isContainedPath(root, current)) return false;
+    if (!existsSync(current)) continue;
+    if (lstatSync(current).isSymbolicLink()) return false;
+    const resolvedCurrent = realpathSync(current);
+    if (
+      resolvedCurrent !== realRoot &&
+      !resolvedCurrent.startsWith(`${realRoot}${sep}`)
+    )
+      return false;
+  }
+  return true;
+}
+
+function readManagedProvenance() {
+  const manifestPath = ".vireo/managed-files.json";
+  if (!hasOnlyContainedNonSymlinkComponents(manifestPath))
+    throw new Error("managed-file provenance path is unsafe");
+  return readJson(manifestPath);
+}
+
+function validateManagedProvenance(managed, projectMetadata) {
+  if (managed?.schemaVersion !== 1) return false;
+  if (!/^[a-f0-9]{40}$/u.test(managed?.templateCommit ?? "")) return false;
+  if (
+    !/^[a-f0-9]{40}$/u.test(projectMetadata?.templateCommit ?? "") ||
+    managed.templateCommit !== projectMetadata.templateCommit
+  )
+    return false;
+  if (!Array.isArray(managed.files) || managed.files.length === 0) return false;
+
+  const paths = new Set();
+  for (const file of managed.files) {
+    if (
+      !isCanonicalProjectPath(file?.path) ||
+      paths.has(file.path) ||
+      !/^[a-f0-9]{64}$/u.test(file?.sha256 ?? "") ||
+      !hasOnlyContainedNonSymlinkComponents(file.path) ||
+      !existsSync(resolve(root, file.path))
+    )
+      return false;
+    paths.add(file.path);
+  }
+  return true;
 }
 
 function result(code, status, summary, remedy) {
@@ -164,6 +241,36 @@ export async function runDoctor() {
       ),
     );
     metadata = { database: "h2" };
+  }
+
+  try {
+    const managed = readManagedProvenance();
+    const valid = validateManagedProvenance(
+      managed,
+      metadataPath === ".vireo/project.json" &&
+        hasOnlyContainedNonSymlinkComponents(metadataPath)
+        ? metadata
+        : undefined,
+    );
+    results.push(
+      valid
+        ? result("VIR-PROJECT-002", "pass", "Managed-file provenance is ready")
+        : result(
+            "VIR-PROJECT-002",
+            "fail",
+            "Managed-file provenance is invalid",
+            "Run the declared Vireo upgrade dry run and restore .vireo/managed-files.json before applying it.",
+          ),
+    );
+  } catch {
+    results.push(
+      result(
+        "VIR-PROJECT-002",
+        "warn",
+        "Managed-file provenance is unavailable",
+        "Projects created before 0.7 receive provenance during the reviewed 0.6-to-0.7 upgrade.",
+      ),
+    );
   }
 
   const frontendInstalled = existsSync(resolve(root, "frontend/node_modules"));
