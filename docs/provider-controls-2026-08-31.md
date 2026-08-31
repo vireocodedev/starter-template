@@ -1,6 +1,6 @@
 # Provider-control desired state and evidence — 2026-08-31
 
-Status: **live machine controls applied and authenticated; environment administrator-bypass UI action open**
+Status: **live machine controls applied and authenticated; human continuity gaps remain**
 
 The Template's `.github/settings/actions.json` (including SHA pinning) and
 `selected-actions.json` are separate GitHub REST PUT payloads. The `template-release.json` environment PUT
@@ -20,6 +20,8 @@ ruleset `21958166`, immutable-tag rulesets `21958135` for 0.7.0 and `21926710`
 for 0.6.0, the exact selected/SHA-pinned Actions policy, read-only workflow
 defaults without PR approval, an empty CODEOWNERS error list, and
 `template-release` policies limited to branch `main` and tag pattern
-`starter-template@*`. The environment still reports `can_admins_bypass: true`;
-disabling that UI-only toggle and retaining a new authenticated GET response is
-the remaining machine-provider action.
+`starter-template@*`. After the maintainer disabled administrator bypass in the
+GitHub UI, an authenticated read at `2026-08-31T21:32:11Z` reports
+`can_admins_bypass: false`. This closes the Template's machine-controlled
+provider-security portion; independent review and backup-owner recovery remain
+human gaps.
