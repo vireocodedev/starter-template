@@ -4,5 +4,8 @@
   "reviewers": [
     { "type": "User", "id": 53398175 }
   ],
-  "deployment_branch_policy": null
+  "deployment_branch_policy": {
+    "protected_branches": false,
+    "custom_branch_policies": true
+  }
 }

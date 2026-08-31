@@ -1,0 +1,4 @@
+{
+  "can_admins_bypass": false,
+  "evidence": "GitHub UI setting plus an authenticated environment GET export"
+}

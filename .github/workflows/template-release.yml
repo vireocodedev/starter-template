@@ -59,6 +59,12 @@ jobs:
           test "$GITHUB_SHA" = "$(git rev-parse HEAD)"
           printf 'tag=%s\n' "$RELEASE_TAG" >> "$GITHUB_OUTPUT"
           printf 'commit=%s\n' "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+      - name: Require expected release commit from origin/main
+        env:
+          EXPECTED_COMMIT: ${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}
+        run: |
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          git merge-base --is-ancestor "$EXPECTED_COMMIT" origin/main
       - name: Require release absence before checkout
         env:
           GH_TOKEN: ${{ github.token }}

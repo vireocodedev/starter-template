@@ -12,6 +12,7 @@ cd "$repository_root"
 
 steps=(
   "template-release|Template release policy|node scripts/template-release-policy.mjs"
+  "repository-security|Repository security desired state|node scripts/repository-security-policy.mjs"
   "verification-pipeline|Verification pipeline contract|node scripts/verification-pipeline-policy.mjs"
   "vireo-compatibility|Vireo package compatibility|node scripts/vireo-package-compatibility-policy.mjs"
   "public-contract|Public Template contract|node scripts/public-contract-policy.mjs"
