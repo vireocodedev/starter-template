@@ -356,6 +356,9 @@ for (const fragment of [
   "name: Require trusted remote tag target before checkout",
   "name: Revalidate release absence and exact tag target",
   "gh release view",
+  "name: Verify exact release target",
+  "RELEASE_COMMIT: ${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}",
+  'run: env GITHUB_SHA="$RELEASE_COMMIT" ./scripts/verify-template.sh silent',
   'git rev-parse "refs/tags/$RELEASE_TAG^{commit}"',
   'git rev-parse HEAD',
   'test "$tag_commit" = "$EXPECTED_COMMIT"',
@@ -408,15 +411,33 @@ const tagCheckout = templateReleaseWorkflow.indexOf(
 const tagResolution = templateReleaseWorkflow.indexOf(
   "name: Resolve exact release target",
 );
+const exactTargetVerification = templateReleaseWorkflow.indexOf(
+  "name: Verify exact release target",
+);
+const releaseManifest = templateReleaseWorkflow.indexOf(
+  "node scripts/write-template-release-manifest.mjs",
+);
 const absenceBeforeCreate = templateReleaseWorkflow.indexOf(
   "name: Revalidate release absence and exact tag target",
 );
 const releaseCreate = templateReleaseWorkflow.indexOf("gh release create");
-if (!(sourceCheckout < nodeSetup && nodeSetup < mainDispatchGuard && mainDispatchGuard < sourcePreflight && sourcePreflight < recoveryResolution && recoveryResolution < absenceBeforeCheckout && absenceBeforeCheckout < remoteBeforeCheckout && remoteBeforeCheckout < tagCheckout && tagCheckout < tagResolution && tagResolution < absenceBeforeCreate && absenceBeforeCreate < releaseCreate)) {
+if (!(sourceCheckout < nodeSetup && nodeSetup < mainDispatchGuard && mainDispatchGuard < sourcePreflight && sourcePreflight < recoveryResolution && recoveryResolution < absenceBeforeCheckout && absenceBeforeCheckout < remoteBeforeCheckout && remoteBeforeCheckout < tagCheckout && tagCheckout < tagResolution && tagResolution < exactTargetVerification && exactTargetVerification < releaseManifest && releaseManifest < absenceBeforeCreate && absenceBeforeCreate < releaseCreate)) {
   problems.push(
-    "template release workflow must resolve the trusted target and prove release absence before checkout and creation",
+    "template release workflow must verify the exact resolved target before writing its manifest and creating a release",
   );
 }
+
+const verifyTemplateWorkflowLines = templateReleaseWorkflow
+  .split("\n")
+  .filter((line) => line.includes("./scripts/verify-template.sh silent"));
+if (
+  verifyTemplateWorkflowLines.length !== 1 ||
+  verifyTemplateWorkflowLines[0].trim() !==
+    'run: env GITHUB_SHA="$RELEASE_COMMIT" ./scripts/verify-template.sh silent'
+)
+  problems.push(
+    "template release workflow must invoke verify-template exactly once with the resolved release commit as GITHUB_SHA",
+  );
 
 const releaseIdentityCommands = templateReleaseWorkflow
   .split("\n")

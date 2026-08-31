@@ -105,7 +105,10 @@ jobs:
       - run: corepack npm run setup
       - run: corepack npm exec -- playwright install --with-deps chromium
         working-directory: frontend
-      - run: ./scripts/verify-template.sh silent
+      - name: Verify exact release target
+        env:
+          RELEASE_COMMIT: ${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}
+        run: env GITHUB_SHA="$RELEASE_COMMIT" ./scripts/verify-template.sh silent
       - run: node scripts/write-template-release-manifest.mjs "$RUNNER_TEMP/template-release-manifest.json" "${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}"
       - name: Revalidate release absence and exact tag target
         env:
