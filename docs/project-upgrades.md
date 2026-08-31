@@ -57,7 +57,16 @@ application unable to compile until the pending actions below have been complete
 Review and port the source-to-target Template diff, including security, operations,
 frontend, backend, schema, and deployment changes.
 
-## Application-owned 0.2.0 to 0.3.0 checklist
+## Application-owned 0.6.0 to 0.7.0 checklist
+
+- Review release notes and the source-to-target Template diff for `frontend/src`,
+  `src`, deployment descriptors, and `.github` workflows/settings.
+- Port only application-owned decisions; the CLI does not rewrite domain schema,
+  handwritten migrations, ejected capabilities, or deployment ownership.
+- Refresh the appropriate lockfile, run setup where the project requires it, then
+  run the documented complete verification command before accepting the upgrade.
+
+## Historical application-owned 0.2.0 to 0.3.0 checklist
 
 Complete each item in the application that is being upgraded. These are intentionally
 not automated: they require a decision about the application's routes, language
