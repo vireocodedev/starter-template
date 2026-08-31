@@ -16,8 +16,8 @@ and GNU-time peak-RSS method from
 | --- | ---: | --- |
 | Complete duration | 230,245 ms | 185,006–238,340 ms |
 | Complete peak RSS | 2,782,792 KiB | 2,715,396–2,884,548 KiB |
-| Frontend-contract duration | 166,632 ms | retained in each reviewed artifact |
-| Frontend-contract peak RSS | 2,782,792 KiB | retained in each reviewed artifact |
+| Frontend-contract duration | 166,632 ms | 123,529–169,543 ms |
+| Frontend-contract peak RSS | 2,782,792 KiB | 2,715,396–2,884,548 KiB |
 
 Each linked run retains `.verification-evidence/latest.json` for 90 days, including
 the schema, observed host, cache statement, durations, and peak RSS. All five runs
@@ -25,8 +25,8 @@ were clean.
 
 ## Decision
 
-The policy adopts the observed complete-gate duration/RSS medians and the
-frontend-contract duration/RSS medians as baselines. Warning and failure limits are
+The policy adopts every observed stage and complete-gate duration/RSS median as its
+baseline. Warning and failure limits are
 unchanged because the comparable records did not approach them. Review again after
 the next five comparable canonical-host records or before changing a relevant gate.
 

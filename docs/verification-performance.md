@@ -57,7 +57,8 @@ the [platform checklist](manual-platform-checklist.md).
 | Container context |              5 s |             10 s |     256 MiB |     512 MiB |
 | Complete gate     |            300 s |            420 s |       6 GiB |       8 GiB |
 
-The 2026-09-01 five-run review sets the complete-gate baseline to 230.245 seconds
+The 2026-09-01 five-run review replaces every stage and complete-gate baseline with
+the five-run median, including a complete-gate baseline of 230.245 seconds
 and 2.65 GiB peak RSS; the frontend-contract baseline is 166.632 seconds and 2.65
 GiB peak RSS. Warning and failure thresholds remain unchanged because every sampled
 canonical-host run was clean. A warning keeps the gate green but requires review
