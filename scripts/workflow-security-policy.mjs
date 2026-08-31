@@ -16,10 +16,43 @@ const workflowFiles = readdirSync(workflowRoot)
 const observed = new Set();
 const problems = [];
 
+function parseJobs(lines) {
+  const jobs = [];
+  const jobsLine = lines.findIndex((line) => line === "jobs:");
+  if (jobsLine < 0) return jobs;
+
+  for (let index = jobsLine + 1; index < lines.length; index += 1) {
+    const match = lines[index].match(/^ {2}([A-Za-z0-9_-]+):\s*$/u);
+    if (!match) continue;
+    const start = index;
+    let end = lines.length;
+    for (let cursor = index + 1; cursor < lines.length; cursor += 1) {
+      if (/^ {2}[A-Za-z0-9_-]+:\s*$/u.test(lines[cursor]) || /^[A-Za-z0-9_-]+:/u.test(lines[cursor])) {
+        end = cursor;
+        break;
+      }
+    }
+    jobs.push({ name: match[1], start, end });
+    index = end - 1;
+  }
+
+  return jobs;
+}
+
 for (const fileName of workflowFiles) {
   const lines = readFileSync(join(workflowRoot, fileName), "utf8").split("\n");
+  const jobs = parseJobs(lines);
   if (!lines.some((line) => /^permissions:\s*\{\}\s*$/u.test(line))) {
     problems.push(`${fileName} must default to permissions: {}`);
+  }
+  for (const job of jobs) {
+    if (
+      !lines
+        .slice(job.start, job.end)
+        .some((line) => /^ {4}timeout-minutes: \d+\s*$/u.test(line))
+    ) {
+      problems.push(`${fileName}:${job.name} must declare timeout-minutes`);
+    }
   }
 
   for (let index = 0; index < lines.length; index += 1) {
