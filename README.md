@@ -96,7 +96,7 @@ verifies a real browser login and persisted Item creation through the built Ngin
 backend, and PostgreSQL stack, in addition to the proxy, readiness, header, and
 database-privilege contracts.
 
-After evaluating the workflow, use the framework's structured [public-beta evaluation form](https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml) or [public Discussions](https://github.com/vireocodedev/starter/discussions). Both paths are public: remove credentials, private source, application data, and identifying project information before posting. Suspected vulnerabilities always use the private security-advisory link instead.
+After evaluating the workflow, use the framework's structured [public-beta evaluation form](https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml) or [public Discussions](https://github.com/vireocodedev/starter/discussions). If you control a non-fixture application and meet the form's qualification statements, use the [independent adopter check-in](https://github.com/vireocodedev/starter/issues/new?template=adopter_check_in.yml). The form definitions and submitted issues are public; opening or submitting the rendered forms requires GitHub sign-in. Remove credentials, private source, application data, and identifying project information before posting. Suspected vulnerabilities always use the private security-advisory link instead.
 
 ## Customize the template
 
