@@ -21,6 +21,10 @@
     "ci.yml": {
       "group": "verify-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}",
       "cancelInProgress": true
+    },
+    "template-release.yml": {
+      "group": "release-${{ github.workflow }}-${{ github.ref }}",
+      "cancelInProgress": false
     }
   }
 }

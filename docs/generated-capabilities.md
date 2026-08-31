@@ -1,6 +1,8 @@
 # Generated capabilities
 
-The root `vireo` script pins the `vireo` executable from `create-vireo@0.5.0`.
+The root `vireo` script pins the `vireo` executable from `create-vireo@0.6.0`.
+The [`starter-template@0.6.0` release contract](https://github.com/vireocodedev/starter-template/blob/starter-template%400.6.0/contracts/template-release-policy.json)
+keeps that generator line aligned with the Template release coordinates.
 Use that command for supported entity generation and the 0.2.0-to-0.3.0 project
 upgrade path. When developing unpublished Starter changes, use the built CLI from a
 local Starter checkout as shown in the framework's [entity-generator

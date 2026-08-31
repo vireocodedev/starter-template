@@ -3,6 +3,12 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const templateReleasePolicy = JSON.parse(
+  readFileSync(join(root, "contracts/template-release-policy.json"), "utf8"),
+);
+const templateReleaseTag = templateReleasePolicy.tag;
+const templateReleaseContract = "template-release-policy.json";
+const templateReleaseContractUrl = `https://github.com/${templateReleasePolicy.repository}/blob/${encodeURIComponent(templateReleaseTag)}/contracts/${templateReleaseContract}`;
 const requiredFiles = [
   "README.md",
   "LICENSE",
@@ -14,6 +20,7 @@ const requiredFiles = [
   "docs/starter-compatibility.md",
   "docs/project-upgrades.md",
   "docs/getting-started.md",
+  "docs/generated-capabilities.md",
   "docs/customizing-the-template.md",
   "docs/project-upgrades.md",
   "docs/deployment.md",
@@ -31,6 +38,10 @@ const requiredFiles = [
   "docs/manual-platform-checklist.md",
   "docs/platform-support-evidence.md",
   "docs/verification-performance.md",
+  "contracts/template-release-policy.json",
+  "scripts/template-release-policy.mjs",
+  "scripts/write-template-release-manifest.mjs",
+  ".github/workflows/template-release.yml",
   "contracts/platform-support-policy.json",
   ".github/CODEOWNERS",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -75,7 +86,24 @@ requireText("README.md", [
   "docs/PUBLIC_API.md",
   "docs/TEMPORAL_VALUES.md",
 ]);
+requireText("README.md", [
+  templateReleaseTag,
+  templateReleaseContract,
+  `create-vireo@${templateReleasePolicy.createVireoVersion}`,
+  "validates that exact tag before it can publish",
+]);
 requireText("SUPPORT.md", ["SECURITY.md", "CODE_OF_CONDUCT.md"]);
+requireText("SECURITY.md", [templateReleaseTag, templateReleaseContract]);
+requireText("SUPPORT.md", [templateReleaseTag, templateReleaseContract]);
+requireText("docs/generated-capabilities.md", [
+  templateReleaseTag,
+  templateReleaseContractUrl,
+  `create-vireo@${templateReleasePolicy.createVireoVersion}`,
+]);
+requireText("docs/project-upgrades.md", [
+  "no adjacent path",
+  "is declared yet",
+]);
 requireText("GOVERNANCE.md", [
   ".github/CODEOWNERS",
   "docs/starter-compatibility.md",
@@ -131,7 +159,7 @@ const executableDocumentationClaims = [
     documentation: "README.md",
     documentedCommand: "./scripts/verify.sh",
     evidence: ".github/workflows/ci.yml",
-    evidenceCommand: "./scripts/verify.sh silent",
+    evidenceCommand: "./scripts/verify-template.sh silent",
   },
   {
     documentation: "README.md",
@@ -160,6 +188,51 @@ for (const claim of executableDocumentationClaims) {
       `${claim.evidence} must execute documented command ${claim.evidenceCommand}`,
     );
   }
+}
+
+const templateVerifier = readFileSync(
+  join(root, "scripts/verify-template.sh"),
+  "utf8",
+);
+if (!templateVerifier.includes("./scripts/verify.sh")) {
+  problems.push(
+    "scripts/verify-template.sh must invoke the application verifier explicitly",
+  );
+}
+if (!templateVerifier.includes("node scripts/template-release-policy.mjs")) {
+  problems.push(
+    "scripts/verify-template.sh must enforce the template release policy",
+  );
+}
+
+const templateReleaseWorkflow = readFileSync(
+  join(root, ".github/workflows/template-release.yml"),
+  "utf8",
+);
+for (const fragment of [
+  "starter-template@*",
+  "./scripts/verify-template.sh silent",
+  "node scripts/template-release-policy.mjs",
+  "node scripts/write-template-release-manifest.mjs",
+  "gh release create",
+  "--verify-tag",
+]) {
+  if (!templateReleaseWorkflow.includes(fragment))
+    problems.push(
+      `template release workflow must contain ${JSON.stringify(fragment)}`,
+    );
+}
+const releasePreflight =
+  'node scripts/template-release-policy.mjs "$GITHUB_REF_NAME"';
+const releaseSetup = "corepack npm run setup";
+if (
+  templateReleaseWorkflow.indexOf(releasePreflight) < 0 ||
+  templateReleaseWorkflow.indexOf(releasePreflight) >
+    templateReleaseWorkflow.indexOf(releaseSetup)
+) {
+  problems.push(
+    "template release workflow must validate its exact tag before setup",
+  );
 }
 
 const markdownFiles = [];

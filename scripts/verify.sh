@@ -16,12 +16,7 @@ if $silent; then
 fi
 
 steps=(
-  "verification-pipeline|Verification pipeline contract|node scripts/verification-pipeline-policy.mjs"
-  "vireo-compatibility|Vireo package compatibility|node scripts/vireo-package-compatibility-policy.mjs"
   "development-database|Development database modes|corepack npm run test:scripts"
-  "public-contract|Public contract policy|node scripts/public-contract-policy.mjs"
-  "flagship-demo|Flagship demo contract|node scripts/flagship-demo-policy.mjs"
-  "flagship-proof|Flagship proof material|node scripts/flagship-proof-policy.mjs"
   "frontend-contract|Frontend contract|${frontend_verify_command}"
   "browser-smoke|Browser smoke tests|cd frontend && corepack npm run test:e2e"
   "jvm-build|JVM build|./gradlew build"
@@ -78,7 +73,7 @@ done
 
 finished_at=$(date +%s%3N)
 total_duration=$((finished_at - started_at))
-printf 'Template verification passed: %d/%d steps (%d ms total).\n' \
+printf 'Application verification passed: %d/%d steps (%d ms total).\n' \
   "$total" "$total" "$total_duration"
 
 node scripts/verification-budget-policy.mjs \
