@@ -25,8 +25,11 @@ the user problem, alternatives, framework-versus-application ownership, migratio
 impact, and verification. Maintainers seek rough consensus when practical and record
 the final trade-off in the relevant pull request or roadmap record.
 
-Changes require review and the authoritative verification gate. Only authorized
-maintainers may merge, tag releases, approve protected environments, or coordinate
+Changes require independent review and the authoritative verification gate once a
+second trusted maintainer is available. The current single-maintainer interim state
+requires the same checks and resolved conversations but cannot enforce independent
+approval without lockout; its [provider-control and backup-owner limitation](docs/provider-controls-2026-08-31.md)
+remains open. Only authorized maintainers may merge, tag releases, approve protected environments, or coordinate
 security fixes. The roadmap communicates intent, not a delivery commitment.
 
 Compatibility and upgrades follow

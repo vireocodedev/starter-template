@@ -65,6 +65,7 @@ const requiredFiles = [
   "docs/offline.md",
   "docs/accessibility.md",
   "docs/manual-platform-checklist.md",
+  "docs/provider-controls-2026-08-31.md",
   "docs/platform-support-evidence.md",
   "docs/verification-performance.md",
   "contracts/template-release-policy.json",
@@ -72,9 +73,16 @@ const requiredFiles = [
   "contracts/project-upgrade-policy.json",
   currentTemplateReleaseTagRulesetPath,
   ".github/rulesets/starter-template-0.6.0.json",
+  ".github/rulesets/main.json",
   ".github/environments/template-release.json",
+  ".github/environments/template-release.deployment-branch-policies.json",
+  ".github/environments/template-release.live-assertions.json",
+  ".github/settings/actions.json",
+  ".github/settings/selected-actions.json",
+  ".github/settings/workflow-permissions.json",
   "scripts/template-release-policy.mjs",
   "scripts/template-release-recovery-policy.mjs",
+  "scripts/repository-security-policy.mjs",
   "scripts/write-template-release-manifest.mjs",
   ".github/workflows/template-release.yml",
   "contracts/platform-support-policy.json",
@@ -208,9 +216,33 @@ if (
   problems.push(
     "template release environment must require exactly User reviewer 53398175",
   );
-if (templateReleaseEnvironment.deployment_branch_policy !== null)
+if (
+  templateReleaseEnvironment.deployment_branch_policy?.protected_branches !== false ||
+  templateReleaseEnvironment.deployment_branch_policy?.custom_branch_policies !== true ||
+  JSON.stringify(
+    JSON.parse(
+      readFileSync(
+        join(
+          root,
+          ".github/environments/template-release.deployment-branch-policies.json",
+        ),
+        "utf8",
+      ),
+    ),
+  ) !==
+    JSON.stringify([
+      { name: "main", type: "branch" },
+      { name: "starter-template@*", type: "tag" },
+    ]) ||
+  JSON.parse(
+    readFileSync(
+      join(root, ".github/environments/template-release.live-assertions.json"),
+      "utf8",
+    ),
+  ).can_admins_bypass !== false
+)
   problems.push(
-    "template release environment deployment_branch_policy must be null to permit main dispatches and tag pushes",
+    "template release environment must permit exactly main dispatches and template tags without administrator bypass",
   );
 requireText("docs/generated-capabilities.md", [
   templateReleaseTag,
@@ -351,6 +383,11 @@ if (!templateVerifier.includes("node scripts/template-release-policy.mjs")) {
     "scripts/verify-template.sh must enforce the template release policy",
   );
 }
+if (!templateVerifier.includes("node scripts/repository-security-policy.mjs")) {
+  problems.push(
+    "scripts/verify-template.sh must enforce the repository security desired-state policy",
+  );
+}
 
 const templateReleaseWorkflow = readFileSync(
   join(root, ".github/workflows/template-release.yml"),
@@ -404,6 +441,7 @@ for (const fragment of [
   "name: Resolve trusted recovery target",
   "node scripts/template-release-recovery-policy.mjs",
   "name: Require release absence before checkout",
+  "name: Require expected release commit from origin/main",
   "name: Require trusted remote tag target before checkout",
   "name: Revalidate release absence and exact tag target",
   "gh release view",
@@ -411,6 +449,7 @@ for (const fragment of [
   "RELEASE_COMMIT: ${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}",
   'run: env GITHUB_SHA="$RELEASE_COMMIT" ./scripts/verify-template.sh silent',
   'git rev-parse "refs/tags/$RELEASE_TAG^{commit}"',
+  'git merge-base --is-ancestor "$EXPECTED_COMMIT" origin/main',
   'git rev-parse HEAD',
   'test "$tag_commit" = "$EXPECTED_COMMIT"',
   'test "$head_commit" = "$EXPECTED_COMMIT"',
@@ -478,6 +517,9 @@ const recoveryResolution = templateReleaseWorkflow.indexOf(
 const absenceBeforeCheckout = templateReleaseWorkflow.indexOf(
   "name: Require release absence before checkout",
 );
+const originMainContainment = templateReleaseWorkflow.indexOf(
+  "name: Require expected release commit from origin/main",
+);
 const remoteBeforeCheckout = templateReleaseWorkflow.indexOf(
   "name: Require trusted remote tag target before checkout",
 );
@@ -497,7 +539,7 @@ const absenceBeforeCreate = templateReleaseWorkflow.indexOf(
   "name: Revalidate release absence and exact tag target",
 );
 const releaseCreate = templateReleaseWorkflow.indexOf("gh release create");
-if (!(sourceCheckout < nodeSetup && nodeSetup < mainDispatchGuard && mainDispatchGuard < sourcePreflight && sourcePreflight < recoveryResolution && recoveryResolution < absenceBeforeCheckout && absenceBeforeCheckout < remoteBeforeCheckout && remoteBeforeCheckout < tagCheckout && tagCheckout < tagResolution && tagResolution < exactTargetVerification && exactTargetVerification < releaseManifest && releaseManifest < absenceBeforeCreate && absenceBeforeCreate < releaseCreate)) {
+if (!(sourceCheckout < nodeSetup && nodeSetup < mainDispatchGuard && mainDispatchGuard < sourcePreflight && sourcePreflight < recoveryResolution && recoveryResolution < originMainContainment && originMainContainment < absenceBeforeCheckout && absenceBeforeCheckout < remoteBeforeCheckout && remoteBeforeCheckout < tagCheckout && tagCheckout < tagResolution && tagResolution < exactTargetVerification && exactTargetVerification < releaseManifest && releaseManifest < absenceBeforeCreate && absenceBeforeCreate < releaseCreate)) {
   problems.push(
     "template release workflow must verify the exact resolved target before writing its manifest and creating a release",
   );
