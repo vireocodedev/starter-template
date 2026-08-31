@@ -45,6 +45,17 @@ for (const fileName of workflowFiles) {
   if (!lines.some((line) => /^permissions:\s*\{\}\s*$/u.test(line))) {
     problems.push(`${fileName} must default to permissions: {}`);
   }
+  const requiredConcurrency = policy.requiredConcurrencyWorkflows?.[fileName];
+  if (requiredConcurrency) {
+    const expected = [
+      "concurrency:",
+      `  group: ${requiredConcurrency.group}`,
+      `  cancel-in-progress: ${requiredConcurrency.cancelInProgress}`,
+    ];
+    if (!expected.every((line) => lines.includes(line))) {
+      problems.push(`${fileName} must declare the required cancellable concurrency group`);
+    }
+  }
   for (const job of jobs) {
     if (
       !lines

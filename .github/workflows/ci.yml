@@ -5,13 +5,13 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "31 5 * * 1"
+    - cron: "41 5 * * 1"
   workflow_dispatch:
 
 permissions: {}
 
 concurrency:
-  group: verify-${{ github.workflow }}-${{ github.ref }}
+  group: verify-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
