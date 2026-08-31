@@ -13,9 +13,9 @@
     "reviewWindowRuns": 5
   },
   "stages": {
-    "public-contract": {
-      "label": "Public contract policy",
-      "baselineMs": 100,
+    "development-database": {
+      "label": "Development database modes",
+      "baselineMs": 500,
       "warningMs": 5000,
       "failureMs": 10000,
       "baselineRssKiB": 80000,

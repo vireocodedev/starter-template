@@ -5,5 +5,9 @@
   "projectName": "starter-template",
   "javaPackage": "com.vireocode.startertemplate",
   "database": "h2",
-  "packageManager": "npm"
+  "packageManager": "npm",
+  "version": "0.6.0",
+  "tag": "starter-template@0.6.0",
+  "createVireoVersion": "0.6.0",
+  "ecosystemRelease": "npm-0.6.0_jvm-0.3.0"
 }

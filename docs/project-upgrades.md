@@ -7,17 +7,19 @@ migrations, deployment files, or an adopted/ejected generated capability.
 
 ## Supported path
 
-This Template revision is the target for `create-vireo` 0.5.0 and upgrades projects to
-Vireo 0.3.0. The first supported
-source pair is a project created by `create-vireo` 0.2.0 from its pinned Template
-commit. Unknown commits, dependency edits, lockfile drift, duplicate migration
-versions, and generated/wire-contract drift are refusals rather than guesses.
+The current `0.6.0` Template source and `create-vireo` 0.6.0 CLI still ship only
+the historical 0.2.0-to-0.3.0 declared transform documented below. They do not
+declare an upgrade path for applications created by `0.6.0`; no adjacent path for
+0.6.0-created applications is declared yet. The historic transform applies only to
+a project created by `create-vireo` 0.2.0 from its pinned Template commit. Unknown
+commits, dependency edits, lockfile drift, duplicate migration versions, and
+generated/wire-contract drift are refusals rather than guesses.
 
 Start from a clean branch and create a recoverable database backup. Install or invoke
 the target CLI version, then review the non-writing plan:
 
 ```bash
-npx --yes --package=create-vireo@0.5.0 vireo upgrade --to 0.3.0 --dry-run
+npx --yes --package=create-vireo@0.6.0 vireo upgrade --to 0.3.0 --dry-run
 ```
 
 The plan distinguishes Vireo-managed edits from required application-owned work.
@@ -25,7 +27,7 @@ After reviewing the target Template diff and all affected changelogs, apply only
 managed migration:
 
 ```bash
-npx --yes --package=create-vireo@0.5.0 vireo upgrade --to 0.3.0 \
+npx --yes --package=create-vireo@0.6.0 vireo upgrade --to 0.3.0 \
   --apply --accept-application-owned
 ```
 

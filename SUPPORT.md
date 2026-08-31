@@ -20,6 +20,12 @@ best-effort basis with no response-time or uptime SLA.
 Include the Template revision or tag, exact Starter artifact versions, reproduction,
 expected and actual behavior, and environment. Search existing issues first.
 
+Release coordinates are published with the
+[`starter-template@0.6.0` release contract](contracts/template-release-policy.json)
+and its draft-and-publish
+[GitHub release](https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.6.0).
+Repository administrators must enable GitHub immutable releases before publishing.
+
 ## Support boundary
 
 The Template demonstrates integration; it is not a hosted service, generated
