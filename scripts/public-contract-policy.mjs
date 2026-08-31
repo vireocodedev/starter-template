@@ -6,6 +6,24 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const templateReleasePolicy = JSON.parse(
   readFileSync(join(root, "contracts/template-release-policy.json"), "utf8"),
 );
+const templateReleaseRecovery = JSON.parse(
+  readFileSync(
+    join(root, "contracts/template-release-recovery.json"),
+    "utf8",
+  ),
+);
+const templateReleaseTagRuleset = JSON.parse(
+  readFileSync(
+    join(root, ".github/rulesets/starter-template-0.6.0.json"),
+    "utf8",
+  ),
+);
+const templateReleaseEnvironment = JSON.parse(
+  readFileSync(
+    join(root, ".github/environments/template-release.json"),
+    "utf8",
+  ),
+);
 const templateReleaseTag = templateReleasePolicy.tag;
 const templateReleaseContract = "template-release-policy.json";
 const templateReleaseContractUrl = `https://github.com/${templateReleasePolicy.repository}/blob/${encodeURIComponent(templateReleaseTag)}/contracts/${templateReleaseContract}`;
@@ -39,7 +57,11 @@ const requiredFiles = [
   "docs/platform-support-evidence.md",
   "docs/verification-performance.md",
   "contracts/template-release-policy.json",
+  "contracts/template-release-recovery.json",
+  ".github/rulesets/starter-template-0.6.0.json",
+  ".github/environments/template-release.json",
   "scripts/template-release-policy.mjs",
+  "scripts/template-release-recovery-policy.mjs",
   "scripts/write-template-release-manifest.mjs",
   ".github/workflows/template-release.yml",
   "contracts/platform-support-policy.json",
@@ -95,6 +117,80 @@ requireText("README.md", [
 requireText("SUPPORT.md", ["SECURITY.md", "CODE_OF_CONDUCT.md"]);
 requireText("SECURITY.md", [templateReleaseTag, templateReleaseContract]);
 requireText("SUPPORT.md", [templateReleaseTag, templateReleaseContract]);
+requireText("SUPPORT.md", [
+  "Never move, delete, or recreate an immutable release tag.",
+  "reviewed `main` workflow-dispatch path",
+  "draft or published GitHub release",
+  "`template-release` protected GitHub environment",
+  "immutable releases are still enabled",
+  "update-and-deletion tag ruleset",
+  "active before recovery approval",
+]);
+if (templateReleaseRecovery.schemaVersion !== 1)
+  problems.push("template release recovery schemaVersion must equal 1");
+if (templateReleaseRecovery.tag !== templateReleasePolicy.tag)
+  problems.push(
+    "template release recovery tag must match template release policy tag",
+  );
+if (!/^[0-9a-f]{40}$/u.test(templateReleaseRecovery.expectedCommit ?? ""))
+  problems.push(
+    "template release recovery expectedCommit must be a lowercase 40-hex Git SHA",
+  );
+const expectedRulesetRef = `refs/tags/${templateReleaseRecovery.tag}`;
+if (templateReleaseTagRuleset.name !== `Protect ${templateReleaseRecovery.tag}`)
+  problems.push("template release tag ruleset name must match recovery tag");
+if (templateReleaseTagRuleset.target !== "tag")
+  problems.push("template release tag ruleset target must equal tag");
+if (templateReleaseTagRuleset.enforcement !== "active")
+  problems.push("template release tag ruleset enforcement must equal active");
+if (
+  !Array.isArray(templateReleaseTagRuleset.bypass_actors) ||
+  templateReleaseTagRuleset.bypass_actors.length !== 0
+)
+  problems.push("template release tag ruleset bypass_actors must be empty");
+const tagRulesetRefName = templateReleaseTagRuleset.conditions?.ref_name;
+if (
+  !Array.isArray(tagRulesetRefName?.include) ||
+  tagRulesetRefName.include.length !== 1 ||
+  tagRulesetRefName.include[0] !== expectedRulesetRef ||
+  !Array.isArray(tagRulesetRefName.exclude) ||
+  tagRulesetRefName.exclude.length !== 0
+)
+  problems.push(
+    "template release tag ruleset must include exactly the recovery tag and exclude no refs",
+  );
+const tagRules = templateReleaseTagRuleset.rules;
+if (
+  !Array.isArray(tagRules) ||
+  tagRules.length !== 2 ||
+  new Set(tagRules.map((rule) => rule?.type)).size !== 2 ||
+  !["update", "deletion"].every((type) =>
+    tagRules.some((rule) => rule?.type === type),
+  )
+)
+  problems.push(
+    "template release tag ruleset must contain exactly update and deletion rules",
+  );
+if (templateReleaseEnvironment.wait_timer !== 0)
+  problems.push("template release environment wait_timer must equal 0");
+if (templateReleaseEnvironment.prevent_self_review !== false)
+  problems.push(
+    "template release environment prevent_self_review must equal false",
+  );
+const environmentReviewers = templateReleaseEnvironment.reviewers;
+if (
+  !Array.isArray(environmentReviewers) ||
+  environmentReviewers.length !== 1 ||
+  environmentReviewers[0]?.type !== "User" ||
+  environmentReviewers[0]?.id !== 53398175
+)
+  problems.push(
+    "template release environment must require exactly User reviewer 53398175",
+  );
+if (templateReleaseEnvironment.deployment_branch_policy !== null)
+  problems.push(
+    "template release environment deployment_branch_policy must be null to permit main dispatches and tag pushes",
+  );
 requireText("docs/generated-capabilities.md", [
   templateReleaseTag,
   templateReleaseContractUrl,
@@ -209,6 +305,10 @@ const templateReleaseWorkflow = readFileSync(
   join(root, ".github/workflows/template-release.yml"),
   "utf8",
 );
+const templateReleaseRecoveryPolicy = readFileSync(
+  join(root, "scripts/template-release-recovery-policy.mjs"),
+  "utf8",
+);
 for (const fragment of [
   "starter-template@*",
   "./scripts/verify-template.sh silent",
@@ -223,7 +323,7 @@ for (const fragment of [
     );
 }
 const releasePreflight =
-  'node scripts/template-release-policy.mjs "$GITHUB_REF_NAME"';
+  'node scripts/template-release-policy.mjs "$RELEASE_TAG"';
 const releaseSetup = "corepack npm run setup";
 if (
   templateReleaseWorkflow.indexOf(releasePreflight) < 0 ||
@@ -233,6 +333,103 @@ if (
   problems.push(
     "template release workflow must validate its exact tag before setup",
   );
+}
+
+for (const fragment of [
+  "workflow_dispatch:",
+  "tag:",
+  "required: true",
+  "type: string",
+  "group: release-${{ github.workflow }}-${{ inputs.tag || github.ref_name }}",
+  "environment: template-release",
+  "name: Checkout policy source",
+  "ref: ${{ github.ref }}",
+  "name: Reject non-main recovery dispatch",
+  "if: github.event_name == 'workflow_dispatch'",
+  'test "$GITHUB_REF" = "refs/heads/main"',
+  "name: Checkout validated release tag",
+  "ref: refs/tags/${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}",
+  "name: Resolve exact release target",
+  "name: Resolve trusted recovery target",
+  "node scripts/template-release-recovery-policy.mjs",
+  "name: Require release absence before checkout",
+  "name: Require trusted remote tag target before checkout",
+  "name: Revalidate release absence and exact tag target",
+  "gh release view",
+  'git rev-parse "refs/tags/$RELEASE_TAG^{commit}"',
+  'git rev-parse HEAD',
+  'test "$tag_commit" = "$EXPECTED_COMMIT"',
+  'test "$head_commit" = "$EXPECTED_COMMIT"',
+  "printf 'tag=%s\\n' \"$RELEASE_TAG\" >> \"$GITHUB_OUTPUT\"",
+  "printf 'commit=%s\\n' \"$GITHUB_SHA\" >> \"$GITHUB_OUTPUT\"",
+  "corepack npm exec -- playwright install --with-deps chromium",
+  '"${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}"',
+  'gh release create "${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}"',
+  'gh release edit "${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}"',
+]) {
+  if (!templateReleaseWorkflow.includes(fragment))
+    problems.push(
+      `template release workflow must contain immutable recovery control ${JSON.stringify(fragment)}`,
+    );
+}
+
+for (const fragment of [
+  "explicit recovery tag must exactly match the recovery contract",
+  "template release recovery tag must match the current template release policy",
+  "template release recovery expectedCommit must be a lowercase 40-hex Git SHA",
+  "`tag=${recovery.tag}\\ncommit=${recovery.expectedCommit}\\n`",
+]) {
+  if (!templateReleaseRecoveryPolicy.includes(fragment))
+    problems.push(
+      `template release recovery policy must contain ${JSON.stringify(fragment)}`,
+    );
+}
+
+const sourceCheckout = templateReleaseWorkflow.indexOf("name: Checkout policy source");
+const nodeSetup = templateReleaseWorkflow.indexOf(
+  "uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+);
+const mainDispatchGuard = templateReleaseWorkflow.indexOf(
+  "name: Reject non-main recovery dispatch",
+);
+const sourcePreflight = templateReleaseWorkflow.indexOf(releasePreflight);
+const recoveryResolution = templateReleaseWorkflow.indexOf(
+  "name: Resolve trusted recovery target",
+);
+const absenceBeforeCheckout = templateReleaseWorkflow.indexOf(
+  "name: Require release absence before checkout",
+);
+const remoteBeforeCheckout = templateReleaseWorkflow.indexOf(
+  "name: Require trusted remote tag target before checkout",
+);
+const tagCheckout = templateReleaseWorkflow.indexOf(
+  "name: Checkout validated release tag",
+);
+const tagResolution = templateReleaseWorkflow.indexOf(
+  "name: Resolve exact release target",
+);
+const absenceBeforeCreate = templateReleaseWorkflow.indexOf(
+  "name: Revalidate release absence and exact tag target",
+);
+const releaseCreate = templateReleaseWorkflow.indexOf("gh release create");
+if (!(sourceCheckout < nodeSetup && nodeSetup < mainDispatchGuard && mainDispatchGuard < sourcePreflight && sourcePreflight < recoveryResolution && recoveryResolution < absenceBeforeCheckout && absenceBeforeCheckout < remoteBeforeCheckout && remoteBeforeCheckout < tagCheckout && tagCheckout < tagResolution && tagResolution < absenceBeforeCreate && absenceBeforeCreate < releaseCreate)) {
+  problems.push(
+    "template release workflow must resolve the trusted target and prove release absence before checkout and creation",
+  );
+}
+
+const releaseIdentityCommands = templateReleaseWorkflow
+  .split("\n")
+  .filter((line) =>
+    /(?:write-template-release-manifest\.mjs|gh release (?:create|edit))/u.test(
+      line,
+    ),
+  );
+for (const unsafeIdentity of releaseIdentityCommands) {
+  if (/(?:GITHUB_(?:SHA|REF_NAME)|github\.(?:sha|ref_name))/u.test(unsafeIdentity))
+    problems.push(
+      `template release workflow must not use unverified GitHub identity ${JSON.stringify(unsafeIdentity)}`,
+    );
 }
 
 const markdownFiles = [];
