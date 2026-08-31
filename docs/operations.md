@@ -60,3 +60,6 @@ that the previous revision remains recoverable for the agreed window.
 Exercise [database recovery](database-recovery.md) and the
 [incident-response procedure](incident-response.md) on a schedule. Record the date,
 revision, operators, timings, failures, corrective actions, and next due date.
+The sanitized [2026-09-01 hosted-demo rehearsal](hosted-demo-recovery-rehearsal-2026-09-01.md)
+passes the maintainer preparation path, records a restart-only counterexample, and
+does not replace an independent witnessed target-environment exercise.

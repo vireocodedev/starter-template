@@ -30,7 +30,11 @@ decisions, owners, and customer impact in a restricted incident log.
    changes and record who authorized them.
 4. **Recover:** use the rehearsed deployment rollback or
    [database recovery](database-recovery.md) path. Check schema/data compatibility
-   before routing old binaries or restoring data.
+   before routing old binaries or restoring data. If a recovery app is unavailable,
+   recreate the reviewed immutable image against the accepted database or use the
+   reviewed rollback path; do not rely on a mutable-container restart loop. The
+   [2026-09-01 rehearsal](hosted-demo-recovery-rehearsal-2026-09-01.md) records the
+   restart-only counterevidence.
 5. **Validate:** require readiness plus user-facing checks, data-integrity checks,
    security checks, and stable telemetry. Continue observation for an explicit
    period before resolving.

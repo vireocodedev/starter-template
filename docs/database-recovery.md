@@ -33,6 +33,10 @@ backup in Git or CI artifacts.
 A backup is not accepted merely because `pg_dump` exited successfully. Restore it
 to an isolated database, start the intended application revision against that
 database, check readiness, and verify representative domain and authentication data.
+The [2026-09-01 hosted-demo rehearsal](hosted-demo-recovery-rehearsal-2026-09-01.md)
+records this acceptance path and its same-host-storage limitation; every deployment
+still needs an independent-failure-domain backup policy and an independently
+witnessed target-environment exercise.
 
 ## Restore without overwriting the source
 
