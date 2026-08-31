@@ -57,10 +57,13 @@ the [platform checklist](manual-platform-checklist.md).
 | Container context |              5 s |             10 s |     256 MiB |     512 MiB |
 | Complete gate     |            300 s |            420 s |       6 GiB |       8 GiB |
 
-The initial complete-gate reference is 130 seconds and 4.02 GiB peak RSS. A warning
-keeps the gate green but requires review before release; a failure threshold fails the
-gate. The browser duration threshold retains the existing allowance for cold backend
-assembly and Playwright startup.
+The 2026-09-01 five-run review sets the complete-gate baseline to 230.245 seconds
+and 2.65 GiB peak RSS; the frontend-contract baseline is 166.632 seconds and 2.65
+GiB peak RSS. Warning and failure thresholds remain unchanged because every sampled
+canonical-host run was clean. A warning keeps the gate green but requires review
+before release; a failure threshold fails the gate. The browser duration threshold
+retains the existing allowance for cold backend assembly and Playwright startup. See
+[`docs/verification-trend-review-2026-09-01.md`](verification-trend-review-2026-09-01.md).
 
 ## Baseline review and exceptions
 

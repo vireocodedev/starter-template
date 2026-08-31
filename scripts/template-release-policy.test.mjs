@@ -16,9 +16,9 @@ const policy = {
   tag: "starter-template@0.7.0",
   createVireoVersion: "0.7.0",
   ecosystemRelease: "npm-0.7.0_jvm-0.3.0",
-  repository: "vireocodedev/starter-template",
+  repository: "vireocodedev/vireo-template",
   releaseUrl:
-    "https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.7.0",
+    "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.7.0",
   immutableReleasesRequired: true,
 };
 const validInputs = {

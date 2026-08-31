@@ -7,7 +7,7 @@
     "deploymentRevision": "aa7d17bb065626e9eac41b80e701b5b8a19552d8",
     "activatedAt": "2026-08-28T09:20:09Z",
     "owner": "Vireo repository maintainers",
-    "incidentPath": "https://github.com/vireocodedev/starter-template/issues/new?template=bug_report.yml"
+    "incidentPath": "https://github.com/vireocodedev/vireo-template/issues/new?template=bug_report.yml"
   },
   "credentials": {
     "username": "demo",
@@ -27,8 +27,8 @@
     "command": "corepack npm --prefix frontend run test:demo",
     "schedule": "hourly",
     "evidenceRuns": [
-      "https://github.com/vireocodedev/starter-template/actions/runs/33158935391",
-      "https://github.com/vireocodedev/starter-template/actions/runs/33159094461"
+      "https://github.com/vireocodedev/vireo-template/actions/runs/33158935391",
+      "https://github.com/vireocodedev/vireo-template/actions/runs/33159094461"
     ]
   }
 }

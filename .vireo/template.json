@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "full-stack",
-  "template": "vireocodedev/starter-template",
+  "template": "vireocodedev/vireo-template",
   "projectName": "starter-template",
   "javaPackage": "com.vireocode.startertemplate",
   "database": "h2",

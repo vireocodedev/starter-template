@@ -25,14 +25,14 @@ jobs:
       - name: Compare the Template snapshot with Starter main
         run: |
           curl --fail --silent --show-error \
-            https://raw.githubusercontent.com/vireocodedev/starter/main/contracts/platform-support-policy.json \
+            https://raw.githubusercontent.com/vireocodedev/vireo/main/contracts/platform-support-policy.json \
             --output "$RUNNER_TEMP/platform-support-policy.json"
           node scripts/platform-support-policy.mjs --compare "$RUNNER_TEMP/platform-support-policy.json"
       - name: Record evidence
         if: always()
         env:
           VIREO_EVIDENCE_COMMAND: compare Template platform policy with public Starter main
-          VIREO_EVIDENCE_CANONICAL_SOURCE: https://github.com/vireocodedev/starter/blob/main/contracts/platform-support-policy.json
+          VIREO_EVIDENCE_CANONICAL_SOURCE: https://github.com/vireocodedev/vireo/blob/main/contracts/platform-support-policy.json
         run: node scripts/write-support-evidence.mjs platform-policy-sync ${{ job.status }} .support-evidence/platform-policy-sync.json
       - if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

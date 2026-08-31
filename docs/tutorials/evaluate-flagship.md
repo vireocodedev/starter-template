@@ -37,4 +37,4 @@ The gate covers application architecture, formatting, lint, types, unit/integrat
 
 ## Decide honestly
 
-Continue only if ordinary React/Spring source, the supported generator boundary, and the published package surface match your team's preferences. Read [comparison boundaries](../comparison.md), [flagship limitations](../flagship.md#honest-boundary), and the Starter [evaluation guide](https://github.com/vireocodedev/starter/blob/main/docs/EVALUATION.md). This exercise proves technical connection and changeability, not production readiness or fit for your domain.
+Continue only if ordinary React/Spring source, the supported generator boundary, and the published package surface match your team's preferences. Read [comparison boundaries](../comparison.md), [flagship limitations](../flagship.md#honest-boundary), and the Vireo [evaluation guide](https://github.com/vireocodedev/vireo/blob/main/docs/EVALUATION.md). This exercise proves technical connection and changeability, not production readiness or fit for your domain.

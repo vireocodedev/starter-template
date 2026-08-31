@@ -1,7 +1,7 @@
 # Loading states and skeletons
 
 Vireo Starter Template follows the normative
-[Vireo Loading-State and Skeleton Standard](https://github.com/vireocodedev/starter/blob/main/docs/LOADING_STATE_STANDARD.md).
+[Vireo Loading-State and Skeleton Standard](https://github.com/vireocodedev/vireo/blob/main/docs/LOADING_STATE_STANDARD.md).
 
 The canonical standard is maintained in Vireo Starter so reusable UI contracts and consuming application conventions have one source of truth. Template route policies, page compositions, feature loading states, and tests MUST comply with that standard. Application-specific decisions and documented exceptions remain in this repository.
 

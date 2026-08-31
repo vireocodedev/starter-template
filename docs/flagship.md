@@ -28,7 +28,7 @@ The development profile seeds active, draft, archived, low-stock, and healthy re
 
 See [flagship architecture proof](flagship-architecture.md) for the request path and [evaluation guide](tutorials/evaluate-flagship.md) for a copy-pastable walkthrough.
 
-Record a sanitized result through the framework's [public-beta evaluation form](https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml). If you control a non-fixture application and meet the qualification statements, use the [independent adopter check-in](https://github.com/vireocodedev/starter/issues/new?template=adopter_check_in.yml). The form definitions and submitted issues are public; opening or submitting the rendered forms requires GitHub sign-in. Open-ended questions belong in [Discussions](https://github.com/vireocodedev/starter/discussions); suspected vulnerabilities do not.
+Record a sanitized result through the framework's [public-beta evaluation form](https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml). If you control a non-fixture application and meet the qualification statements, use the [independent adopter check-in](https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml). The form definitions and submitted issues are public; opening or submitting the rendered forms requires GitHub sign-in. Open-ended questions belong in [Discussions](https://github.com/vireocodedev/vireo/discussions); suspected vulnerabilities do not.
 
 ## Honest boundary
 

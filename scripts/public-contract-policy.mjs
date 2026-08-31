@@ -128,12 +128,12 @@ requireText("README.md", [
   "docs/EVALUATION.md",
   "docs/PUBLIC_API.md",
   "docs/TEMPORAL_VALUES.md",
-  "https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml",
-  "https://github.com/vireocodedev/starter/issues/new?template=adopter_check_in.yml",
+  "https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml",
+  "https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml",
 ]);
 requireText("docs/flagship.md", [
-  "https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml",
-  "https://github.com/vireocodedev/starter/issues/new?template=adopter_check_in.yml",
+  "https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml",
+  "https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml",
 ]);
 requireText("README.md", [
   templateReleaseTag,

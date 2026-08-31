@@ -24,10 +24,10 @@
     },
     "frontend-contract": {
       "label": "Frontend contract",
-      "baselineMs": 105000,
+      "baselineMs": 166632,
       "warningMs": 180000,
       "failureMs": 240000,
-      "baselineRssKiB": 4215276,
+      "baselineRssKiB": 2782792,
       "warningRssKiB": 6291456,
       "failureRssKiB": 8388608
     },
@@ -60,10 +60,10 @@
     }
   },
   "total": {
-    "baselineMs": 130000,
+    "baselineMs": 230245,
     "warningMs": 300000,
     "failureMs": 420000,
-    "baselineRssKiB": 4215276,
+    "baselineRssKiB": 2782792,
     "warningRssKiB": 6291456,
     "failureRssKiB": 8388608
   }
