@@ -37,11 +37,7 @@ for (const packagePath of Object.keys(packageLock.packages ?? {})) {
 }
 
 for (const [name, version] of starterDependencies) {
-  if (
-    /^(?:file|link|workspace):/.test(version) ||
-    version.includes("../starter") ||
-    version.includes("../vireo")
-  ) {
+  if (/^(?:file|link|workspace):/.test(version) || version.includes("../starter") || version.includes("../vireo")) {
     problems.push(`${name} must resolve from the published registry, received ${version}.`);
   }
 }
