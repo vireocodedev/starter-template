@@ -139,15 +139,17 @@ jobs:
         postgresql: ["17", "18"]
     services:
       postgres:
-        image: postgres:${{ matrix.postgresql }}-alpine
+        image: postgres:${{ matrix.postgresql }}
         env:
           POSTGRES_DB: starter_template
-          POSTGRES_USER: starter_template
-          POSTGRES_PASSWORD: support-only-password
+          POSTGRES_USER: starter_template_owner
+          POSTGRES_PASSWORD: support-owner-only-password
+          POSTGRES_RUNTIME_USER: starter_template_runtime
+          POSTGRES_RUNTIME_PASSWORD: support-runtime-only-password
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U starter_template -d starter_template"
+          --health-cmd "pg_isready -U starter_template_owner -d starter_template"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 12
@@ -171,23 +173,29 @@ jobs:
         working-directory: frontend
       - run: corepack npm exec -- playwright install --with-deps chromium
         working-directory: frontend
+      - name: Bootstrap the production runtime database role
+        run: |
+          docker cp deploy/postgres/init-runtime-role.sh "${{ job.services.postgres.id }}:/tmp/vireo-runtime-role.sh"
+          docker exec "${{ job.services.postgres.id }}" /bin/bash /tmp/vireo-runtime-role.sh
       - name: Exercise migrations and CRUD through the real application
         env:
           VIREO_E2E_EXTERNAL_DATABASE: "true"
-          SPRING_PROFILES_ACTIVE: dev
+          SPRING_PROFILES_ACTIVE: prod,dev
           SPRING_DATASOURCE_URL: jdbc:postgresql://127.0.0.1:5432/starter_template
-          SPRING_DATASOURCE_USERNAME: starter_template
-          SPRING_DATASOURCE_PASSWORD: support-only-password
+          SPRING_DATASOURCE_USERNAME: starter_template_runtime
+          SPRING_DATASOURCE_PASSWORD: support-runtime-only-password
+          SPRING_FLYWAY_USER: starter_template_owner
+          SPRING_FLYWAY_PASSWORD: support-owner-only-password
         run: corepack npm run test:e2e
         working-directory: frontend
       - name: Resolve tested image digest
         if: always()
-        run: echo "VIREO_EVIDENCE_IMAGE=$(docker image inspect postgres:${{ matrix.postgresql }}-alpine --format '{{index .RepoDigests 0}}')" >> "$GITHUB_ENV"
+        run: echo "VIREO_EVIDENCE_IMAGE=$(docker image inspect postgres:${{ matrix.postgresql }} --format '{{index .RepoDigests 0}}')" >> "$GITHUB_ENV"
       - name: Record evidence
         if: always()
         env:
           VIREO_EVIDENCE_COMMAND: corepack npm run test:e2e
-          VIREO_EVIDENCE_DATABASE_MODE: full-stack-dev-profile
+          VIREO_EVIDENCE_DATABASE_MODE: full-stack-production-runtime-role
           VIREO_EVIDENCE_POSTGRESQL: ${{ matrix.postgresql }}
         run: node scripts/write-support-evidence.mjs postgres-${{ matrix.postgresql }} ${{ job.status }} .support-evidence/postgres-${{ matrix.postgresql }}.json
       - if: always()
