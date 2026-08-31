@@ -44,12 +44,18 @@ test("hosted PostgreSQL support fixtures require the production runtime role", (
     "SPRING_DATASOURCE_USERNAME=\"$database_runtime\"",
     "SPRING_FLYWAY_USER=\"$database_owner\"",
     "prod,dev",
+    'pg_isready --host 127.0.0.1 --username "$database_owner" --dbname "$database_name"',
   ]) {
     assert.ok(
       recovery.includes(requiredRecoveryFragment),
       `database recovery rehearsal must retain ${requiredRecoveryFragment}`,
     );
   }
+
+  assert.ok(
+    !recovery.includes('pg_isready --username "$database_owner" --dbname "$database_name"'),
+    "database recovery rehearsal must not accept the temporary PostgreSQL initialization socket",
+  );
 });
 
 test("the shared production runtime-role bootstrap remains fail-closed and re-runnable", () => {

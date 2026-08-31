@@ -44,7 +44,7 @@ trap cleanup EXIT
 wait_for_database() {
   local container_name="$1"
   for _ in $(seq 1 60); do
-    if docker exec "$container_name" pg_isready --username "$database_owner" --dbname "$database_name" >/dev/null 2>&1; then
+    if docker exec "$container_name" pg_isready --host 127.0.0.1 --username "$database_owner" --dbname "$database_name" >/dev/null 2>&1; then
       return
     fi
     sleep 1
