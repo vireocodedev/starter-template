@@ -8,6 +8,10 @@ This sanitized record covers `synthetic-hosted-demo-maintainer-rehearsal` from
 target and does not establish public uptime, disaster-recovery durability, or the
 required independent-witness result.
 
+The hosted demo was initially activated at revision
+`aa7d17bb065626e9eac41b80e701b5b8a19552d8`; this record verifies the later current
+deployment revision above and does not rewrite the activation history.
+
 | Check | Result |
 | --- | --- |
 | Backup | Guarded logical backup completed in 1 s: 25,048 bytes, mode `0600`, SHA-256 `ed671e99c90f6c8b29c28e1f18e7ce0d0f07e7ac7450e44d1589b8a6932b2a86`; `pg_restore --list` verified it |

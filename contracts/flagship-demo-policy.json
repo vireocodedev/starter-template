@@ -4,7 +4,7 @@
   "availabilityClaim": "best-effort-no-sla",
   "dataClassification": "public-synthetic-only",
   "operations": {
-    "deploymentRevision": "aa7d17bb065626e9eac41b80e701b5b8a19552d8",
+    "deploymentRevision": "a24f9435d3f624fb1962c3d5c4e3457b69f5be28",
     "activatedAt": "2026-08-28T09:20:09Z",
     "owner": "Vireo repository maintainers",
     "incidentPath": "https://github.com/vireocodedev/vireo-template/issues/new?template=bug_report.yml"
