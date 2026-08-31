@@ -98,10 +98,27 @@ export function validateTemplateRelease({
     );
   if (compatibility.schemaVersion !== 1)
     problems.push("compatibility contract schemaVersion must equal 1");
-  if (tag && tag !== policy.tag)
+  if (tag !== undefined && tag !== policy.tag)
     problems.push(`tag ${tag} must equal ${policy.tag}`);
 
   return problems;
+}
+
+export function resolveTemplateReleaseTag(
+  { explicitTag, environment = process.env } = {},
+) {
+  if (explicitTag !== undefined) return explicitTag;
+
+  const refName = environment.GITHUB_REF_NAME;
+  if (environment.GITHUB_REF_TYPE === "tag" && typeof refName === "string")
+    return refName;
+
+  const ref = environment.GITHUB_REF;
+  const tagPrefix = "refs/tags/";
+  if (typeof ref === "string" && ref.startsWith(tagPrefix))
+    return ref.slice(tagPrefix.length);
+
+  return undefined;
 }
 
 export function readTemplateReleaseInputs(root = repositoryRoot) {
@@ -135,7 +152,7 @@ function isMainModule() {
 if (isMainModule()) {
   const problems = validateTemplateRelease({
     ...readTemplateReleaseInputs(),
-    tag: process.argv[2] ?? process.env.GITHUB_REF_NAME,
+    tag: resolveTemplateReleaseTag({ explicitTag: process.argv[2] }),
   });
   if (problems.length > 0) {
     for (const problem of problems) console.error(problem);

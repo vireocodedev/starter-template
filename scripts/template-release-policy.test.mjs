@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  resolveTemplateReleaseTag,
   validateTemplateRelease,
   validateTemplateReleaseCoordinates,
 } from "./template-release-policy.mjs";
@@ -49,6 +50,57 @@ test("validates canonical template release coordinates", () => {
   assert.deepEqual(
     validateTemplateRelease({ ...validInputs, tag: policy.tag }),
     [],
+  );
+});
+
+test("resolves only explicit tags and GitHub tag refs", () => {
+  assert.equal(
+    resolveTemplateReleaseTag({
+      explicitTag: policy.tag,
+      environment: {
+        GITHUB_REF_NAME: "11/merge",
+        GITHUB_REF_TYPE: "branch",
+      },
+    }),
+    policy.tag,
+  );
+  assert.ok(
+    validateTemplateRelease({
+      ...validInputs,
+      tag: resolveTemplateReleaseTag({ explicitTag: "starter-template@0.5.0" }),
+    }).length > 0,
+  );
+  assert.equal(
+    resolveTemplateReleaseTag({
+      environment: { GITHUB_REF_NAME: policy.tag, GITHUB_REF_TYPE: "tag" },
+    }),
+    policy.tag,
+  );
+  assert.equal(
+    resolveTemplateReleaseTag({
+      environment: { GITHUB_REF: `refs/tags/${policy.tag}` },
+    }),
+    policy.tag,
+  );
+  assert.equal(
+    resolveTemplateReleaseTag({
+      environment: {
+        GITHUB_EVENT_NAME: "pull_request",
+        GITHUB_REF_NAME: "11/merge",
+        GITHUB_REF: "refs/pull/11/merge",
+      },
+    }),
+    undefined,
+  );
+  assert.equal(
+    resolveTemplateReleaseTag({
+      environment: {
+        GITHUB_REF_NAME: "main",
+        GITHUB_REF_TYPE: "branch",
+        GITHUB_REF: "refs/heads/main",
+      },
+    }),
+    undefined,
   );
 });
 
