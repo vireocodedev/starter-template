@@ -23,7 +23,7 @@
       "cancelInProgress": true
     },
     "template-release.yml": {
-      "group": "release-${{ github.workflow }}-${{ github.ref }}",
+      "group": "release-${{ github.workflow }}-${{ inputs.tag || github.ref_name }}",
       "cancelInProgress": false
     }
   }

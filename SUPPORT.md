@@ -26,6 +26,22 @@ and its draft-and-publish
 [GitHub release](https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.6.0).
 Repository administrators must enable GitHub immutable releases before publishing.
 
+## Immutable release recovery
+
+Never move, delete, or recreate an immutable release tag. If a release workflow
+needs recovery, use the reviewed `main` workflow-dispatch path with the existing
+release tag and its expected commit
+[`5b123e60bd1ce733ae70711796552a17aaa60fe3`](contracts/template-release-recovery.json).
+Stop immediately if that tag already has a draft or published GitHub release;
+investigate the existing release rather than attempting to replace it.
+
+The `template-release` protected GitHub environment is the administrative
+preflight gate. Its required reviewer checks immutable releases are still enabled
+before approving a recovery or new release run. The workflow deliberately
+does not attempt that administration-only API check with its repository token.
+The update-and-deletion tag ruleset for `starter-template@0.6.0` must also be
+active before recovery approval.
+
 ## Support boundary
 
 The Template demonstrates integration; it is not a hosted service, generated
