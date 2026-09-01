@@ -126,6 +126,7 @@ main website is authoritative.
 - [Versions and exact references](https://vireocode.com/versions/)
 
 - [Getting started and configuration](docs/getting-started.md)
+- [Working with Codex in the Template and generated apps](docs/codex.md)
 - [30-minute vertical slice](docs/tutorials/30-minute-vertical-slice.md)
 - [10-minute flagship evaluation](docs/tutorials/evaluate-flagship.md)
 - [Flagship experience and proof](docs/flagship.md)

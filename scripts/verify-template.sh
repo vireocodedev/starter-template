@@ -11,6 +11,7 @@ cd "$repository_root"
 ./scripts/verify.sh "$@"
 
 steps=(
+  "codex-customization|Codex customization policy|node scripts/codex-customization-policy.mjs"
   "template-release|Template release policy|node scripts/template-release-policy.mjs"
   "repository-security|Repository security desired state|node scripts/repository-security-policy.mjs"
   "verification-pipeline|Verification pipeline contract|node scripts/verification-pipeline-policy.mjs"

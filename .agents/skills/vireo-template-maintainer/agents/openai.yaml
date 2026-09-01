@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vireo Template Maintainer"
+  short_description: "Maintain safe Vireo Template projections"
+  default_prompt: "Use $vireo-template-maintainer to update the Vireo Template safely."
