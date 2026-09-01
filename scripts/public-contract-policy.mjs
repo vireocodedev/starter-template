@@ -7,10 +7,7 @@ const templateReleasePolicy = JSON.parse(
   readFileSync(join(root, "contracts/template-release-policy.json"), "utf8"),
 );
 const templateReleaseRecovery = JSON.parse(
-  readFileSync(
-    join(root, "contracts/template-release-recovery.json"),
-    "utf8",
-  ),
+  readFileSync(join(root, "contracts/template-release-recovery.json"), "utf8"),
 );
 const projectUpgradeContract = JSON.parse(
   readFileSync(join(root, "contracts/project-upgrade-policy.json"), "utf8"),
@@ -28,16 +25,21 @@ const currentTemplateReleaseTagRuleset = JSON.parse(
 const retainedTemplateReleaseTags = [
   templateReleaseRecovery.tag,
   `starter-template@${projectUpgradeContract.previousRelease}`,
-].filter((tag, index, tags) => tag !== templateReleasePolicy.tag && tags.indexOf(tag) === index);
-const retainedTemplateReleaseTagRulesets = retainedTemplateReleaseTags.map((tag) => ({
-  tag,
-  ruleset: JSON.parse(
-    readFileSync(
-      join(root, ".github/rulesets", `${tag.replace("@", "-")}.json`),
-      "utf8",
+].filter(
+  (tag, index, tags) =>
+    tag !== templateReleasePolicy.tag && tags.indexOf(tag) === index,
+);
+const retainedTemplateReleaseTagRulesets = retainedTemplateReleaseTags.map(
+  (tag) => ({
+    tag,
+    ruleset: JSON.parse(
+      readFileSync(
+        join(root, ".github/rulesets", `${tag.replace("@", "-")}.json`),
+        "utf8",
+      ),
     ),
-  ),
-}));
+  }),
+);
 const templateReleaseEnvironment = JSON.parse(
   readFileSync(
     join(root, ".github/environments/template-release.json"),
@@ -168,7 +170,9 @@ requireText("SUPPORT.md", [
 if (templateReleaseRecovery.schemaVersion !== 1)
   problems.push("template release recovery schemaVersion must equal 1");
 if (!/^starter-template@0\.6\.0$/u.test(templateReleaseRecovery.tag ?? ""))
-  problems.push("template release recovery must retain the protected immutable 0.6.0 tag");
+  problems.push(
+    "template release recovery must retain the protected immutable 0.6.0 tag",
+  );
 if (!/^[0-9a-f]{40}$/u.test(templateReleaseRecovery.expectedCommit ?? ""))
   problems.push(
     "template release recovery expectedCommit must be a lowercase 40-hex Git SHA",
@@ -181,7 +185,10 @@ function validateImmutableTagRuleset({ ruleset, tag, role }) {
     problems.push(`${role} release tag ruleset target must equal tag`);
   if (ruleset.enforcement !== "active")
     problems.push(`${role} release tag ruleset enforcement must equal active`);
-  if (!Array.isArray(ruleset.bypass_actors) || ruleset.bypass_actors.length !== 0)
+  if (
+    !Array.isArray(ruleset.bypass_actors) ||
+    ruleset.bypass_actors.length !== 0
+  )
     problems.push(`${role} release tag ruleset bypass_actors must be empty`);
   const refName = ruleset.conditions?.ref_name;
   if (
@@ -239,8 +246,10 @@ if (
     "template release environment must require exactly User reviewer 53398175",
   );
 if (
-  templateReleaseEnvironment.deployment_branch_policy?.protected_branches !== false ||
-  templateReleaseEnvironment.deployment_branch_policy?.custom_branch_policies !== true ||
+  templateReleaseEnvironment.deployment_branch_policy?.protected_branches !==
+    false ||
+  templateReleaseEnvironment.deployment_branch_policy
+    ?.custom_branch_policies !== true ||
   JSON.stringify(
     JSON.parse(
       readFileSync(
@@ -285,7 +294,9 @@ if (
       edge.status === "supported",
   )
 ) {
-  problems.push("project upgrade contract must declare the final adjacent upgrade coordinate");
+  problems.push(
+    "project upgrade contract must declare the final adjacent upgrade coordinate",
+  );
 }
 for (const edge of [
   { from: "0.2.0", to: "0.3.0" },
@@ -311,7 +322,9 @@ if (
   projectUpgradeContract.lockfileRefreshCommands?.frontend !==
     "corepack npm install --package-lock-only"
 ) {
-  problems.push("final project upgrade contract must derive profile-correct lock refresh commands without a self-referential Template SHA");
+  problems.push(
+    "final project upgrade contract must derive profile-correct lock refresh commands without a self-referential Template SHA",
+  );
 }
 requireText("docs/project-upgrades.md", [
   "0.6.0-to-0.7.0",
@@ -336,6 +349,24 @@ const compatibility = requireText("docs/starter-compatibility.md", [
 const frontendManifest = JSON.parse(
   readFileSync(join(root, "frontend/package.json"), "utf8"),
 );
+for (const script of [
+  "test:storybook",
+  "test:storybook:local-starter",
+  "storybook",
+  "storybook:local-starter",
+  "build-storybook",
+  "build-storybook:local-starter",
+]) {
+  if (
+    !frontendManifest.scripts?.[script]?.startsWith(
+      "STORYBOOK_DISABLE_TELEMETRY=1 ",
+    )
+  ) {
+    problems.push(
+      `frontend/package.json ${script} must disable Storybook telemetry before startup`,
+    );
+  }
+}
 const starterDependencies = Object.entries(
   frontendManifest.dependencies,
 ).filter(([name]) => name.startsWith("@vireocodedev/"));
@@ -488,11 +519,11 @@ for (const fragment of [
   'run: env GITHUB_SHA="$RELEASE_COMMIT" ./scripts/verify-template.sh silent',
   'git rev-parse "refs/tags/$RELEASE_TAG^{commit}"',
   'git merge-base --is-ancestor "$EXPECTED_COMMIT" origin/main',
-  'git rev-parse HEAD',
+  "git rev-parse HEAD",
   'test "$tag_commit" = "$EXPECTED_COMMIT"',
   'test "$head_commit" = "$EXPECTED_COMMIT"',
-  "printf 'tag=%s\\n' \"$RELEASE_TAG\" >> \"$GITHUB_OUTPUT\"",
-  "printf 'commit=%s\\n' \"$GITHUB_SHA\" >> \"$GITHUB_OUTPUT\"",
+  'printf \'tag=%s\\n\' "$RELEASE_TAG" >> "$GITHUB_OUTPUT"',
+  'printf \'commit=%s\\n\' "$GITHUB_SHA" >> "$GITHUB_OUTPUT"',
   "corepack npm exec -- playwright install --with-deps chromium",
   '"${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}"',
   'gh release create "${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}"',
@@ -523,7 +554,9 @@ if (
   !recoveryTargetStep?.includes(
     'node scripts/template-release-recovery-policy.mjs "$RUNNER_TEMP/template-release-recovery-target" "$RELEASE_TAG"',
   ) ||
-  !recoveryTargetStep.includes('if [ "${{ github.event_name }}" = "push" ]; then')
+  !recoveryTargetStep.includes(
+    'if [ "${{ github.event_name }}" = "push" ]; then',
+  )
 )
   problems.push(
     "template release workflow must validate a trusted historical dispatch directly against the recovery contract after checkout",
@@ -541,7 +574,9 @@ for (const fragment of [
     );
 }
 
-const sourceCheckout = templateReleaseWorkflow.indexOf("name: Checkout policy source");
+const sourceCheckout = templateReleaseWorkflow.indexOf(
+  "name: Checkout policy source",
+);
 const nodeSetup = templateReleaseWorkflow.indexOf(
   "uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
 );
@@ -577,7 +612,21 @@ const absenceBeforeCreate = templateReleaseWorkflow.indexOf(
   "name: Revalidate release absence and exact tag target",
 );
 const releaseCreate = templateReleaseWorkflow.indexOf("gh release create");
-if (!(sourceCheckout < nodeSetup && nodeSetup < mainDispatchGuard && mainDispatchGuard < sourcePreflight && sourcePreflight < recoveryResolution && recoveryResolution < originMainContainment && originMainContainment < absenceBeforeCheckout && absenceBeforeCheckout < remoteBeforeCheckout && remoteBeforeCheckout < tagCheckout && tagCheckout < tagResolution && tagResolution < exactTargetVerification && exactTargetVerification < releaseManifest && releaseManifest < absenceBeforeCreate && absenceBeforeCreate < releaseCreate)) {
+if (!(
+  sourceCheckout < nodeSetup &&
+  nodeSetup < mainDispatchGuard &&
+  mainDispatchGuard < sourcePreflight &&
+  sourcePreflight < recoveryResolution &&
+  recoveryResolution < originMainContainment &&
+  originMainContainment < absenceBeforeCheckout &&
+  absenceBeforeCheckout < remoteBeforeCheckout &&
+  remoteBeforeCheckout < tagCheckout &&
+  tagCheckout < tagResolution &&
+  tagResolution < exactTargetVerification &&
+  exactTargetVerification < releaseManifest &&
+  releaseManifest < absenceBeforeCreate &&
+  absenceBeforeCreate < releaseCreate
+)) {
   problems.push(
     "template release workflow must verify the exact resolved target before writing its manifest and creating a release",
   );
@@ -603,7 +652,9 @@ const releaseIdentityCommands = templateReleaseWorkflow
     ),
   );
 for (const unsafeIdentity of releaseIdentityCommands) {
-  if (/(?:GITHUB_(?:SHA|REF_NAME)|github\.(?:sha|ref_name))/u.test(unsafeIdentity))
+  if (
+    /(?:GITHUB_(?:SHA|REF_NAME)|github\.(?:sha|ref_name))/u.test(unsafeIdentity)
+  )
     problems.push(
       `template release workflow must not use unverified GitHub identity ${JSON.stringify(unsafeIdentity)}`,
     );
@@ -628,6 +679,11 @@ collectMarkdown(root);
 
 for (const source of markdownFiles) {
   const markdown = readFileSync(source, "utf8");
+  if (/(?<!corepack )npm run\b/u.test(markdown)) {
+    problems.push(
+      `${relative(root, source)} must route documented npm scripts through Corepack`,
+    );
+  }
   for (const match of markdown.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)) {
     const rawTarget = match[1].trim().replace(/^<|>$/g, "");
     if (!rawTarget || /^(?:https?:|mailto:|#)/.test(rawTarget)) continue;
@@ -642,6 +698,19 @@ for (const source of markdownFiles) {
       problems.push(
         `${relative(root, source)} links to unsupported ${rawTarget}`,
       );
+  }
+}
+
+for (const path of [
+  "scripts/setup.mjs",
+  "scripts/dev.mjs",
+  "scripts/vireo-doctor.mjs",
+  "scripts/verification-host.mjs",
+]) {
+  if (/(?<!corepack )npm run\b/u.test(readFileSync(join(root, path), "utf8"))) {
+    problems.push(
+      `${path} must route user-facing npm script remedies through Corepack`,
+    );
   }
 }
 

@@ -94,7 +94,9 @@ function isCanonicalProjectPath(path) {
     return false;
   if (isAbsolute(path) || path.startsWith("/")) return false;
   const segments = path.split("/");
-  return segments.every((segment) => segment !== "" && segment !== "." && segment !== "..");
+  return segments.every(
+    (segment) => segment !== "" && segment !== "." && segment !== "..",
+  );
 }
 
 function isContainedPath(base, candidate) {
@@ -281,7 +283,7 @@ export async function runDoctor() {
           "VIR-DEPS-001",
           "fail",
           "Frontend dependencies are not installed",
-          "Run `npm run setup`.",
+          "Run `corepack npm run setup`.",
         ),
   );
 
@@ -431,7 +433,7 @@ async function main() {
         ? report.results.some((entry) => entry.status === "warn")
           ? "Ready for development with warnings; supported release evidence still requires the host noted above."
           : "Ready to run."
-        : "Resolve the failed checks above and rerun `npm run doctor`.",
+        : "Resolve the failed checks above and rerun `corepack npm run doctor`.",
     );
   }
   if (!report.ok) process.exitCode = 1;

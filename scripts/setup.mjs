@@ -6,7 +6,9 @@ const root = resolve(import.meta.dirname, "..");
 const wrapper = process.platform === "win32" ? "gradlew.bat" : "gradlew";
 
 if (!existsSync(resolve(root, wrapper))) {
-  console.error("[VIR-SETUP-001] Gradle wrapper is missing. Restore it from version control.");
+  console.error(
+    "[VIR-SETUP-001] Gradle wrapper is missing. Restore it from version control.",
+  );
   process.exit(1);
 }
 
@@ -18,4 +20,6 @@ const result = spawnSync("corepack", ["npm", "ci", "--prefix", "frontend"], {
 });
 if (result.status !== 0) process.exit(result.status ?? 1);
 
-console.log("Setup complete. Run `npm run doctor`, then `npm run dev`.");
+console.log(
+  "Setup complete. Run `corepack npm run doctor`, then `corepack npm run dev`.",
+);
