@@ -11,5 +11,4 @@ Vireo is for teams that want a conventional React PWA and Spring Boot service wi
 
 This table is a selection boundary, not a benchmark result. Vireo does not claim broader generation than JHipster, tighter Java/TypeScript integration than Hilla, a larger frontend ecosystem than Refine/react-admin, or more freedom than assembling the stack manually. Re-run the official quickstarts for any comparison used in public marketing; the repository's earlier desk research is not permanent competitive proof.
 
-Choose Vireo only if the [flagship path](flagship.md), [public API map](https://github.com/vireocodedev/starter/blob/main/docs/PUBLIC_API.md), and [evaluation limits](https://github.com/vireocodedev/starter/blob/main/docs/EVALUATION.md) match the application you intend to own.
-
+Choose Vireo only if the [flagship path](flagship.md), [public API map](https://github.com/vireocodedev/vireo/blob/main/docs/PUBLIC_API.md), and [evaluation limits](https://github.com/vireocodedev/vireo/blob/main/docs/EVALUATION.md) match the application you intend to own.

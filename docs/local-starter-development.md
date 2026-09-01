@@ -1,13 +1,13 @@
 # Developing against local Starter libraries
 
-The template can use either published Starter packages or locally built packages from the adjacent `starter` repository. Published packages are always the default for both the TypeScript frontend and JVM backend; local resolution must be selected explicitly.
+The template can use either published Starter packages or locally built packages from the adjacent `vireo` repository. Published packages are always the default for both the TypeScript frontend and JVM backend; local resolution must be selected explicitly.
 
 The expected workspace layout is:
 
 ```text
 vireocode/
-├── starter/
-└── starter-template/
+├── vireo/
+└── vireo-template/
     └── frontend/
 ```
 
@@ -17,14 +17,14 @@ Published frontend packages come from the public npm registry and install
 anonymously:
 
 ```bash
-cd starter-template/frontend
+cd vireo-template/frontend
 corepack npm ci
 ```
 
 Start the frontend with:
 
 ```bash
-cd starter-template/frontend
+cd vireo-template/frontend
 corepack npm run dev
 ```
 
@@ -34,7 +34,7 @@ This mode:
 - selects the published Starter TypeScript project automatically;
 - makes VS Code and command-line TypeScript validate the published API.
 
-Normal tests, Storybook, E2E, builds, and `corepack npm run verify` follow the same published-package rule. The presence of an adjacent `starter` checkout never changes a default command implicitly.
+Normal tests, Storybook, E2E, builds, and `corepack npm run verify` follow the same published-package rule. The presence of an adjacent `vireo` checkout never changes a default command implicitly.
 
 The JVM build resolves published Vireo artifacts anonymously from Maven Central. No Gradle credentials are required. A plain Gradle command never reads artifacts from Maven Local.
 
@@ -49,7 +49,7 @@ corepack npm run starter:mode:published
 When changing Starter and testing those changes in the template, run only:
 
 ```bash
-cd starter-template/frontend
+cd vireo-template/frontend
 corepack npm run dev:local-starter
 ```
 
@@ -66,10 +66,10 @@ Do not run Starter's monorepo `corepack npm run dev` alongside this command. The
 For the JVM libraries, first publish the Starter artifacts to Maven Local and then opt the template build into that repository explicitly:
 
 ```bash
-cd starter/jvm
+cd vireo/jvm
 ./gradlew publishToMavenLocal
 
-cd ../../starter-template
+cd ../../vireo-template
 ./gradlew bootRun -PuseLocalStarter=true
 ```
 
@@ -99,14 +99,14 @@ Vite sees implementation changes immediately in local source mode. When a Starte
 For Starter UI:
 
 ```bash
-cd starter
+cd vireo
 corepack npm run build --workspace @vireocodedev/ui
 ```
 
 For changes across several Starter packages:
 
 ```bash
-cd starter
+cd vireo
 corepack npm run build
 ```
 
@@ -117,10 +117,10 @@ The template's local TypeScript mode will read the refreshed declarations automa
 Use dist mode when validating the actual JavaScript and declarations emitted by Starter rather than source-mode HMR:
 
 ```bash
-cd starter
+cd vireo
 corepack npm run build
 
-cd ../starter-template/frontend
+cd ../vireo-template/frontend
 corepack npm run dev:local-starter:dist
 ```
 
@@ -131,7 +131,7 @@ This is an integration check, not the normal local development loop.
 Validate the template against local Starter declarations and emitted output with:
 
 ```bash
-cd starter-template/frontend
+cd vireo-template/frontend
 corepack npm run typecheck:local-starter
 corepack npm run build:local-starter
 corepack npm run verify:local-starter
@@ -143,7 +143,7 @@ Use the normal verification workflow when validating a release-compatible templa
 corepack npm run verify
 ```
 
-`verify` always selects and exercises published packages. `verify:local-starter` is the explicit integration suite for an adjacent Starter checkout.
+`verify` always selects and exercises published packages. `verify:local-starter` is the explicit integration suite for an adjacent `vireo` checkout.
 
 ## Command summary
 

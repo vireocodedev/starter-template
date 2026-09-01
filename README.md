@@ -1,6 +1,6 @@
 # Vireo Starter Template
 
-A production-shaped React PWA and Spring Boot application for starting a Vireo product. It demonstrates an authenticated, localized, responsive CRUD workflow while keeping reusable contracts in [Vireo Starter](https://github.com/vireocodedev/starter) and product behavior in this repository.
+A production-shaped React PWA and Spring Boot application for starting a Vireo product. It demonstrates an authenticated, localized, responsive CRUD workflow while keeping reusable contracts in [Vireo](https://github.com/vireocodedev/vireo) and product behavior in this repository.
 
 This is a public `0.x` Template, not a production-readiness claim. Clone it, keep or
 replace the handwritten Item slice, or generate an additional scalar/enum capability
@@ -96,7 +96,7 @@ verifies a real browser login and persisted Item creation through the built Ngin
 backend, and PostgreSQL stack, in addition to the proxy, readiness, header, and
 database-privilege contracts.
 
-After evaluating the workflow, use the framework's structured [public-beta evaluation form](https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml) or [public Discussions](https://github.com/vireocodedev/starter/discussions). If you control a non-fixture application and meet the form's qualification statements, use the [independent adopter check-in](https://github.com/vireocodedev/starter/issues/new?template=adopter_check_in.yml). The form definitions and submitted issues are public; opening or submitting the rendered forms requires GitHub sign-in. Remove credentials, private source, application data, and identifying project information before posting. Suspected vulnerabilities always use the private security-advisory link instead.
+After evaluating the workflow, use the framework's structured [public-beta evaluation form](https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml) or [public Discussions](https://github.com/vireocodedev/vireo/discussions). If you control a non-fixture application and meet the form's qualification statements, use the [independent adopter check-in](https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml). The form definitions and submitted issues are public; opening or submitting the rendered forms requires GitHub sign-in. Remove credentials, private source, application data, and identifying project information before posting. Suspected vulnerabilities always use the private security-advisory link instead.
 
 ## Customize the template
 
@@ -154,9 +154,9 @@ main website is authoritative.
 - [Accessibility statement and verification](docs/accessibility.md)
 - [Manual accessibility and platform checklist](docs/manual-platform-checklist.md)
 - [Interactive Storybook and exact references](https://vireocode.com/reference/)
-- [Framework evaluation and limitations](https://github.com/vireocodedev/starter/blob/main/docs/EVALUATION.md)
-- [Vireo public API entry points](https://github.com/vireocodedev/starter/blob/main/docs/PUBLIC_API.md)
-- [Canonical temporal values](https://github.com/vireocodedev/starter/blob/main/docs/TEMPORAL_VALUES.md)
+- [Framework evaluation and limitations](https://github.com/vireocodedev/vireo/blob/main/docs/EVALUATION.md)
+- [Vireo public API entry points](https://github.com/vireocodedev/vireo/blob/main/docs/PUBLIC_API.md)
+- [Canonical temporal values](https://github.com/vireocodedev/vireo/blob/main/docs/TEMPORAL_VALUES.md)
 
 ## Community and project policy
 

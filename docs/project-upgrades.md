@@ -57,7 +57,16 @@ application unable to compile until the pending actions below have been complete
 Review and port the source-to-target Template diff, including security, operations,
 frontend, backend, schema, and deployment changes.
 
-## Application-owned 0.2.0 to 0.3.0 checklist
+## Application-owned 0.6.0 to 0.7.0 checklist
+
+- Review release notes and the source-to-target Template diff for `frontend/src`,
+  `src`, deployment descriptors, and `.github` workflows/settings.
+- Port only application-owned decisions; the CLI does not rewrite domain schema,
+  handwritten migrations, ejected capabilities, or deployment ownership.
+- Refresh the appropriate lockfile, run setup where the project requires it, then
+  run the documented complete verification command before accepting the upgrade.
+
+## Historical application-owned 0.2.0 to 0.3.0 checklist
 
 Complete each item in the application that is being upgraded. These are intentionally
 not automated: they require a decision about the application's routes, language
@@ -105,21 +114,26 @@ catalogues, component composition, and visual identity.
 - Resolve the contract errors above before treating the upgrade as complete; a
   successful managed apply is not a substitute for this verification.
 
-## Minimal and full Template migrations
+## Historical 0.2.0→0.3.0 minimal and full Template migrations
 
-A minimal migration accepts only the CLI-managed release-pair edits, completes the
+A historical minimal migration accepts only the CLI-managed release-pair edits, completes the
 checklist above, and preserves unrelated application customisations. It is suitable
 when the project has intentionally diverged from the Template and the team has
 reviewed the corresponding compatibility impact.
 
-A full Template migration additionally ports the reviewed 0.2.0-to-0.3.0 Template
+A historical full Template migration additionally ports the reviewed 0.2.0-to-0.3.0 Template
 diff across the application's chosen frontend, backend, database, operational, and
 deployment surfaces. Use it when the project remains close to the Template or when a
 target change is needed for security, operational, or product consistency. In either
 case, review the resulting diff, rehearse deployment and data recovery, and retain a
 rollback path before production.
 
-Then refresh dependencies if the printed plan requires it, run `corepack npm run
+For the current 0.6.0→0.7.0 edge, instead complete the current checklist above:
+review and selectively port application-owned diffs, refresh the lockfile, run
+`corepack npm run setup`, `corepack npm run generate:check`, and the full verify
+command, then commit the reviewed migration together with chosen Template changes.
+
+For the historical checklist, refresh dependencies if the printed plan requires it, run `corepack npm run
 setup`, `corepack npm run generate:check`, `./scripts/verify.sh`, the deployment
 smoke, and the application-owned database/deployment rehearsal. Commit the migration,
 lockfiles, and consciously selected Template changes together or in an explicitly

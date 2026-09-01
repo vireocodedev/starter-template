@@ -8,7 +8,7 @@ best-effort basis. There is no guaranteed response or resolution time.
 - Use the bug form for a reproducible defect in the unmodified Template.
 - Use the feature-request form for a proposal about the reusable Template baseline.
 - Report a reusable Vireo package defect in the
-  [Starter repository](https://github.com/vireocodedev/starter/issues).
+  [Vireo repository](https://github.com/vireocodedev/vireo/issues).
 - Follow [SECURITY.md](SECURITY.md) for suspected vulnerabilities. Never disclose
   vulnerability details in a public issue.
 
@@ -23,7 +23,7 @@ expected and actual behavior, and environment. Search existing issues first.
 Release coordinates are published with the
 [`starter-template@0.7.0` release contract](contracts/template-release-policy.json)
 and its draft-and-publish
-[GitHub release](https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.7.0).
+[GitHub release](https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.7.0).
 Repository administrators must enable GitHub immutable releases before publishing.
 
 ## Immutable release recovery

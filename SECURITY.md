@@ -6,13 +6,13 @@ The current `main` branch and the latest tagged template release receive securit
 
 The [`starter-template@0.7.0` release contract](contracts/template-release-policy.json)
 requires GitHub immutable releases before publishing the corresponding
-[release](https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.7.0).
+[release](https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.7.0).
 Repository administrators must enable that GitHub setting; the release workflow's
 default token cannot verify it.
 
 ## Reporting a vulnerability
 
-Do not open a public issue. Use GitHub private vulnerability reporting for `vireocodedev/starter-template` and include the affected revision, reproduction steps, impact, and proposed mitigation when available.
+Do not open a public issue. Use GitHub private vulnerability reporting for `vireocodedev/vireo-template` and include the affected revision, reproduction steps, impact, and proposed mitigation when available.
 
 Maintainers target acknowledgement of a complete report within two business days
 and initial severity/next-step triage within five business days. Once confirmed,

@@ -37,7 +37,7 @@ for (const packagePath of Object.keys(packageLock.packages ?? {})) {
 }
 
 for (const [name, version] of starterDependencies) {
-  if (/^(?:file|link|workspace):/.test(version) || version.includes("../starter")) {
+  if (/^(?:file|link|workspace):/.test(version) || version.includes("../starter") || version.includes("../vireo")) {
     problems.push(`${name} must resolve from the published registry, received ${version}.`);
   }
 }
@@ -51,7 +51,12 @@ for (const scriptName of publishedScripts) {
 }
 
 const publishedTsconfig = fs.readFileSync(path.join(frontendRoot, "tsconfig.app.json"), "utf8");
-if (publishedTsconfig.includes("../../starter") || publishedTsconfig.includes("../starter/packages")) {
+if (
+  publishedTsconfig.includes("../../starter") ||
+  publishedTsconfig.includes("../starter/packages") ||
+  publishedTsconfig.includes("../../vireo") ||
+  publishedTsconfig.includes("../vireo/packages")
+) {
   problems.push("tsconfig.app.json references the local Starter checkout.");
 }
 

@@ -18,7 +18,7 @@ authorization, conflict, privacy, and recovery decisions.
 ## Enabling a real disconnected workflow
 
 Use Vireo's SQLite and server replay modules only after completing the framework's
-[offline guarantees and admission checklist](https://github.com/vireocodedev/starter/blob/main/docs/OFFLINE_GUARANTEES.md).
+[offline guarantees and admission checklist](https://github.com/vireocodedev/vireo/blob/main/docs/OFFLINE_GUARANTEES.md).
 At minimum, the application must own:
 
 - which reads and mutations are safe offline;

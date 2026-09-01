@@ -57,5 +57,5 @@ The repository is configured with:
 The hourly journey verifies the public shell, authentication, live overview data,
 navigation, and seeded inventory without modifying shared state. Maintainers own the
 deployment on a best-effort basis. Report a reproducible outage through the
-[Template bug form](https://github.com/vireocodedev/starter-template/issues/new?template=bug_report.yml);
+[Template bug form](https://github.com/vireocodedev/vireo-template/issues/new?template=bug_report.yml);
 suspected vulnerabilities always use the private security-advisory path.

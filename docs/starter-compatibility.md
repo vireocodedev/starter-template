@@ -19,7 +19,7 @@ The lockfiles are the reproducibility boundary. Updating a supported package ran
 The npm and JVM version numbers are independent and do not need to match. This
 repository revision, its declared ranges, `starterVersion`, and committed lockfiles
 form the compatibility manifest for the exact combination demonstrated here. The
-upstream [Vireo compatibility policy](https://github.com/vireocodedev/starter/blob/main/docs/COMPATIBILITY.md)
+upstream [Vireo compatibility policy](https://github.com/vireocodedev/vireo/blob/main/docs/COMPATIBILITY.md)
 defines artifact SemVer, public-contract boundaries, deprecation windows, and
 release-line support.
 

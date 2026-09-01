@@ -15,55 +15,55 @@
   "stages": {
     "development-database": {
       "label": "Development database modes",
-      "baselineMs": 500,
+      "baselineMs": 523,
       "warningMs": 5000,
       "failureMs": 10000,
-      "baselineRssKiB": 80000,
+      "baselineRssKiB": 74180,
       "warningRssKiB": 262144,
       "failureRssKiB": 524288
     },
     "frontend-contract": {
       "label": "Frontend contract",
-      "baselineMs": 105000,
+      "baselineMs": 166632,
       "warningMs": 180000,
       "failureMs": 240000,
-      "baselineRssKiB": 4215276,
+      "baselineRssKiB": 2782792,
       "warningRssKiB": 6291456,
       "failureRssKiB": 8388608
     },
     "browser-smoke": {
       "label": "Browser smoke tests",
-      "baselineMs": 25000,
+      "baselineMs": 60272,
       "warningMs": 110000,
       "failureMs": 150000,
-      "baselineRssKiB": 1800000,
+      "baselineRssKiB": 206764,
       "warningRssKiB": 3145728,
       "failureRssKiB": 4194304
     },
     "jvm-build": {
       "label": "JVM build",
-      "baselineMs": 1000,
+      "baselineMs": 2578,
       "warningMs": 90000,
       "failureMs": 120000,
-      "baselineRssKiB": 1100000,
+      "baselineRssKiB": 111432,
       "warningRssKiB": 1572864,
       "failureRssKiB": 2097152
     },
     "container-context": {
       "label": "Container context contract",
-      "baselineMs": 100,
+      "baselineMs": 145,
       "warningMs": 5000,
       "failureMs": 10000,
-      "baselineRssKiB": 80000,
+      "baselineRssKiB": 50312,
       "warningRssKiB": 262144,
       "failureRssKiB": 524288
     }
   },
   "total": {
-    "baselineMs": 130000,
+    "baselineMs": 230245,
     "warningMs": 300000,
     "failureMs": 420000,
-    "baselineRssKiB": 4215276,
+    "baselineRssKiB": 2782792,
     "warningRssKiB": 6291456,
     "failureRssKiB": 8388608
   }
