@@ -21,9 +21,9 @@ Include the Template revision or tag, exact Starter artifact versions, reproduct
 expected and actual behavior, and environment. Search existing issues first.
 
 Release coordinates are published with the
-[`starter-template@0.8.0` release contract](contracts/template-release-policy.json)
+[`starter-template@0.8.1` release contract](contracts/template-release-policy.json)
 and its draft-and-publish
-[GitHub release](https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.0).
+[GitHub release](https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.1).
 Repository administrators must enable GitHub immutable releases before publishing.
 
 ## Immutable release recovery

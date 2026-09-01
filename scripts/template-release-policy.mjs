@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const releaseVersionPattern = /^0\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/u;
 const expectedRepository = "vireocodedev/vireo-template";
-const expectedJvmVersion = "0.3.0";
+const expectedJvmVersion = "0.3.1";
 
 export function validateTemplateReleaseCoordinates(policy) {
   const problems = [];

@@ -7,10 +7,10 @@ replace the handwritten Item slice, or generate an additional scalar/enum capabi
 from a versioned schema. Vireo provides libraries and explicit integration seams;
 the application owns domain rules, authorization policy, sensitive-data decisions,
 offline eligibility, and conflict resolution. The generator is publicly available in
-the `create-vireo@0.8.0` release line, including frontend-only project and entity
+the `create-vireo@0.8.1` release line, including frontend-only project and entity
 generation for separately owned backend systems.
 
-The canonical current [`starter-template@0.8.0` release contract](contracts/template-release-policy.json)
+The canonical current [`starter-template@0.8.1` release contract](contracts/template-release-policy.json)
 defines its tag, generator line, and immutable-release prerequisite. Its tag-triggered
 workflow validates that exact tag before it can publish a release.
 

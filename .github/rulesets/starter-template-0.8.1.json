@@ -1,0 +1,16 @@
+{
+  "name": "Protect starter-template@0.8.1",
+  "target": "tag",
+  "enforcement": "active",
+  "bypass_actors": [],
+  "conditions": {
+    "ref_name": {
+      "include": ["refs/tags/starter-template@0.8.1"],
+      "exclude": []
+    }
+  },
+  "rules": [
+    { "type": "update" },
+    { "type": "deletion" }
+  ]
+}
