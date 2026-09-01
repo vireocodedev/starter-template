@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveVerificationEvidenceSource } from "./verification-evidence-source.mjs";
@@ -11,6 +11,10 @@ const policy = JSON.parse(
     "utf8",
   ),
 );
+const projectPath = join(repositoryRoot, ".vireo", "project.json");
+const project = existsSync(projectPath)
+  ? JSON.parse(readFileSync(projectPath, "utf8"))
+  : undefined;
 const observed = Object.fromEntries(
   process.argv.slice(2).map((argument) => {
     const separator = argument.indexOf("=");
@@ -31,8 +35,13 @@ const warnings = [];
 const observedStages = {};
 const evidenceSource = resolveVerificationEvidenceSource({
   env: process.env,
+  project,
   command: (command, args) =>
-    execFileSync(command, args, { cwd: repositoryRoot, encoding: "utf8" }),
+    execFileSync(command, args, {
+      cwd: repositoryRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    }),
 });
 problems.push(...evidenceSource.problems);
 

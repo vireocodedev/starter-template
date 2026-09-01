@@ -40,7 +40,8 @@ export function evaluateVerificationHost({
     return {
       status: "fail",
       summary: "Ubuntu 24.04 x86-64 is missing GNU time or GNU date",
-      remedy: "Install GNU time and coreutils before running `npm run verify`.",
+      remedy:
+        "Install GNU time and coreutils before running `corepack npm run verify`.",
     };
   }
 

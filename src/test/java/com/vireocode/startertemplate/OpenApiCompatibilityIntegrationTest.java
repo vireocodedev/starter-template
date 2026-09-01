@@ -1,6 +1,7 @@
 package com.vireocode.startertemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -49,12 +50,43 @@ class OpenApiCompatibilityIntegrationTest {
         assertThat(actual.isObject()).as("OpenAPI response is a JSON object").isTrue();
         JsonNode expected = readContract();
 
-        assertThat(normalizeOperations(actual)).isEqualTo(readStringMap(expected.path("operations")));
-        assertThat(sortedFieldNames(actual.path("components").path("schemas")))
-                .isEqualTo(readStrings(expected.path("schemaNames")));
+        assertOperationsRetainBaseline(
+                normalizeOperations(actual),
+                readStringMap(expected.path("operations")));
+        assertSchemaNamesRetainBaseline(
+                sortedFieldNames(actual.path("components").path("schemas")),
+                readStrings(expected.path("schemaNames")));
         assertSchemaContracts(actual.path("components").path("schemas"), expected.path("schemas"));
         assertThat(normalizeSecuritySchemes(actual.path("components").path("securitySchemes")))
                 .isEqualTo(readStringMap(expected.path("securitySchemes")));
+    }
+
+    @Test
+    @DisplayName("Reviewed OpenAPI baseline permits additive generated capabilities")
+    void reviewedBaselinePermitsAdditiveGeneratedCapabilities() {
+        Map<String, Object> reviewedOperations = Map.of(
+                "GET /api/items", Map.of("responses", List.of("200")));
+        Map<String, Object> generatedOperations = new TreeMap<>(reviewedOperations);
+        generatedOperations.put(
+                "POST /api/purchase-orders",
+                Map.of("responses", List.of("200", "400")));
+
+        assertOperationsRetainBaseline(generatedOperations, reviewedOperations);
+        assertSchemaNamesRetainBaseline(
+                List.of("ItemDTO", "PurchaseOrderDTO"),
+                List.of("ItemDTO"));
+    }
+
+    @Test
+    @DisplayName("Reviewed OpenAPI baseline still rejects removed operations and schemas")
+    void reviewedBaselineRejectsBreakingRemovals() {
+        Map<String, Object> reviewedOperations = Map.of(
+                "GET /api/items", Map.of("responses", List.of("200")));
+
+        assertThatThrownBy(() -> assertOperationsRetainBaseline(Map.of(), reviewedOperations))
+                .isInstanceOf(AssertionError.class);
+        assertThatThrownBy(() -> assertSchemaNamesRetainBaseline(List.of(), List.of("ItemDTO")))
+                .isInstanceOf(AssertionError.class);
     }
 
     private JsonNode readContract() throws Exception {
@@ -102,6 +134,18 @@ class OpenApiCompatibilityIntegrationTest {
             normalized.put(entry.getKey(), values);
         });
         return normalized;
+    }
+
+    private void assertOperationsRetainBaseline(
+            Map<String, Object> actual,
+            Map<String, Object> expected) {
+        assertThat(actual).containsAllEntriesOf(expected);
+    }
+
+    private void assertSchemaNamesRetainBaseline(
+            List<String> actual,
+            List<String> expected) {
+        assertThat(actual).containsAll(expected);
     }
 
     private void assertSchemaContracts(JsonNode actualSchemas, JsonNode expectedSchemas) {

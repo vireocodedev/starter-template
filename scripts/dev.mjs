@@ -20,7 +20,7 @@ const databaseMode = resolveDatabaseMode(metadata);
 const report = await runDoctor();
 if (!report.ok) {
   console.error(
-    "Environment checks failed. Run `npm run doctor` for remedies.",
+    "Environment checks failed. Run `corepack npm run doctor` for remedies.",
   );
   process.exit(1);
 }

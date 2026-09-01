@@ -37,10 +37,10 @@ before committing to individual packages.
 
 ## Prerequisites
 
-The authoritative local `npm run verify` promise is currently **Ubuntu 24.04
+The authoritative local `corepack npm run verify` promise is currently **Ubuntu 24.04
 x86-64** with GNU time/coreutils. macOS, Windows/WSL2, other Linux releases, and
 ARM64 may work for development but remain untested and are not release-evidence
-hosts. `npm run doctor` reports this boundary before saying the project is ready;
+hosts. `corepack npm run doctor` reports this boundary before saying the project is ready;
 see [platform support evidence](docs/platform-support-evidence.md).
 
 - Java 21 (Java 25 is exercised as a compatibility runtime)
