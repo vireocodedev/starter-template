@@ -9,9 +9,13 @@ Template, or one or more applications. Do not assume that every nested repositor
 in scope simply because it is nearby.
 
 The Template's maintainer skill is intentionally not projected. Newly created
-applications receive application-owned Codex guidance and app-facing skills instead.
-Existing or older applications may not have these files; inspect their manifests,
-dependencies, scripts, and generated ownership before applying current conventions.
+applications receive application-owned root `AGENTS.md` guidance and managed
+app-facing `.agents/skills/vireo-app-*` additions instead. Existing or older
+applications may not have these files; inspect their manifests, dependencies,
+scripts, and generated ownership before applying current conventions. During an
+upgrade, review and port the root guidance with the application's source and
+deployment decisions, while accepting projected consumer skills through the managed
+upgrade path.
 
 Trust only repositories whose source and commands you have reviewed. Trusting a
 repository enables its project instructions; it does not authorize release,
