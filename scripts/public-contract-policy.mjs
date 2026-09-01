@@ -12,6 +12,9 @@ const templateReleaseRecovery = JSON.parse(
     "utf8",
   ),
 );
+const projectUpgradeContract = JSON.parse(
+  readFileSync(join(root, "contracts/project-upgrade-policy.json"), "utf8"),
+);
 const currentTemplateReleaseTagRuleset = JSON.parse(
   readFileSync(
     join(
@@ -22,12 +25,19 @@ const currentTemplateReleaseTagRuleset = JSON.parse(
     "utf8",
   ),
 );
-const historicalTemplateReleaseTagRuleset = JSON.parse(
-  readFileSync(
-    join(root, ".github/rulesets/starter-template-0.6.0.json"),
-    "utf8",
+const retainedTemplateReleaseTags = [
+  templateReleaseRecovery.tag,
+  `starter-template@${projectUpgradeContract.previousRelease}`,
+].filter((tag, index, tags) => tag !== templateReleasePolicy.tag && tags.indexOf(tag) === index);
+const retainedTemplateReleaseTagRulesets = retainedTemplateReleaseTags.map((tag) => ({
+  tag,
+  ruleset: JSON.parse(
+    readFileSync(
+      join(root, ".github/rulesets", `${tag.replace("@", "-")}.json`),
+      "utf8",
+    ),
   ),
-);
+}));
 const templateReleaseEnvironment = JSON.parse(
   readFileSync(
     join(root, ".github/environments/template-release.json"),
@@ -72,7 +82,9 @@ const requiredFiles = [
   "contracts/template-release-recovery.json",
   "contracts/project-upgrade-policy.json",
   currentTemplateReleaseTagRulesetPath,
-  ".github/rulesets/starter-template-0.6.0.json",
+  ...retainedTemplateReleaseTags.map(
+    (tag) => `.github/rulesets/${tag.replace("@", "-")}.json`,
+  ),
   ".github/rulesets/main.json",
   ".github/environments/template-release.json",
   ".github/environments/template-release.deployment-branch-policies.json",
@@ -201,11 +213,15 @@ validateImmutableTagRuleset({
   tag: templateReleasePolicy.tag,
   role: "current",
 });
-validateImmutableTagRuleset({
-  ruleset: historicalTemplateReleaseTagRuleset,
-  tag: templateReleaseRecovery.tag,
-  role: "historical recovery",
-});
+for (const { tag, ruleset } of retainedTemplateReleaseTagRulesets)
+  validateImmutableTagRuleset({
+    ruleset,
+    tag,
+    role:
+      tag === templateReleaseRecovery.tag
+        ? "historical recovery"
+        : "retained historical",
+  });
 if (templateReleaseEnvironment.wait_timer !== 0)
   problems.push("template release environment wait_timer must equal 0");
 if (templateReleaseEnvironment.prevent_self_review !== false)
@@ -255,15 +271,12 @@ requireText("docs/generated-capabilities.md", [
   templateReleaseContractUrl,
   `create-vireo@${templateReleasePolicy.createVireoVersion}`,
 ]);
-const projectUpgradeContract = JSON.parse(
-  readFileSync(join(root, "contracts/project-upgrade-policy.json"), "utf8"),
-);
 if (
   projectUpgradeContract.schemaVersion !== 1 ||
   projectUpgradeContract.contractId !== "vireo-template-project-upgrades" ||
   projectUpgradeContract.publicRelease !== templateReleasePolicy.version ||
   projectUpgradeContract.candidateRelease !== undefined ||
-  projectUpgradeContract.previousRelease !== "0.6.0" ||
+  projectUpgradeContract.previousRelease !== "0.7.0" ||
   projectUpgradeContract.publicationState !== "final" ||
   !projectUpgradeContract.supportedEdges?.some(
     (edge) =>
@@ -273,6 +286,22 @@ if (
   )
 ) {
   problems.push("project upgrade contract must declare the final adjacent upgrade coordinate");
+}
+for (const edge of [
+  { from: "0.2.0", to: "0.3.0" },
+  { from: "0.6.0", to: "0.7.0" },
+]) {
+  if (
+    !projectUpgradeContract.supportedEdges?.some(
+      (candidate) =>
+        candidate.from === edge.from &&
+        candidate.to === edge.to &&
+        candidate.status === "historical",
+    )
+  )
+    problems.push(
+      `project upgrade contract must retain historical ${edge.from}-to-${edge.to} edge`,
+    );
 }
 if (
   projectUpgradeContract.targetTemplateCommit !== undefined ||
@@ -286,6 +315,9 @@ if (
 }
 requireText("docs/project-upgrades.md", [
   "0.6.0-to-0.7.0",
+  "0.7.0-to-0.8.0",
+  "root `AGENTS.md`",
+  "managed Vireo guidance",
   "vireo status",
   "package-lock-only",
 ]);

@@ -8,7 +8,7 @@ import {
   writeTemplateReleaseRecoveryOutputs,
 } from "./template-release-recovery-policy.mjs";
 
-const templateReleasePolicy = { tag: "starter-template@0.7.0" };
+const templateReleasePolicy = { tag: "starter-template@0.8.0" };
 const recovery = {
   schemaVersion: 1,
   tag: "starter-template@0.6.0",
