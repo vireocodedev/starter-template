@@ -17,6 +17,7 @@
     "vireo": "npx --yes --package=create-vireo@0.7.0 vireo",
     "release:policy": "node scripts/template-release-policy.mjs",
     "generate:check": "corepack npm run vireo -- check",
+    "codex:check": "node scripts/codex-customization-policy.mjs",
     "verify": "bash scripts/verify-template.sh"
   }
 }
