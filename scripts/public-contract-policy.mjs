@@ -338,7 +338,7 @@ requireText("docs/project-upgrades.md", [
   "0.7.0-to-0.8.0",
   "0.8.0-to-0.8.1",
   "root `AGENTS.md`",
-  "managed Vireo guidance",
+  "existing managed projected consumer-skill guidance",
   "vireo status",
   "package-lock-only",
 ]);

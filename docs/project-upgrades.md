@@ -66,8 +66,8 @@ frontend, backend, schema, and deployment changes.
   for the application's product, team, and deployment model.
 - Port only application-owned decisions; the CLI does not rewrite domain schema,
   handwritten migrations, ejected capabilities, or deployment ownership.
-- The projected `.agents/skills/vireo-app-*` additions are managed Vireo guidance.
-  Accept those managed files through the declared upgrade, then review their scope
+- The existing projected `.agents/skills/vireo-app-*` files remain managed Vireo
+  guidance. Retain them through the declared upgrade, then review their scope
   alongside the application-owned root `AGENTS.md`; do not treat them as authority
   to change product, deployment, secrets, or provider decisions automatically.
 - Review the application's verification-script and hosted-CI path before porting
@@ -150,7 +150,7 @@ rollback path before production.
 
 For the current 0.8.0→0.8.1 edge, instead complete the current checklist above:
 review the application-owned root `AGENTS.md`, source, and deployment diffs; accept
-the managed projected consumer-skill additions; review verification scripts,
+the existing managed projected consumer-skill guidance; review verification scripts,
 OpenAPI, Corepack, and Storybook telemetry; refresh the lockfile; then run
 `corepack npm run setup`, `corepack npm run generate:check`, and the full verify
 command, then commit the reviewed migration together with chosen Template changes.

@@ -5,7 +5,14 @@ import { fileURLToPath } from "node:url";
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const releaseVersionPattern = /^0\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/u;
 const expectedRepository = "vireocodedev/vireo-template";
-const expectedJvmVersion = "0.3.1";
+const ecosystemReleasePattern =
+  /^npm-(?<createVireoVersion>0\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*))_jvm-(?<jvmVersion>0\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*))$/u;
+
+function resolveEcosystemRelease(policy) {
+  return typeof policy.ecosystemRelease === "string"
+    ? policy.ecosystemRelease.match(ecosystemReleasePattern)?.groups
+    : undefined;
+}
 
 export function validateTemplateReleaseCoordinates(policy) {
   const problems = [];
@@ -24,12 +31,10 @@ export function validateTemplateReleaseCoordinates(policy) {
     problems.push(
       "template release policy createVireoVersion must equal version",
     );
-  if (
-    policy.ecosystemRelease !==
-    `npm-${policy.createVireoVersion}_jvm-${expectedJvmVersion}`
-  )
+  const ecosystemRelease = resolveEcosystemRelease(policy);
+  if (ecosystemRelease?.createVireoVersion !== policy.createVireoVersion)
     problems.push(
-      `template release policy ecosystemRelease must equal npm-createVireoVersion_jvm-${expectedJvmVersion}`,
+      "template release policy ecosystemRelease must encode its createVireoVersion and a strict 0.x JVM version",
     );
   if (policy.repository !== expectedRepository)
     problems.push(
@@ -55,9 +60,11 @@ export function validateTemplateRelease({
   packageJson,
   template,
   compatibility,
+  starterVersion,
   tag,
 }) {
   const problems = validateTemplateReleaseCoordinates(policy);
+  const ecosystemRelease = resolveEcosystemRelease(policy);
 
   if (packageJson.name !== "starter-template")
     problems.push("package.json name must equal starter-template");
@@ -98,15 +105,20 @@ export function validateTemplateRelease({
     );
   if (compatibility.schemaVersion !== 1)
     problems.push("compatibility contract schemaVersion must equal 1");
+  if (starterVersion !== ecosystemRelease?.jvmVersion)
+    problems.push(
+      "gradle.properties starterVersion must match the JVM version advertised by template release policy ecosystemRelease",
+    );
   if (tag !== undefined && tag !== policy.tag)
     problems.push(`tag ${tag} must equal ${policy.tag}`);
 
   return problems;
 }
 
-export function resolveTemplateReleaseTag(
-  { explicitTag, environment = process.env } = {},
-) {
+export function resolveTemplateReleaseTag({
+  explicitTag,
+  environment = process.env,
+} = {}) {
   if (explicitTag !== undefined) return explicitTag;
 
   const refName = environment.GITHUB_REF_NAME;
@@ -139,6 +151,9 @@ export function readTemplateReleaseInputs(root = repositoryRoot) {
         "utf8",
       ),
     ),
+    starterVersion: readFileSync(join(root, "gradle.properties"), "utf8").match(
+      /^starterVersion=(.+)$/mu,
+    )?.[1],
   };
 }
 
