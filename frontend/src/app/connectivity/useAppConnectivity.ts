@@ -112,7 +112,7 @@ export function useAppConnectivity(): AppConnectivity {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, [check]);
+  }, [check, setConnectivity]);
 
   return connectivity;
 }
