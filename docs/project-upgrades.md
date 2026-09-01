@@ -7,23 +7,24 @@ migrations, deployment files, or an adopted/ejected generated capability.
 
 ## Supported path
 
-The public graph retains the historical 0.2.0-to-0.3.0 and 0.6.0-to-0.7.0
-transforms and declares the supported 0.7.0-to-0.8.0 adjacent edge. Releases 0.4
-and 0.5 are historical/EOL: they are not retroactively admitted as upgrade sources.
-The 0.8 release is terminal until a later release declares its own adjacent edge.
+The public graph retains the historical 0.2.0-to-0.3.0, 0.6.0-to-0.7.0, and
+0.7.0-to-0.8.0 transforms and declares the supported 0.8.0-to-0.8.1 adjacent
+edge. Releases 0.4 and 0.5 are historical/EOL: they are not retroactively
+admitted as upgrade sources. The 0.8.1 release is terminal until a later release
+declares its own adjacent edge.
 
 Start with a read-only inventory. It reports the recorded CLI and Template revision,
 the next declared hop, managed-file drift, pending application-owned work, and
 generated capabilities that remain managed or have been ejected:
 
 ```bash
-npx --yes --package=create-vireo@0.8.0 vireo status --project .
+npx --yes --package=create-vireo@0.8.1 vireo status --project .
 ```
 
-For a 0.7.0-created application, use the target CLI and review the non-writing plan:
+For a 0.8.0-created application, use the target CLI and review the non-writing plan:
 
 ```bash
-npx --yes --package=create-vireo@0.8.0 vireo upgrade --to 0.8.0 --dry-run
+npx --yes --package=create-vireo@0.8.1 vireo upgrade --to 0.8.1 --dry-run
 ```
 
 The CLI updates only the declared managed edge. It refuses unknown Template commits
@@ -38,7 +39,7 @@ Start from a clean branch and create a recoverable database backup. Install or i
 the target CLI version, then review the non-writing plan:
 
 ```bash
-npx --yes --package=create-vireo@0.8.0 vireo upgrade --to 0.8.0 --dry-run
+npx --yes --package=create-vireo@0.8.1 vireo upgrade --to 0.8.1 --dry-run
 ```
 
 The plan distinguishes Vireo-managed edits from required application-owned work.
@@ -46,7 +47,7 @@ After reviewing the target Template diff and all affected changelogs, apply only
 managed migration:
 
 ```bash
-npx --yes --package=create-vireo@0.8.0 vireo upgrade --to 0.8.0 \
+npx --yes --package=create-vireo@0.8.1 vireo upgrade --to 0.8.1 \
   --apply --accept-application-owned
 ```
 
@@ -57,7 +58,7 @@ application unable to compile until the pending actions below have been complete
 Review and port the source-to-target Template diff, including security, operations,
 frontend, backend, schema, and deployment changes.
 
-## Application-owned 0.7.0 to 0.8.0 checklist
+## Application-owned 0.8.0 to 0.8.1 checklist
 
 - Review release notes and the source-to-target Template diff for the root
   `AGENTS.md`, `frontend/src`, `src`, deployment descriptors, and `.github`
@@ -65,10 +66,23 @@ frontend, backend, schema, and deployment changes.
   for the application's product, team, and deployment model.
 - Port only application-owned decisions; the CLI does not rewrite domain schema,
   handwritten migrations, ejected capabilities, or deployment ownership.
-- The projected `.agents/skills/vireo-app-*` additions are managed Vireo guidance.
-  Accept those managed files through the declared upgrade, then review their scope
+- The existing projected `.agents/skills/vireo-app-*` files remain managed Vireo
+  guidance. Retain them through the declared upgrade, then review their scope
   alongside the application-owned root `AGENTS.md`; do not treat them as authority
   to change product, deployment, secrets, or provider decisions automatically.
+- Review the application's verification-script and hosted-CI path before porting
+  them. Keep the complete verification command appropriate to the chosen profile;
+  do not infer that a managed upgrade has exercised application-owned checks.
+- Review OpenAPI compatibility intentionally. For full-stack projects, compare the
+  target API contract and its `openapi-compatibility.json` baseline with the
+  application's public API, versioned clients, and deployment order; frontend-only
+  projects retain ownership of their external API boundary.
+- Keep user-facing npm commands routed through Corepack. Review lockfile refreshes,
+  package-manager policy, and any application-specific command wrappers rather
+  than replacing them with a globally installed npm invocation.
+- Review Storybook telemetry and analytics choices. The target disables Storybook
+  telemetry for its scripts; retain or deliberately replace that setting according
+  to the application's privacy and provider policy before running Storybook in CI.
 - Refresh the appropriate lockfile, run setup where the project requires it, then
   run the documented complete verification command before accepting the upgrade.
 
@@ -134,9 +148,10 @@ target change is needed for security, operational, or product consistency. In ei
 case, review the resulting diff, rehearse deployment and data recovery, and retain a
 rollback path before production.
 
-For the current 0.7.0→0.8.0 edge, instead complete the current checklist above:
+For the current 0.8.0→0.8.1 edge, instead complete the current checklist above:
 review the application-owned root `AGENTS.md`, source, and deployment diffs; accept
-the managed projected consumer-skill additions; refresh the lockfile; then run
+the existing managed projected consumer-skill guidance; review verification scripts,
+OpenAPI, Corepack, and Storybook telemetry; refresh the lockfile; then run
 `corepack npm run setup`, `corepack npm run generate:check`, and the full verify
 command, then commit the reviewed migration together with chosen Template changes.
 

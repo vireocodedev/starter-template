@@ -12,7 +12,7 @@ The template's ordinary install, development, test, Storybook, and production-bu
 | `@vireocodedev/history`        | `^0.2.2`       |
 | `@vireocodedev/infrastructure` | `^0.2.2`       |
 | `@vireocodedev/localization`   | `^0.2.2`       |
-| Vireo Starter JVM modules      | `0.3.0`        |
+| Vireo Starter JVM modules      | `0.3.1`        |
 
 The lockfiles are the reproducibility boundary. Updating a supported package range still requires reviewing and committing the resulting lockfile changes and passing the authoritative verification command.
 

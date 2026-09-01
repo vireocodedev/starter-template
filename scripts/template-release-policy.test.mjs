@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  readTemplateReleaseInputs,
   resolveTemplateReleaseTag,
   validateTemplateRelease,
   validateTemplateReleaseCoordinates,
@@ -12,13 +13,13 @@ import {
 
 const policy = {
   schemaVersion: 1,
-  version: "0.8.0",
-  tag: "starter-template@0.8.0",
-  createVireoVersion: "0.8.0",
-  ecosystemRelease: "npm-0.8.0_jvm-0.3.0",
+  version: "0.8.1",
+  tag: "starter-template@0.8.1",
+  createVireoVersion: "0.8.1",
+  ecosystemRelease: "npm-0.8.1_jvm-0.3.1",
   repository: "vireocodedev/vireo-template",
   releaseUrl:
-    "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.0",
+    "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.1",
   immutableReleasesRequired: true,
 };
 const validInputs = {
@@ -27,7 +28,7 @@ const validInputs = {
     name: "starter-template",
     private: true,
     version: policy.version,
-    scripts: { vireo: "npx --yes --package=create-vireo@0.8.0 vireo" },
+    scripts: { vireo: "npx --yes --package=create-vireo@0.8.1 vireo" },
   },
   template: {
     schemaVersion: 1,
@@ -38,7 +39,8 @@ const validInputs = {
     createVireoVersion: policy.createVireoVersion,
     ecosystemRelease: policy.ecosystemRelease,
   },
-  compatibility: { schemaVersion: 1, id: "vireo-template-0.8.0" },
+  compatibility: { schemaVersion: 1, id: "vireo-template-0.8.1" },
+  starterVersion: "0.3.1",
 };
 
 test("validates canonical template release coordinates", () => {
@@ -110,7 +112,7 @@ test("rejects each release-coordinate mismatch", () => {
     ["version", "1.0.0"],
     ["tag", "starter-template@0.5.0"],
     ["createVireoVersion", "0.5.0"],
-    ["ecosystemRelease", "npm-0.8.0_jvm-0.2.0"],
+    ["ecosystemRelease", "npm-0.5.0_jvm-0.3.1"],
     ["repository", "example/template"],
     ["releaseUrl", "https://example.test/release"],
     ["immutableReleasesRequired", false],
@@ -134,13 +136,14 @@ test("rejects every local coordinate drift and a supplied tag mismatch", () => {
     ["template", { ...validInputs.template, createVireoVersion: "0.5.0" }],
     [
       "template",
-      { ...validInputs.template, ecosystemRelease: "npm-0.5.0_jvm-0.3.0" },
+      { ...validInputs.template, ecosystemRelease: "npm-0.5.0_jvm-0.3.1" },
     ],
     ["template", { ...validInputs.template, schemaVersion: 2 }],
     ["template", { ...validInputs.template, profile: "frontend" }],
     ["template", { ...validInputs.template, template: "example/template" }],
     ["compatibility", { schemaVersion: 1, id: "vireo-template-0.5.0" }],
     ["compatibility", { schemaVersion: 2, id: validInputs.compatibility.id }],
+    ["starterVersion", "0.2.0"],
   ]) {
     assert.ok(
       validateTemplateRelease({ ...validInputs, [key]: value }).length > 0,
@@ -150,6 +153,12 @@ test("rejects every local coordinate drift and a supplied tag mismatch", () => {
     validateTemplateRelease({ ...validInputs, tag: "starter-template@0.5.0" })
       .length > 0,
   );
+});
+
+test("reads and binds the Gradle starter baseline to the advertised JVM coordinate", () => {
+  const inputs = readTemplateReleaseInputs();
+  assert.equal(inputs.starterVersion, "0.3.1");
+  assert.deepEqual(validateTemplateRelease({ ...inputs }), []);
 });
 
 test("creates a deterministic manifest and rejects unsafe release inputs", () => {

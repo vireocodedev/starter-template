@@ -158,6 +158,12 @@ requireText("README.md", [
 requireText("SUPPORT.md", ["SECURITY.md", "CODE_OF_CONDUCT.md"]);
 requireText("SECURITY.md", [templateReleaseTag, templateReleaseContract]);
 requireText("SUPPORT.md", [templateReleaseTag, templateReleaseContract]);
+requireText("docs/provider-controls-2026-08-31.md", [
+  `starter-template@${projectUpgradeContract.previousRelease}`,
+  templateReleaseTag,
+  currentTemplateReleaseTagRulesetPath,
+  "not evidence that GitHub has applied it",
+]);
 requireText("SUPPORT.md", [
   "Never move, delete, or recreate an immutable release tag.",
   "reviewed `main` workflow-dispatch path",
@@ -285,7 +291,7 @@ if (
   projectUpgradeContract.contractId !== "vireo-template-project-upgrades" ||
   projectUpgradeContract.publicRelease !== templateReleasePolicy.version ||
   projectUpgradeContract.candidateRelease !== undefined ||
-  projectUpgradeContract.previousRelease !== "0.7.0" ||
+  projectUpgradeContract.previousRelease !== "0.8.0" ||
   projectUpgradeContract.publicationState !== "final" ||
   !projectUpgradeContract.supportedEdges?.some(
     (edge) =>
@@ -301,6 +307,7 @@ if (
 for (const edge of [
   { from: "0.2.0", to: "0.3.0" },
   { from: "0.6.0", to: "0.7.0" },
+  { from: "0.7.0", to: "0.8.0" },
 ]) {
   if (
     !projectUpgradeContract.supportedEdges?.some(
@@ -329,8 +336,9 @@ if (
 requireText("docs/project-upgrades.md", [
   "0.6.0-to-0.7.0",
   "0.7.0-to-0.8.0",
+  "0.8.0-to-0.8.1",
   "root `AGENTS.md`",
-  "managed Vireo guidance",
+  "existing managed projected consumer-skill guidance",
   "vireo status",
   "package-lock-only",
 ]);

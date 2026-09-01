@@ -1,13 +1,14 @@
 {
   "schemaVersion": 1,
   "contractId": "vireo-template-project-upgrades",
-  "publicRelease": "0.8.0",
-  "previousRelease": "0.7.0",
+  "publicRelease": "0.8.1",
+  "previousRelease": "0.8.0",
   "publicationState": "final",
   "supportedEdges": [
     { "from": "0.2.0", "to": "0.3.0", "status": "historical" },
     { "from": "0.6.0", "to": "0.7.0", "status": "historical" },
-    { "from": "0.7.0", "to": "0.8.0", "status": "supported" }
+    { "from": "0.7.0", "to": "0.8.0", "status": "historical" },
+    { "from": "0.8.0", "to": "0.8.1", "status": "supported" }
   ],
   "historicalEol": ["0.4.0", "0.5.0"],
   "lockfileRefreshCommands": {

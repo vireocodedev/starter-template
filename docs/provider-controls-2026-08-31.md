@@ -25,3 +25,13 @@ GitHub UI, an authenticated read at `2026-08-31T21:32:11Z` reports
 `can_admins_bypass: false`. This closes the Template's machine-controlled
 provider-security portion; independent review and backup-owner recovery remain
 human gaps.
+
+## Release-payload inventory
+
+The source inventory retains immutable ruleset payloads for historical release
+tags and the immediately prior `starter-template@0.8.0` tag. It also contains
+the exact no-bypass update-and-deletion payload for the prepared
+`starter-template@0.8.1` tag in
+`.github/rulesets/starter-template-0.8.1.json`. That checked-in payload is a
+reviewable desired state, not evidence that GitHub has applied it: create and
+read back the matching active provider ruleset before pushing the release tag.
