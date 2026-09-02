@@ -305,7 +305,7 @@ if (
   projectUpgradeContract.contractId !== "vireo-template-project-upgrades" ||
   projectUpgradeContract.publicRelease !== templateReleasePolicy.version ||
   projectUpgradeContract.candidateRelease !== undefined ||
-  projectUpgradeContract.previousRelease !== "0.8.4" ||
+  projectUpgradeContract.previousRelease !== "0.8.6" ||
   projectUpgradeContract.publicationState !== "final" ||
   !projectUpgradeContract.supportedEdges?.some(
     (edge) =>
@@ -322,7 +322,7 @@ if (
   supersededTemplateOnlyRelease !== "0.8.5" ||
   !projectUpgradeContract.supportedEdges?.some(
     (edge) =>
-      edge.from === projectUpgradeContract.previousRelease &&
+      edge.from === "0.8.4" &&
       edge.to === supersededTemplateOnlyRelease &&
       edge.status === "historical" &&
       edge.note ===
@@ -341,6 +341,7 @@ for (const edge of [
   { from: "0.8.1", to: "0.8.2" },
   { from: "0.8.2", to: "0.8.3" },
   { from: "0.8.3", to: "0.8.4" },
+  { from: "0.8.4", to: "0.8.6" },
 ]) {
   if (
     !projectUpgradeContract.supportedEdges?.some(
@@ -377,6 +378,7 @@ requireText("docs/project-upgrades.md", [
   "no paired",
   "create-vireo@0.8.5",
   "0.8.4-to-0.8.6",
+  "0.8.6-to-0.8.7",
   ".vireo/example-manifest.json",
   "transactionally",
   "target Template commit",
