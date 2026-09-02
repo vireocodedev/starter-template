@@ -165,6 +165,12 @@ function result(code, status, summary, remedy) {
   return { code, status, summary, ...(remedy ? { remedy } : {}) };
 }
 
+export function resolveDoctorProfile(metadata) {
+  return typeof metadata?.profile === "string" && metadata.profile.trim() !== ""
+    ? metadata.profile
+    : "unknown";
+}
+
 export async function runDoctor() {
   const results = [];
   const node = process.versions.node;
@@ -411,6 +417,7 @@ export async function runDoctor() {
     schemaVersion: 1,
     ok: results.every((entry) => entry.status !== "fail"),
     project: metadata.projectName ?? "unknown",
+    profile: resolveDoctorProfile(metadata),
     database: metadata.database,
     databaseMode: databaseMode ?? "invalid",
     results,

@@ -110,7 +110,7 @@ test("uses immutable generated-project provenance for a local no-Git project", (
   const project = {
     projectName: "consumer-app",
     templateCommit: "2aa661d1458b9c2bb5e72f3ec35a6617a2bec04d",
-    createdBy: "create-vireo@0.8.1",
+    createdBy: "create-vireo@0.8.2",
   };
   const resolved = resolveVerificationEvidenceSource({
     command: () => {
@@ -147,7 +147,7 @@ test("never substitutes generated-project provenance for hosted Git evidence", (
         project: {
           projectName: "consumer-app",
           templateCommit: "2aa661d1458b9c2bb5e72f3ec35a6617a2bec04d",
-          createdBy: "create-vireo@0.8.1",
+          createdBy: "create-vireo@0.8.2",
         },
       }),
     (error) =>
