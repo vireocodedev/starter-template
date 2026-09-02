@@ -350,6 +350,7 @@ requireText("docs/project-upgrades.md", [
   "target Template commit",
   "frontend/tests/e2e/overview.spec.ts",
   "full-stack optional sample",
+  "refuses the entire managed upgrade on mismatch or customized bytes",
   "No dependency, JVM, schema, Flyway, or lockfile change",
   "root `AGENTS.md`",
   "existing managed projected consumer-skill guidance",

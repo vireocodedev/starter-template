@@ -68,7 +68,9 @@ It refuses malformed or customized managed provenance rather than overwriting it
 For a pristine 0.8.4 full-stack
 `frontend/tests/e2e/overview.spec.ts`, the transaction adds that exact file digest
 to the example manifest. This records the optional sample for later safe
-`remove-example` removal; it never claims customized bytes. The sample is not
+`remove-example` removal. The migration compares the file to the exact pristine
+0.8.4 digest and refuses the entire managed upgrade on mismatch or customized bytes;
+intentionally restore or adapt the Overview spec before retrying. The sample is not
 projected into frontend-only applications.
 
 - No dependency, JVM, schema, Flyway, or lockfile change is required to accept
@@ -78,8 +80,9 @@ projected into frontend-only applications.
   commit migration are one managed transaction, so an interrupted apply recovers
   rather than leaving a partially updated ownership record.
 - The Overview spec is a full-stack optional sample. A pristine existing 0.8.4
-  sample gains managed provenance for later removal, while customized bytes require
-  consumer review or adaptation. Frontend-only projects do not receive that sample.
+  sample gains managed provenance for later removal. A mismatched or customized
+  sample refuses the entire managed upgrade until the consumer intentionally restores
+  or adapts it before retrying. Frontend-only projects do not receive that sample.
 - Application test configuration, CI policy, deployment verification, and other
   optional Template changes remain application-owned decisions. Run only the checks
   appropriate to the changes the application chooses to adopt.
