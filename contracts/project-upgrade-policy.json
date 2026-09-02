@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "contractId": "vireo-template-project-upgrades",
   "publicRelease": "0.8.5",
-  "previousRelease": "0.8.3",
+  "previousRelease": "0.8.4",
   "publicationState": "final",
   "supportedEdges": [
     { "from": "0.2.0", "to": "0.3.0", "status": "historical" },
