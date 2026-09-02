@@ -291,7 +291,7 @@ if (
   projectUpgradeContract.contractId !== "vireo-template-project-upgrades" ||
   projectUpgradeContract.publicRelease !== templateReleasePolicy.version ||
   projectUpgradeContract.candidateRelease !== undefined ||
-  projectUpgradeContract.previousRelease !== "0.8.3" ||
+  projectUpgradeContract.previousRelease !== "0.8.4" ||
   projectUpgradeContract.publicationState !== "final" ||
   !projectUpgradeContract.supportedEdges?.some(
     (edge) =>
