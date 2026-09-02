@@ -7,24 +7,24 @@ migrations, deployment files, or an adopted/ejected generated capability.
 
 ## Supported path
 
-The public graph retains the historical 0.2.0-to-0.3.0, 0.6.0-to-0.7.0, and
-0.7.0-to-0.8.0 transforms and declares the supported 0.8.0-to-0.8.1 adjacent
-edge. Releases 0.4 and 0.5 are historical/EOL: they are not retroactively
-admitted as upgrade sources. The 0.8.1 release is terminal until a later release
-declares its own adjacent edge.
+The public graph retains the historical 0.2.0-to-0.3.0, 0.6.0-to-0.7.0,
+0.7.0-to-0.8.0, and 0.8.0-to-0.8.1 transforms and declares the supported
+0.8.1-to-0.8.2 adjacent edge. Releases 0.4 and 0.5 are historical/EOL: they are
+not retroactively admitted as upgrade sources. The 0.8.2 release is terminal
+until a later release declares its own adjacent edge.
 
 Start with a read-only inventory. It reports the recorded CLI and Template revision,
 the next declared hop, managed-file drift, pending application-owned work, and
 generated capabilities that remain managed or have been ejected:
 
 ```bash
-npx --yes --package=create-vireo@0.8.1 vireo status --project .
+npx --yes --package=create-vireo@0.8.2 vireo status --project .
 ```
 
-For a 0.8.0-created application, use the target CLI and review the non-writing plan:
+For a 0.8.1-created application, use the target CLI and review the non-writing plan:
 
 ```bash
-npx --yes --package=create-vireo@0.8.1 vireo upgrade --to 0.8.1 --dry-run
+npx --yes --package=create-vireo@0.8.2 vireo upgrade --to 0.8.2 --dry-run
 ```
 
 The CLI updates only the declared managed edge. It refuses unknown Template commits
@@ -39,7 +39,7 @@ Start from a clean branch and create a recoverable database backup. Install or i
 the target CLI version, then review the non-writing plan:
 
 ```bash
-npx --yes --package=create-vireo@0.8.1 vireo upgrade --to 0.8.1 --dry-run
+npx --yes --package=create-vireo@0.8.2 vireo upgrade --to 0.8.2 --dry-run
 ```
 
 The plan distinguishes Vireo-managed edits from required application-owned work.
@@ -47,7 +47,7 @@ After reviewing the target Template diff and all affected changelogs, apply only
 managed migration:
 
 ```bash
-npx --yes --package=create-vireo@0.8.1 vireo upgrade --to 0.8.1 \
+npx --yes --package=create-vireo@0.8.2 vireo upgrade --to 0.8.2 \
   --apply --accept-application-owned
 ```
 
@@ -58,7 +58,7 @@ application unable to compile until the pending actions below have been complete
 Review and port the source-to-target Template diff, including security, operations,
 frontend, backend, schema, and deployment changes.
 
-## Application-owned 0.8.0 to 0.8.1 checklist
+## Application-owned 0.8.1 to 0.8.2 checklist
 
 - Review release notes and the source-to-target Template diff for the root
   `AGENTS.md`, `frontend/src`, `src`, deployment descriptors, and `.github`
@@ -148,7 +148,7 @@ target change is needed for security, operational, or product consistency. In ei
 case, review the resulting diff, rehearse deployment and data recovery, and retain a
 rollback path before production.
 
-For the current 0.8.0→0.8.1 edge, instead complete the current checklist above:
+For the current 0.8.1→0.8.2 edge, instead complete the current checklist above:
 review the application-owned root `AGENTS.md`, source, and deployment diffs; accept
 the existing managed projected consumer-skill guidance; review verification scripts,
 OpenAPI, Corepack, and Storybook telemetry; refresh the lockfile; then run

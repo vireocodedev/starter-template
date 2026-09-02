@@ -291,7 +291,7 @@ if (
   projectUpgradeContract.contractId !== "vireo-template-project-upgrades" ||
   projectUpgradeContract.publicRelease !== templateReleasePolicy.version ||
   projectUpgradeContract.candidateRelease !== undefined ||
-  projectUpgradeContract.previousRelease !== "0.8.0" ||
+  projectUpgradeContract.previousRelease !== "0.8.1" ||
   projectUpgradeContract.publicationState !== "final" ||
   !projectUpgradeContract.supportedEdges?.some(
     (edge) =>
@@ -308,6 +308,7 @@ for (const edge of [
   { from: "0.2.0", to: "0.3.0" },
   { from: "0.6.0", to: "0.7.0" },
   { from: "0.7.0", to: "0.8.0" },
+  { from: "0.8.0", to: "0.8.1" },
 ]) {
   if (
     !projectUpgradeContract.supportedEdges?.some(
@@ -337,6 +338,7 @@ requireText("docs/project-upgrades.md", [
   "0.6.0-to-0.7.0",
   "0.7.0-to-0.8.0",
   "0.8.0-to-0.8.1",
+  "0.8.1-to-0.8.2",
   "root `AGENTS.md`",
   "existing managed projected consumer-skill guidance",
   "vireo status",
