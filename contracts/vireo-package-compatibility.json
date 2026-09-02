@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "vireo-template-0.8.2",
+  "id": "vireo-template-0.8.3",
   "packages": {
     "@vireocodedev/history": ["^0.2.2"],
     "@vireocodedev/infrastructure": ["^0.2.2"],
@@ -8,6 +8,14 @@
     "@vireocodedev/query": ["^0.2.2"],
     "@vireocodedev/shell": ["^0.2.2"],
     "@vireocodedev/sqlite": ["^0.2.2", "^0.2.3"],
-    "@vireocodedev/ui": ["^0.3.0"]
+    "@vireocodedev/ui": ["^0.3.1"]
+  },
+  "lockedPackages": {
+    "@vireocodedev/history": "0.2.2",
+    "@vireocodedev/infrastructure": "0.2.2",
+    "@vireocodedev/localization": "0.2.2",
+    "@vireocodedev/query": "0.2.2",
+    "@vireocodedev/shell": "0.2.2",
+    "@vireocodedev/ui": "0.3.1"
   }
 }
