@@ -7,6 +7,13 @@ import viteConfig from "./vite.config.ts";
 export default mergeConfig(
   viteConfig,
   defineConfig({
+    // Storybook's interaction runtime reaches this public boundary even when a
+    // generated application has only a minimal set of stories. Prebundle the
+    // package entry point so its CommonJS aria-query/lz-string dependencies do
+    // not become native ESM imports in the browser test runtime.
+    optimizeDeps: {
+      include: ["@testing-library/dom"],
+    },
     test: {
       testTimeout: 30_000,
       projects: [
