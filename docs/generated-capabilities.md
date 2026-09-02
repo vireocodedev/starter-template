@@ -6,7 +6,8 @@ keeps that generator line aligned with the Template release coordinates.
 Use that command for supported entity generation, the retained historical
 0.2.0-to-0.3.0, 0.6.0-to-0.7.0, and 0.7.0-to-0.8.0 project upgrades, and the
 historical 0.8.0-to-0.8.1, 0.8.1-to-0.8.2, and 0.8.2-to-0.8.3, plus the
-supported adjacent 0.8.4-to-0.8.5 project upgrade. When developing unpublished
+historical 0.8.3-to-0.8.4 transform and the supported adjacent 0.8.4-to-0.8.5
+project upgrade. When developing unpublished
 Starter changes, use the built CLI from a
 local Starter checkout as shown in the framework's [entity-generator
 guide](https://github.com/vireocodedev/vireo/blob/main/docs/generators/entity-schema.md).

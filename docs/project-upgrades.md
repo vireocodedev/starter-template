@@ -9,9 +9,10 @@ migrations, deployment files, or an adopted/ejected generated capability.
 
 The public graph retains the historical 0.2.0-to-0.3.0, 0.6.0-to-0.7.0,
 0.7.0-to-0.8.0, 0.8.0-to-0.8.1, 0.8.1-to-0.8.2, and 0.8.2-to-0.8.3 transforms
-and declares the supported 0.8.4-to-0.8.5 adjacent edge. Releases 0.4 and 0.5
-are historical/EOL: they are not retroactively admitted as upgrade sources. The 0.8.5 release is
-terminal until a later release declares its own adjacent edge.
+and historical 0.8.3-to-0.8.4 transform, then declares the supported
+0.8.4-to-0.8.5 adjacent edge. Releases 0.4 and 0.5 are historical/EOL: they
+are not retroactively admitted as upgrade sources. The 0.8.5 release is terminal
+until a later release declares its own adjacent edge.
 
 Start with a read-only inventory. It reports the recorded CLI and Template revision,
 the next declared hop, managed-file drift, pending application-owned work, and
@@ -59,26 +60,32 @@ application unable to compile until the pending actions below have been complete
 Review and port the source-to-target Template diff, including security, operations,
 frontend, backend, schema, and deployment changes.
 
-## Application-owned 0.8.4 to 0.8.5 checklist
+## Managed 0.8.4 to 0.8.5 migration
 
-This release-pair edge hardens Template verification tooling only. It does not
-change frontend or JVM dependencies, the database schema, Flyway migrations, or
-generated-capability contracts.
+This edge transactionally migrates managed `.vireo/example-manifest.json`
+provenance and its target Template commit alongside the recorded managed upgrade.
+It refuses malformed or customized managed provenance rather than overwriting it.
+For a pristine 0.8.4 full-stack
+`frontend/tests/e2e/overview.spec.ts`, the transaction adds that exact file digest
+to the example manifest. This records the optional sample for later safe
+`remove-example` removal; it never claims customized bytes. The sample is not
+projected into frontend-only applications.
 
-- No dependency, lockfile, JVM, schema, or database migration is required to
-  accept this edge. Do not change package versions or lockfiles solely for 0.8.5.
-- Review the source-to-target Template diff if the application chooses to adopt the
-  improved verification tooling. Application test configuration, CI policy, and
-  deployment verification remain application-owned decisions.
-- When reviewing optional application-owned changes, include the root `AGENTS.md`
-  and the existing managed projected consumer-skill guidance; neither is changed by
-  the managed 0.8.4-to-0.8.5 edge itself.
-- Optionally port the relevant tests or release-verification hardening after
-  reviewing their fit for the application's product and CI environment. The
-  managed upgrade itself does not claim those application-owned changes were made.
-- Run the verification appropriate to the application only when it adopts those
-  optional changes; an accepted managed edge requires no new frontend, JVM, or
-  database verification surface.
+- No dependency, JVM, schema, Flyway, or lockfile change is required to accept
+  this edge. Do not change package versions, database migrations, or lockfiles
+  solely for 0.8.5.
+- Review the non-writing plan before applying it. The provenance update and Template
+  commit migration are one managed transaction, so an interrupted apply recovers
+  rather than leaving a partially updated ownership record.
+- The Overview spec is a full-stack optional sample. A pristine existing 0.8.4
+  sample gains managed provenance for later removal, while customized bytes require
+  consumer review or adaptation. Frontend-only projects do not receive that sample.
+- Application test configuration, CI policy, deployment verification, and other
+  optional Template changes remain application-owned decisions. Run only the checks
+  appropriate to the changes the application chooses to adopt.
+- When reviewing those optional changes, include the root `AGENTS.md` and the
+  existing managed projected consumer-skill guidance; neither is changed by the
+  managed 0.8.4-to-0.8.5 transaction itself.
 
 ## Historical application-owned 0.2.0 to 0.3.0 checklist
 
@@ -142,10 +149,10 @@ target change is needed for security, operational, or product consistency. In ei
 case, review the resulting diff, rehearse deployment and data recovery, and retain a
 rollback path before production.
 
-For the current 0.8.4→0.8.5 edge, use the current checklist above. It is a
-verification-tooling hardening release: no dependency, JVM, schema, or lockfile
-migration is implied. Port application-owned test or CI changes only after review,
-then run the checks appropriate to those chosen changes.
+For the current 0.8.4→0.8.5 edge, use the managed migration guidance above. Its
+transactional provenance/commit update does not imply a dependency, JVM, schema,
+Flyway, or lockfile migration. Port application-owned test or CI changes only after
+review, then run the checks appropriate to those chosen changes.
 
 For the historical checklist, refresh dependencies if the printed plan requires it, run `corepack npm run
 setup`, `corepack npm run generate:check`, `./scripts/verify.sh`, the deployment

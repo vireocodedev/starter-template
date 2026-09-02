@@ -29,7 +29,7 @@ human gaps.
 ## Release-payload inventory
 
 The source inventory retains immutable ruleset payloads for historical release
-tags and the immediately prior `starter-template@0.8.3` tag. It also contains
+tags and the immediately prior `starter-template@0.8.4` tag. It also contains
 the exact no-bypass update-and-deletion payload for the prepared
 `starter-template@0.8.5` tag in
 `.github/rulesets/starter-template-0.8.5.json`. That checked-in payload is a
