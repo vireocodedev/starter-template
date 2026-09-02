@@ -22,10 +22,20 @@ the canonical baseline.
 
 ## Production browser budgets
 
-`cd frontend && corepack npm run performance:audit` runs Lighthouse's default
-mobile emulation against the production `/login` bundle. CI retains the structured
-`.performance-evidence/lighthouse.json` artifact for 90 days. The merge gate
-enforces:
+`cd frontend && corepack npm run performance:audit` runs three independent
+Lighthouse samples using the default mobile emulation against the production
+`/login` bundle. The preview server is shared, but each sample starts a fresh
+headless Chrome process. CI retains the structured, schema-versioned
+`.performance-evidence/lighthouse.json` artifact for 90 days. It includes every
+raw sample, its automated accessibility findings, the aggregation policy, and the
+gate result. On a failed Chrome, Lighthouse, or policy-validation attempt, the
+same schema records `status: "failed"`, the completed samples, and a sanitized
+error summary before the audit exits.
+
+Performance and timing metrics use the median of the three samples. Accessibility
+and best-practices use the minimum sample score: a single regression fails the
+gate. Each timing maximum is also a raw per-sample hard cap, so an extreme timing
+result cannot be hidden by an otherwise passing median. The merge gate enforces:
 
 | Metric                    |           Budget |
 | ------------------------- | ---------------: |
@@ -36,6 +46,12 @@ enforces:
 | Largest Contentful Paint  | at most 5,000 ms |
 | Total Blocking Time       |   at most 500 ms |
 | Cumulative Layout Shift   |     at most 0.10 |
+
+Equality passes every threshold. A one-off performance-score outlier may pass when
+the median meets its budget and no raw hard cap is crossed; two regressed samples
+that lower the median fail. The deterministic Lighthouse policy test covers those
+cases and the single-sample accessibility, best-practices, and timing hard-cap
+failures before the browser audit runs.
 
 The existing production build also limits the largest JavaScript chunk to 700 KiB
 and total JavaScript to 2,400 KiB before compression. These are regression budgets

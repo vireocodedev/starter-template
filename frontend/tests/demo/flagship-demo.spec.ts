@@ -16,7 +16,11 @@ test("public flagship completes the read-only evaluation journey", async ({ page
   await expect(
     page.getByRole("heading", { level: 2, name: "Keep field operations supplied and moving." }),
   ).toBeVisible();
-  await expect(page.getByText("Live snapshot", { exact: true })).toBeVisible();
+  await expect(page.locator('[data-app-overview-state="loaded"]')).toBeVisible();
+  const overviewHero = page.locator("[data-app-overview-hero]");
+  const liveSnapshot = overviewHero.getByText("Live snapshot", { exact: true });
+  await expect(liveSnapshot).toHaveCount(1);
+  await expect(liveSnapshot).toBeVisible();
   await expect(page.locator("[data-app-overview-metrics]")).toBeVisible();
 
   await page.getByRole("button", { name: "Open inventory" }).click();
