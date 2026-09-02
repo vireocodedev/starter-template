@@ -22,12 +22,22 @@ const currentTemplateReleaseTagRuleset = JSON.parse(
     "utf8",
   ),
 );
+const supersededTemplateOnlyRelease = projectUpgradeContract.supportedEdges?.find(
+  (edge) =>
+    edge.status === "historical" &&
+    typeof edge.note === "string" &&
+    edge.note.includes("no paired public create-vireo@0.8.5 release existed"),
+)?.to;
 const retainedTemplateReleaseTags = [
   templateReleaseRecovery.tag,
   `starter-template@${projectUpgradeContract.previousRelease}`,
+  supersededTemplateOnlyRelease &&
+    `starter-template@${supersededTemplateOnlyRelease}`,
 ].filter(
   (tag, index, tags) =>
-    tag !== templateReleasePolicy.tag && tags.indexOf(tag) === index,
+    typeof tag === "string" &&
+    tag !== templateReleasePolicy.tag &&
+    tags.indexOf(tag) === index,
 );
 const retainedTemplateReleaseTagRulesets = retainedTemplateReleaseTags.map(
   (tag) => ({
@@ -160,6 +170,7 @@ requireText("SECURITY.md", [templateReleaseTag, templateReleaseContract]);
 requireText("SUPPORT.md", [templateReleaseTag, templateReleaseContract]);
 requireText("docs/provider-controls-2026-08-31.md", [
   `starter-template@${projectUpgradeContract.previousRelease}`,
+  "starter-template@0.8.5",
   templateReleaseTag,
   currentTemplateReleaseTagRulesetPath,
   "not evidence that GitHub has applied it",
@@ -285,6 +296,9 @@ requireText("docs/generated-capabilities.md", [
   templateReleaseTag,
   templateReleaseContractUrl,
   `create-vireo@${templateReleasePolicy.createVireoVersion}`,
+  "0.8.4-to-0.8.5 solely",
+  "non-executable superseded evidence",
+  "no public `create-vireo@0.8.5` CLI was",
 ]);
 if (
   projectUpgradeContract.schemaVersion !== 1 ||
@@ -302,6 +316,21 @@ if (
 ) {
   problems.push(
     "project upgrade contract must declare the final adjacent upgrade coordinate",
+  );
+}
+if (
+  supersededTemplateOnlyRelease !== "0.8.5" ||
+  !projectUpgradeContract.supportedEdges?.some(
+    (edge) =>
+      edge.from === projectUpgradeContract.previousRelease &&
+      edge.to === supersededTemplateOnlyRelease &&
+      edge.status === "historical" &&
+      edge.note ===
+        "Superseded Template-only release evidence: no paired public create-vireo@0.8.5 release existed.",
+  )
+) {
+  problems.push(
+    "project upgrade contract must retain the superseded Template-only 0.8.4-to-0.8.5 evidence with its unpaired CLI explanation",
   );
 }
 for (const edge of [
@@ -345,6 +374,9 @@ requireText("docs/project-upgrades.md", [
   "0.8.2-to-0.8.3",
   "0.8.3-to-0.8.4",
   "0.8.4-to-0.8.5",
+  "no paired",
+  "create-vireo@0.8.5",
+  "0.8.4-to-0.8.6",
   ".vireo/example-manifest.json",
   "transactionally",
   "target Template commit",
@@ -354,6 +386,12 @@ requireText("docs/project-upgrades.md", [
   "No dependency, JVM, schema, Flyway, or lockfile change",
   "root `AGENTS.md`",
   "existing managed projected consumer-skill guidance",
+  "frontend/vitest.storybook.config.ts",
+  "frontend/scripts/storybook-config-policy.test.mjs",
+  "frontend/package.json#scripts.architecture:check",
+  "refuses the entire managed upgrade",
+  "Application-authored tests, story selection",
+  "deployment remain application-owned",
   "vireo status",
   "package-lock-only",
 ]);

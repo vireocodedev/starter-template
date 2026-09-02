@@ -9,23 +9,25 @@ migrations, deployment files, or an adopted/ejected generated capability.
 
 The public graph retains the historical 0.2.0-to-0.3.0, 0.6.0-to-0.7.0,
 0.7.0-to-0.8.0, 0.8.0-to-0.8.1, 0.8.1-to-0.8.2, and 0.8.2-to-0.8.3 transforms
-and historical 0.8.3-to-0.8.4 transform, then declares the supported
-0.8.4-to-0.8.5 adjacent edge. Releases 0.4 and 0.5 are historical/EOL: they
-are not retroactively admitted as upgrade sources. The 0.8.5 release is terminal
-until a later release declares its own adjacent edge.
+and historical 0.8.3-to-0.8.4 transform. The 0.8.4-to-0.8.5 record is
+superseded Template-only evidence, rather than a consumer upgrade path: no paired
+public `create-vireo@0.8.5` release existed. The supported adjacent edge is
+0.8.4-to-0.8.6. Releases 0.4 and 0.5 are historical/EOL: they are not
+retroactively admitted as upgrade sources. The 0.8.6 release is terminal until a
+later release declares its own adjacent edge.
 
 Start with a read-only inventory. It reports the recorded CLI and Template revision,
 the next declared hop, managed-file drift, pending application-owned work, and
 generated capabilities that remain managed or have been ejected:
 
 ```bash
-npx --yes --package=create-vireo@0.8.5 vireo status --project .
+npx --yes --package=create-vireo@0.8.6 vireo status --project .
 ```
 
 For a 0.8.4-created application, use the target CLI and review the non-writing plan:
 
 ```bash
-npx --yes --package=create-vireo@0.8.5 vireo upgrade --to 0.8.5 --dry-run
+npx --yes --package=create-vireo@0.8.6 vireo upgrade --to 0.8.6 --dry-run
 ```
 
 The CLI updates only the declared managed edge. It refuses unknown Template commits
@@ -41,7 +43,7 @@ Start from a clean branch and create a recoverable database backup. Install or i
 the target CLI version, then review the non-writing plan:
 
 ```bash
-npx --yes --package=create-vireo@0.8.5 vireo upgrade --to 0.8.5 --dry-run
+npx --yes --package=create-vireo@0.8.6 vireo upgrade --to 0.8.6 --dry-run
 ```
 
 The plan distinguishes Vireo-managed edits from required application-owned work.
@@ -49,7 +51,7 @@ After reviewing the target Template diff and all affected changelogs, apply only
 managed migration:
 
 ```bash
-npx --yes --package=create-vireo@0.8.5 vireo upgrade --to 0.8.5 \
+npx --yes --package=create-vireo@0.8.6 vireo upgrade --to 0.8.6 \
   --apply --accept-application-owned
 ```
 
@@ -60,7 +62,7 @@ application unable to compile until the pending actions below have been complete
 Review and port the source-to-target Template diff, including security, operations,
 frontend, backend, schema, and deployment changes.
 
-## Managed 0.8.4 to 0.8.5 migration
+## Managed 0.8.4 to 0.8.6 migration
 
 This edge transactionally migrates managed `.vireo/example-manifest.json`
 provenance and its target Template commit alongside the recorded managed upgrade.
@@ -73,9 +75,21 @@ to the example manifest. This records the optional sample for later safe
 intentionally restore or adapt the Overview spec before retrying. The sample is not
 projected into frontend-only applications.
 
+Vireo also manages these exact 0.8.4-to-0.8.6 frontend verification surfaces:
+
+- `frontend/vitest.storybook.config.ts`;
+- `frontend/scripts/storybook-config-policy.test.mjs`; and
+- the exact `frontend/package.json#scripts.architecture:check` value.
+
+The transaction replaces only pristine bytes for those managed surfaces and refuses
+the entire managed upgrade on customized bytes. It does not merge application edits
+into these files. Application-authored tests, story selection, unrelated test
+configuration, CI, and deployment remain application-owned; review and port them
+as product decisions rather than expecting the CLI to overwrite them.
+
 - No dependency, JVM, schema, Flyway, or lockfile change is required to accept
   this edge. Do not change package versions, database migrations, or lockfiles
-  solely for 0.8.5.
+  solely for 0.8.6.
 - Review the non-writing plan before applying it. The provenance update and Template
   commit migration are one managed transaction, so an interrupted apply recovers
   rather than leaving a partially updated ownership record.
@@ -83,12 +97,13 @@ projected into frontend-only applications.
   sample gains managed provenance for later removal. A mismatched or customized
   sample refuses the entire managed upgrade until the consumer intentionally restores
   or adapts it before retrying. Frontend-only projects do not receive that sample.
-- Application test configuration, CI policy, deployment verification, and other
-  optional Template changes remain application-owned decisions. Run only the checks
-  appropriate to the changes the application chooses to adopt.
+- Application-authored tests, story selection, unrelated test configuration, CI,
+  deployment verification, and other optional Template changes remain
+  application-owned decisions. Run only the checks appropriate to the changes the
+  application chooses to adopt.
 - When reviewing those optional changes, include the root `AGENTS.md` and the
   existing managed projected consumer-skill guidance; neither is changed by the
-  managed 0.8.4-to-0.8.5 transaction itself.
+  managed 0.8.4-to-0.8.6 transaction itself.
 
 ## Historical application-owned 0.2.0 to 0.3.0 checklist
 
@@ -152,10 +167,11 @@ target change is needed for security, operational, or product consistency. In ei
 case, review the resulting diff, rehearse deployment and data recovery, and retain a
 rollback path before production.
 
-For the current 0.8.4→0.8.5 edge, use the managed migration guidance above. Its
-transactional provenance/commit update does not imply a dependency, JVM, schema,
-Flyway, or lockfile migration. Port application-owned test or CI changes only after
-review, then run the checks appropriate to those chosen changes.
+For the current 0.8.4→0.8.6 edge, use the managed migration guidance above. Its
+transactional provenance/commit update and the three exact frontend verification
+surfaces do not imply a dependency, JVM, schema, Flyway, or lockfile migration.
+Port application-owned test, CI, and deployment changes only after review, then run
+the checks appropriate to those chosen changes.
 
 For the historical checklist, refresh dependencies if the printed plan requires it, run `corepack npm run
 setup`, `corepack npm run generate:check`, `./scripts/verify.sh`, the deployment
