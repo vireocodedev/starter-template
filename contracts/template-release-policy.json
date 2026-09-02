@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "version": "0.8.4",
-  "tag": "starter-template@0.8.4",
-  "createVireoVersion": "0.8.4",
-  "ecosystemRelease": "npm-0.8.4_jvm-0.3.1",
+  "version": "0.8.5",
+  "tag": "starter-template@0.8.5",
+  "createVireoVersion": "0.8.5",
+  "ecosystemRelease": "npm-0.8.5_jvm-0.3.1",
   "repository": "vireocodedev/vireo-template",
-  "releaseUrl": "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.4",
+  "releaseUrl": "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.5",
   "immutableReleasesRequired": true
 }

@@ -291,7 +291,7 @@ if (
   projectUpgradeContract.contractId !== "vireo-template-project-upgrades" ||
   projectUpgradeContract.publicRelease !== templateReleasePolicy.version ||
   projectUpgradeContract.candidateRelease !== undefined ||
-  projectUpgradeContract.previousRelease !== "0.8.3" ||
+  projectUpgradeContract.previousRelease !== "0.8.4" ||
   projectUpgradeContract.publicationState !== "final" ||
   !projectUpgradeContract.supportedEdges?.some(
     (edge) =>
@@ -311,6 +311,7 @@ for (const edge of [
   { from: "0.8.0", to: "0.8.1" },
   { from: "0.8.1", to: "0.8.2" },
   { from: "0.8.2", to: "0.8.3" },
+  { from: "0.8.3", to: "0.8.4" },
 ]) {
   if (
     !projectUpgradeContract.supportedEdges?.some(
@@ -343,6 +344,14 @@ requireText("docs/project-upgrades.md", [
   "0.8.1-to-0.8.2",
   "0.8.2-to-0.8.3",
   "0.8.3-to-0.8.4",
+  "0.8.4-to-0.8.5",
+  ".vireo/example-manifest.json",
+  "transactionally",
+  "target Template commit",
+  "frontend/tests/e2e/overview.spec.ts",
+  "full-stack optional sample",
+  "refuses the entire managed upgrade on mismatch or customized bytes",
+  "No dependency, JVM, schema, Flyway, or lockfile change",
   "root `AGENTS.md`",
   "existing managed projected consumer-skill guidance",
   "vireo status",
