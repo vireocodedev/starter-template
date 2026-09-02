@@ -8,9 +8,9 @@ migrations, deployment files, or an adopted/ejected generated capability.
 ## Supported path
 
 The public graph retains the historical 0.2.0-to-0.3.0, 0.6.0-to-0.7.0,
-0.7.0-to-0.8.0, 0.8.0-to-0.8.1, and 0.8.1-to-0.8.2 transforms and declares the
-supported 0.8.2-to-0.8.3 adjacent edge. Releases 0.4 and 0.5 are historical/EOL:
-they are not retroactively admitted as upgrade sources. The 0.8.3 release is
+0.7.0-to-0.8.0, 0.8.0-to-0.8.1, 0.8.1-to-0.8.2, and 0.8.2-to-0.8.3 transforms
+and declares the supported 0.8.3-to-0.8.4 adjacent edge. Releases 0.4 and 0.5
+are historical/EOL: they are not retroactively admitted as upgrade sources. The 0.8.4 release is
 terminal until a later release declares its own adjacent edge.
 
 Start with a read-only inventory. It reports the recorded CLI and Template revision,
@@ -18,19 +18,20 @@ the next declared hop, managed-file drift, pending application-owned work, and
 generated capabilities that remain managed or have been ejected:
 
 ```bash
-npx --yes --package=create-vireo@0.8.3 vireo status --project .
+npx --yes --package=create-vireo@0.8.4 vireo status --project .
 ```
 
-For a 0.8.2-created application, use the target CLI and review the non-writing plan:
+For a 0.8.3-created application, use the target CLI and review the non-writing plan:
 
 ```bash
-npx --yes --package=create-vireo@0.8.3 vireo upgrade --to 0.8.3 --dry-run
+npx --yes --package=create-vireo@0.8.4 vireo upgrade --to 0.8.4 --dry-run
 ```
 
 The CLI updates only the declared managed edge. It refuses unknown Template commits
 and managed-file customizations, preserves application-owned files and ejected
 generated capabilities, and never fabricates resolved package-lock entries.
-After an accepted apply, refresh the real lockfile with
+Refresh the real lockfile only when the accepted plan changes package declarations
+or explicitly requires a lockfile update. For those dependency-changing edges, use
 `corepack npm install --package-lock-only --prefix frontend` for full-stack
 applications, or `corepack npm install --package-lock-only` at a frontend-only
 project root, before verification.
@@ -39,7 +40,7 @@ Start from a clean branch and create a recoverable database backup. Install or i
 the target CLI version, then review the non-writing plan:
 
 ```bash
-npx --yes --package=create-vireo@0.8.3 vireo upgrade --to 0.8.3 --dry-run
+npx --yes --package=create-vireo@0.8.4 vireo upgrade --to 0.8.4 --dry-run
 ```
 
 The plan distinguishes Vireo-managed edits from required application-owned work.
@@ -47,7 +48,7 @@ After reviewing the target Template diff and all affected changelogs, apply only
 managed migration:
 
 ```bash
-npx --yes --package=create-vireo@0.8.3 vireo upgrade --to 0.8.3 \
+npx --yes --package=create-vireo@0.8.4 vireo upgrade --to 0.8.4 \
   --apply --accept-application-owned
 ```
 
@@ -58,36 +59,26 @@ application unable to compile until the pending actions below have been complete
 Review and port the source-to-target Template diff, including security, operations,
 frontend, backend, schema, and deployment changes.
 
-## Application-owned 0.8.2 to 0.8.3 checklist
+## Application-owned 0.8.3 to 0.8.4 checklist
 
-- Review release notes and the source-to-target Template diff for the root
-  `AGENTS.md`, `frontend/src`, `src`, deployment descriptors, and `.github`
-  workflows/settings. They are application-owned decisions: selectively port them
-  for the application's product, team, and deployment model.
-- Port only application-owned decisions; the CLI does not rewrite domain schema,
-  handwritten migrations, ejected capabilities, or deployment ownership.
-- The existing projected `.agents/skills/vireo-app-*` files remain managed Vireo
-  guidance. Retain them through the declared upgrade, then review their scope
-  alongside the application-owned root `AGENTS.md`; do not treat them as authority
-  to change product, deployment, secrets, or provider decisions automatically.
-- Review the application's verification-script and hosted-CI path before porting
-  them. Keep the complete verification command appropriate to the chosen profile;
-  do not infer that a managed upgrade has exercised application-owned checks.
-- Review OpenAPI compatibility intentionally. For full-stack projects, compare the
-  target API contract and its `openapi-compatibility.json` baseline with the
-  application's public API, versioned clients, and deployment order; frontend-only
-  projects retain ownership of their external API boundary.
-- Keep user-facing npm commands routed through Corepack. Review lockfile refreshes,
-  package-manager policy, and any application-specific command wrappers rather
-  than replacing them with a globally installed npm invocation.
-- Review Storybook telemetry and analytics choices. The target disables Storybook
-  telemetry for its scripts; retain or deliberately replace that setting according
-  to the application's privacy and provider policy before running Storybook in CI.
-- Refresh the appropriate lockfile, run setup where the project requires it, then
-  run the documented complete verification command before accepting the upgrade.
-- The managed frontend package declaration raises `@vireocodedev/ui` from
-  `^0.3.0` to `^0.3.1`. Keep the resolved `0.3.1` public-registry entry in the
-  reviewed lockfile; the CLI deliberately does not invent lockfile records.
+This release-pair edge hardens Template verification tooling only. It does not
+change frontend or JVM dependencies, the database schema, Flyway migrations, or
+generated-capability contracts.
+
+- No dependency, lockfile, JVM, schema, or database migration is required to
+  accept this edge. Do not change package versions or lockfiles solely for 0.8.4.
+- Review the source-to-target Template diff if the application chooses to adopt the
+  improved verification tooling. Application test configuration, CI policy, and
+  deployment verification remain application-owned decisions.
+- When reviewing optional application-owned changes, include the root `AGENTS.md`
+  and the existing managed projected consumer-skill guidance; neither is changed by
+  the managed 0.8.3-to-0.8.4 edge itself.
+- Optionally port the relevant tests or release-verification hardening after
+  reviewing their fit for the application's product and CI environment. The
+  managed upgrade itself does not claim those application-owned changes were made.
+- Run the verification appropriate to the application only when it adopts those
+  optional changes; an accepted managed edge requires no new frontend, JVM, or
+  database verification surface.
 
 ## Historical application-owned 0.2.0 to 0.3.0 checklist
 
@@ -151,12 +142,10 @@ target change is needed for security, operational, or product consistency. In ei
 case, review the resulting diff, rehearse deployment and data recovery, and retain a
 rollback path before production.
 
-For the current 0.8.2→0.8.3 edge, instead complete the current checklist above:
-review the application-owned root `AGENTS.md`, source, and deployment diffs; accept
-the existing managed projected consumer-skill guidance; review verification scripts,
-OpenAPI, Corepack, and Storybook telemetry; refresh the lockfile; then run
-`corepack npm run setup`, `corepack npm run generate:check`, and the full verify
-command, then commit the reviewed migration together with chosen Template changes.
+For the current 0.8.3→0.8.4 edge, use the current checklist above. It is a
+verification-tooling hardening release: no dependency, JVM, schema, or lockfile
+migration is implied. Port application-owned test or CI changes only after review,
+then run the checks appropriate to those chosen changes.
 
 For the historical checklist, refresh dependencies if the printed plan requires it, run `corepack npm run
 setup`, `corepack npm run generate:check`, `./scripts/verify.sh`, the deployment

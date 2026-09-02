@@ -4,9 +4,9 @@
 
 The current `main` branch and the latest tagged template release receive security updates. Applications created from the template own their deployed versions and must regularly merge or port upstream fixes.
 
-The [`starter-template@0.8.3` release contract](contracts/template-release-policy.json)
+The [`starter-template@0.8.4` release contract](contracts/template-release-policy.json)
 requires GitHub immutable releases before publishing the corresponding
-[release](https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.3).
+[release](https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.4).
 Repository administrators must enable that GitHub setting; the release workflow's
 default token cannot verify it.
 

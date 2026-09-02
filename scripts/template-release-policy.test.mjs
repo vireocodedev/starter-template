@@ -13,13 +13,13 @@ import {
 
 const policy = {
   schemaVersion: 1,
-  version: "0.8.3",
-  tag: "starter-template@0.8.3",
-  createVireoVersion: "0.8.3",
-  ecosystemRelease: "npm-0.8.3_jvm-0.3.1",
+  version: "0.8.4",
+  tag: "starter-template@0.8.4",
+  createVireoVersion: "0.8.4",
+  ecosystemRelease: "npm-0.8.4_jvm-0.3.1",
   repository: "vireocodedev/vireo-template",
   releaseUrl:
-    "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.3",
+    "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.4",
   immutableReleasesRequired: true,
 };
 const validInputs = {
@@ -28,7 +28,7 @@ const validInputs = {
     name: "starter-template",
     private: true,
     version: policy.version,
-    scripts: { vireo: "npx --yes --package=create-vireo@0.8.3 vireo" },
+    scripts: { vireo: "npx --yes --package=create-vireo@0.8.4 vireo" },
   },
   template: {
     schemaVersion: 1,
@@ -39,7 +39,7 @@ const validInputs = {
     createVireoVersion: policy.createVireoVersion,
     ecosystemRelease: policy.ecosystemRelease,
   },
-  compatibility: { schemaVersion: 1, id: "vireo-template-0.8.3" },
+  compatibility: { schemaVersion: 1, id: "vireo-template-0.8.4" },
   starterVersion: "0.3.1",
 };
 
