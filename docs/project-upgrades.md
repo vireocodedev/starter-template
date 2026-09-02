@@ -11,23 +11,24 @@ The public graph retains the historical 0.2.0-to-0.3.0, 0.6.0-to-0.7.0,
 0.7.0-to-0.8.0, 0.8.0-to-0.8.1, 0.8.1-to-0.8.2, and 0.8.2-to-0.8.3 transforms
 and historical 0.8.3-to-0.8.4 transform. The 0.8.4-to-0.8.5 record is
 superseded Template-only evidence, rather than a consumer upgrade path: no paired
-public `create-vireo@0.8.5` release existed. The supported adjacent edge is
-0.8.4-to-0.8.6. Releases 0.4 and 0.5 are historical/EOL: they are not
-retroactively admitted as upgrade sources. The 0.8.6 release is terminal until a
-later release declares its own adjacent edge.
+public `create-vireo@0.8.5` release existed. The 0.8.4-to-0.8.6 edge is retained
+as historical evidence. The supported adjacent edge is 0.8.6-to-0.8.7. Releases
+0.4 and 0.5 are historical/EOL: they are not retroactively admitted as upgrade
+sources. The 0.8.7 release is terminal until a later release declares its own
+adjacent edge.
 
 Start with a read-only inventory. It reports the recorded CLI and Template revision,
 the next declared hop, managed-file drift, pending application-owned work, and
 generated capabilities that remain managed or have been ejected:
 
 ```bash
-npx --yes --package=create-vireo@0.8.6 vireo status --project .
+npx --yes --package=create-vireo@0.8.7 vireo status --project .
 ```
 
-For a 0.8.4-created application, use the target CLI and review the non-writing plan:
+For a 0.8.6-created application, use the target CLI and review the non-writing plan:
 
 ```bash
-npx --yes --package=create-vireo@0.8.6 vireo upgrade --to 0.8.6 --dry-run
+npx --yes --package=create-vireo@0.8.7 vireo upgrade --to 0.8.7 --dry-run
 ```
 
 The CLI updates only the declared managed edge. It refuses unknown Template commits
@@ -43,7 +44,7 @@ Start from a clean branch and create a recoverable database backup. Install or i
 the target CLI version, then review the non-writing plan:
 
 ```bash
-npx --yes --package=create-vireo@0.8.6 vireo upgrade --to 0.8.6 --dry-run
+npx --yes --package=create-vireo@0.8.7 vireo upgrade --to 0.8.7 --dry-run
 ```
 
 The plan distinguishes Vireo-managed edits from required application-owned work.
@@ -51,7 +52,7 @@ After reviewing the target Template diff and all affected changelogs, apply only
 managed migration:
 
 ```bash
-npx --yes --package=create-vireo@0.8.6 vireo upgrade --to 0.8.6 \
+npx --yes --package=create-vireo@0.8.7 vireo upgrade --to 0.8.7 \
   --apply --accept-application-owned
 ```
 
@@ -62,7 +63,17 @@ application unable to compile until the pending actions below have been complete
 Review and port the source-to-target Template diff, including security, operations,
 frontend, backend, schema, and deployment changes.
 
-## Managed 0.8.4 to 0.8.6 migration
+## Managed 0.8.6 to 0.8.7 migration
+
+This adjacent patch updates only release-managed Vireo provenance and the root
+`package.json#scripts.vireo` pin. It moves a pristine project to the exact target
+Template commit and `create-vireo@0.8.7`; it refuses customized managed bytes and
+never replaces application-owned source, tests, deployment files, generated-once
+files, or ejected capabilities. No dependency, JVM, schema, Flyway, or lockfile
+change is required. Review the dry run and accept application-owned work only when
+you have separately chosen it for the product.
+
+## Historical 0.8.4 to 0.8.6 migration
 
 This edge transactionally migrates managed `.vireo/example-manifest.json`
 provenance and its target Template commit alongside the recorded managed upgrade.
@@ -167,7 +178,7 @@ target change is needed for security, operational, or product consistency. In ei
 case, review the resulting diff, rehearse deployment and data recovery, and retain a
 rollback path before production.
 
-For the current 0.8.4→0.8.6 edge, use the managed migration guidance above. Its
+For the historical 0.8.4→0.8.6 edge, use the retained managed migration guidance above. Its
 transactional provenance/commit update and the three exact frontend verification
 surfaces do not imply a dependency, JVM, schema, Flyway, or lockfile migration.
 Port application-owned test, CI, and deployment changes only after review, then run
