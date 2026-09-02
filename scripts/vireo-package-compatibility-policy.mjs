@@ -2,13 +2,17 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
-import { evaluateVireoPackageCompatibility } from "./vireo-package-compatibility.mjs";
+import {
+  evaluateVireoPackageCompatibility,
+  evaluateVireoPackageLockCompatibility,
+} from "./vireo-package-compatibility.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const readJson = async (relativePath) =>
   JSON.parse(await readFile(path.join(root, relativePath), "utf8"));
 const contract = await readJson("contracts/vireo-package-compatibility.json");
 const frontend = await readJson("frontend/package.json");
+const lock = await readJson("frontend/package-lock.json");
 const problems = [];
 
 if (contract.schemaVersion !== 1 || typeof contract.id !== "string") {
@@ -24,6 +28,16 @@ const current = evaluateVireoPackageCompatibility(
 if (!current.compatible)
   problems.push(
     ...current.problems.map((problem) => `current manifest: ${problem}`),
+  );
+
+const locked = evaluateVireoPackageLockCompatibility({
+  dependencies: frontend.dependencies,
+  lock,
+  contract,
+});
+if (!locked.compatible)
+  problems.push(
+    ...locked.problems.map((problem) => `committed lock: ${problem}`),
   );
 
 const independentPatch = evaluateVireoPackageCompatibility(

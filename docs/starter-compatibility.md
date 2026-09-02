@@ -6,7 +6,7 @@ The template's ordinary install, development, test, Storybook, and production-bu
 
 | Package                        | Supported line |
 | ------------------------------ | -------------- |
-| `@vireocodedev/ui`             | `^0.3.0`       |
+| `@vireocodedev/ui`             | `^0.3.1`       |
 | `@vireocodedev/query`          | `^0.2.2`       |
 | `@vireocodedev/shell`          | `^0.2.2`       |
 | `@vireocodedev/history`        | `^0.2.2`       |
