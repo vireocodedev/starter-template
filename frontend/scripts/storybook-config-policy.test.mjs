@@ -1,19 +1,22 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { resolve } from "node:path";
+import { loadConfigFromFile } from "vite";
 
 const configPath = resolve(import.meta.dirname, "..", "vitest.storybook.config.ts");
 
-test("Storybook prebundles its public testing boundary for minimal story surfaces", () => {
-  const config = readFileSync(configPath, "utf8");
+test("Storybook prebundles its public testing boundary for minimal story surfaces", async () => {
+  const loaded = await loadConfigFromFile({ command: "serve", mode: "test" }, configPath);
+  const config = loaded?.config;
 
-  assert.match(
-    config,
-    /optimizeDeps:\s*\{\s*include:\s*\["@testing-library\/dom"\],\s*\}/u,
+  assert.ok(config, "Vitest Storybook configuration must load");
+  assert.deepEqual(config.optimizeDeps?.include, ["@testing-library/dom"]);
+
+  const projects = config.test?.projects;
+  assert.ok(Array.isArray(projects), "Storybook browser projects must remain configured");
+  assert.deepEqual(
+    projects.map(project => project.test?.name),
+    ["storybook", "storybook-reduced-motion"],
   );
-  assert.match(config, /mergeConfig\(\s*viteConfig,/u);
-  assert.equal((config.match(/storybookTest\(/gu) ?? []).length, 2);
-  assert.match(config, /name:\s*"storybook"/u);
-  assert.match(config, /name:\s*"storybook-reduced-motion"/u);
+  assert.ok(projects.every(project => project.extends === true));
 });
