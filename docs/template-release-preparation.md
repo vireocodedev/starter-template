@@ -5,6 +5,72 @@ Vireo Template release. It takes the planned Template and `create-vireo` version
 the exact public JVM version, and exactly these seven public npm coordinates:
 history, infrastructure, localization, query, shell, sqlite, and ui.
 
+## Hosted preparation PR
+
+After the seven npm libraries and JVM modules are publicly available, dispatch
+**Prepare Template release** from this repository's `main` branch. Supply the
+planned matching Template/CLI version, the JVM version, and exactly these seven
+npm package versions as one JSON object:
+
+```json
+{
+  "@vireocodedev/history": "0.2.3",
+  "@vireocodedev/infrastructure": "0.2.3",
+  "@vireocodedev/localization": "0.2.3",
+  "@vireocodedev/query": "0.2.3",
+  "@vireocodedev/shell": "0.2.3",
+  "@vireocodedev/sqlite": "0.2.4",
+  "@vireocodedev/ui": "0.3.2"
+}
+```
+
+The workflow checks out one exact `main` commit, invokes the same
+`release:prepare --apply` public preflight, accepts only its fixed set of
+release-owned file changes, and runs the complete hosted Template qualification
+before it can access any write credential. It then refuses a moved `main`, creates
+or reuses only `automation/template-release-X.Y.Z`, and opens one App-authored PR.
+Retries succeed only when that PR's base, head commit/tree, marker, title/body, and
+author exactly match the verified result. It never force-pushes, edits an existing
+PR, or enables auto-merge.
+
+One administrator setup is required before the first dispatch. Create a dedicated
+GitHub App installed only on `vireocodedev/vireo-template`, with repository
+**Contents: read/write** and **Pull requests: read/write** permissions. In the
+`template-preparation` environment, set variable
+`TEMPLATE_RELEASE_AUTOMATION_APP_ID` and secret
+`TEMPLATE_RELEASE_AUTOMATION_APP_PRIVATE_KEY`; configure that environment from
+the checked-in desired state to allow exactly `main`, no reviewers, no wait, and no
+administrator bypass. The workflow mints a repository-scoped App token only in
+its final PR-creation job; it does not use `GITHUB_TOKEN` or a personal token for
+writes.
+
+Also set the non-secret repository Actions variable
+`TEMPLATE_RELEASE_AUTOMATION_APP_SLUG` to the App's bot slug (without `[bot]`).
+The unprotected reconciler inspection uses it to reject a non-App-authored PR
+before the protected job is eligible to mint a token; the protected job then
+requires the minted token to report the same slug. Until this variable is set,
+scheduled reconciliation is a successful no-op with an explicit configuration
+notice; an invalid slug fails closed.
+
+The scheduled **Reconcile Template preparation PRs** workflow and its manual
+dispatch inspect only marked `automation/template-release-X.Y.Z` PRs. It never
+uses persistent auto-merge. Its unprotected inspection first verifies the
+configured non-secret App slug, then reconstructs the canonical public input and
+independently re-runs `release:prepare --apply` in an isolated detached worktree
+at the exact current `main` commit. The resulting temporary-index tree and the
+fixed generated-path set are the only accepted expected output; PR artifact
+metadata is never trusted as its own expected tree.
+
+A non-draft candidate must remain one exact App-authored commit directly on
+current `main`, with that independently regenerated tree, canonical input,
+artifact evidence, changed paths, PR body/marker, required checks, and review
+threads all intact. Only then does it mint the same scoped App token, immediately
+repeat the inspection with GitHub's read-only workflow token and the independently
+computed tree, and make one expected-head SHA REST squash-merge request with the
+App token. The merge response must explicitly report `merged: true`.
+Pending checks, a stale or newly moved base, or unresolved threads are successful
+no-ops left for the next run; malformed or modified automation output fails closed.
+
 ```bash
 corepack npm run release:prepare -- \
   --template-version 0.8.8 \
@@ -19,6 +85,10 @@ corepack npm run release:prepare -- \
   --npm @vireocodedev/ui@0.3.2 \
   --json
 ```
+
+For hosted-style input, the same command also accepts `--npm-json` instead of the
+seven repeated `--npm` arguments. The JSON object must contain exactly the same
+seven package names and strict public versions.
 
 The normal command is non-writing. It anonymously queries only
 `registry.npmjs.org` and Maven Central's canonical repository, refuses redirects,

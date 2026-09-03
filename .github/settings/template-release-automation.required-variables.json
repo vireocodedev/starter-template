@@ -1,0 +1,4 @@
+{
+  "variables": ["TEMPLATE_RELEASE_AUTOMATION_APP_SLUG"],
+  "purpose": "Non-secret repository Actions variable naming the dedicated Template release GitHub App bot for read-only eligibility inspection."
+}
