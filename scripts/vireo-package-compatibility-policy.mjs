@@ -41,7 +41,10 @@ if (!locked.compatible)
   );
 
 const independentPatch = evaluateVireoPackageCompatibility(
-  { ...frontend.dependencies, "@vireocodedev/sqlite": "^0.2.2" },
+  {
+    ...frontend.dependencies,
+    "@vireocodedev/sqlite": contract.packages?.["@vireocodedev/sqlite"]?.[0],
+  },
   contract,
 );
 if (!independentPatch.compatible) {

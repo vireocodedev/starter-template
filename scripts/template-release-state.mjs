@@ -4,6 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { validateTemplateReleaseCoordinates } from "./template-release-policy.mjs";
+import { validateArtifactCoordinateBinding, validateArtifactFileDigests, validatePreparedArtifactBinding } from "./template-release-artifacts.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const rulesetName = "Protect starter-template release tags";
@@ -37,17 +38,31 @@ export function validateWildcardTagRuleset(ruleset) {
   return undefined;
 }
 
-export function validateReleaseManifest({ manifest, policy, commit }) {
+export function validateReleaseManifest({ manifest, policy, commit, readReleaseFile } = {}) {
   if (!manifest || typeof manifest !== "object")
     return "release manifest is missing or invalid";
-  if (manifest.schemaVersion !== 1)
-    return "release manifest schemaVersion must equal 1";
+  if (![1, 2].includes(manifest.schemaVersion))
+    return "release manifest schemaVersion must equal 1 or 2";
   for (const [key, value] of Object.entries(policy)) {
+    if (key === "schemaVersion" && manifest.schemaVersion === 2) continue;
     if (manifest[key] !== value)
       return `release manifest ${key} must match the current release policy`;
   }
   if (manifest.commit !== commit)
     return "release manifest commit must equal the annotated tag commit";
+  if (
+    manifest.schemaVersion === 2 &&
+    validatePreparedArtifactBinding(
+      { prepared: true, schemaVersion: 1, templateVersion: policy.version, createVireoVersion: policy.createVireoVersion, ...manifest.artifacts },
+      { version: policy.version },
+    ).length > 0
+  )
+    return "schema 2 release manifest must bind exact prepared public artifacts";
+  const taggedFileReader = readReleaseFile ?? ((path) => execFileSync("git", ["show", `${commit}:${path}`], { cwd: root }));
+  if (manifest.schemaVersion === 2 && validateArtifactFileDigests(manifest.artifacts, { readFile: taggedFileReader }).length > 0)
+    return "schema 2 release manifest bound-file digests must match the checked-out release target";
+  if (manifest.schemaVersion === 2 && validateArtifactCoordinateBinding(manifest.artifacts, { policy, readFile: taggedFileReader }).length > 0)
+    return "schema 2 release manifest artifacts must match bound dependency and JVM coordinates";
   return undefined;
 }
 

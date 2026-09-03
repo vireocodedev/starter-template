@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import test from "node:test";
 
 import {
@@ -7,6 +8,14 @@ import {
   validateReleaseManifest,
   validateWildcardTagRuleset,
 } from "./template-release-state.mjs";
+import {
+  artifactMavenModules,
+  artifactNpmPackages,
+  canonicalMavenGroup,
+  createPreparedArtifactBinding,
+  requiredArtifactFiles,
+  validateArtifactFileDigests,
+} from "./template-release-artifacts.mjs";
 
 const policy = {
   schemaVersion: 1,
@@ -196,4 +205,46 @@ test("fails closed for tag, release, manifest, and wildcard-ruleset drift", () =
       "fail",
     );
   }
+});
+
+test("validates schema-2 file provenance against the tagged tree, not later main bytes", () => {
+  const taggedBytes = Object.fromEntries(requiredArtifactFiles.map((path) => [path, Buffer.from(`tagged:${path}`)]));
+  const directPackages = artifactNpmPackages.filter((name) => name !== "@vireocodedev/sqlite");
+  taggedBytes["contracts/vireo-package-compatibility.json"] = Buffer.from(JSON.stringify({
+    packages: Object.fromEntries(artifactNpmPackages.map((name) => [name, ["^0.2.3"]])),
+  }));
+  taggedBytes["frontend/package.json"] = Buffer.from(JSON.stringify({
+    dependencies: Object.fromEntries(directPackages.map((name) => [name, "^0.2.3"])),
+  }));
+  taggedBytes["frontend/package-lock.json"] = Buffer.from(JSON.stringify({
+    packages: Object.fromEntries(directPackages.map((name) => [`node_modules/${name}`, { version: "0.2.3", integrity: "sha512-test" }])),
+  }));
+  taggedBytes["gradle.properties"] = Buffer.from("starterVersion=0.3.1\n");
+  const artifacts = createPreparedArtifactBinding({
+    templateVersion: policy.version,
+    createVireoVersion: policy.createVireoVersion,
+    npm: Object.fromEntries(artifactNpmPackages.map((name) => [name, {
+      version: "0.2.3",
+      tarball: `https://registry.npmjs.org/${name}/-/${name.split("/").at(-1)}-0.2.3.tgz`,
+      integrity: "sha512-test",
+      attestation: "https://registry.npmjs.org/-/npm/v1/attestations/test",
+      attestationBundleSha256: "c".repeat(64),
+    }])),
+    maven: { group: canonicalMavenGroup, version: "0.3.1", modules: Object.fromEntries(artifactMavenModules.map((name) => [name, { sha256: "a".repeat(64), signatureSha256: "b".repeat(64) }])) },
+    files: Object.fromEntries(requiredArtifactFiles.map((path) => [path, createHash("sha256").update(taggedBytes[path]).digest("hex")])),
+  });
+  const schema2 = { ...policy, schemaVersion: 2, commit, artifacts: { mavenGroup: artifacts.mavenGroup, npm: artifacts.npm, maven: artifacts.maven, files: artifacts.files, coordinateDigest: artifacts.coordinateDigest, fileDigest: artifacts.fileDigest } };
+  assert.equal(validateReleaseManifest({ manifest: schema2, policy, commit, readReleaseFile: (path) => taggedBytes[path] }), undefined);
+  assert.ok(validateArtifactFileDigests(schema2.artifacts, { readFile: () => Buffer.from("later-main-change") }).length > 0);
+  assert.equal(validateReleaseManifest({ manifest: schema2, policy, commit, readReleaseFile: () => Buffer.from("later-main-change") }), "schema 2 release manifest bound-file digests must match the checked-out release target");
+  const tamperedBytes = { ...taggedBytes, "contracts/vireo-package-compatibility.json": Buffer.from(JSON.stringify({ packages: { ...Object.fromEntries(artifactNpmPackages.map((name) => [name, ["^0.2.3"]])), "@vireocodedev/history": ["^0.2.4"] } })) };
+  const tamperedArtifacts = createPreparedArtifactBinding({
+    templateVersion: policy.version,
+    createVireoVersion: policy.createVireoVersion,
+    npm: artifacts.npm,
+    maven: artifacts.maven,
+    files: Object.fromEntries(requiredArtifactFiles.map((path) => [path, createHash("sha256").update(tamperedBytes[path]).digest("hex")])),
+  });
+  const tamperedManifest = { ...schema2, artifacts: { mavenGroup: tamperedArtifacts.mavenGroup, npm: tamperedArtifacts.npm, maven: tamperedArtifacts.maven, files: tamperedArtifacts.files, coordinateDigest: tamperedArtifacts.coordinateDigest, fileDigest: tamperedArtifacts.fileDigest } };
+  assert.equal(validateReleaseManifest({ manifest: tamperedManifest, policy, commit, readReleaseFile: (path) => tamperedBytes[path] }), "schema 2 release manifest artifacts must match bound dependency and JVM coordinates");
 });

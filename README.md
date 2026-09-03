@@ -14,6 +14,8 @@ The canonical current [`starter-template@0.8.7` release contract](contracts/temp
 defines its tag, generator line, and immutable-release prerequisite. Merging a
 release-coordinate change to `main` is explicit publication authorization: the workflow
 verifies that exact commit before it creates the annotated immutable tag and release.
+Maintainers prepare the next coordinated public package line with
+[Template release preparation](docs/template-release-preparation.md).
 
 ## Evaluate before adopting
 

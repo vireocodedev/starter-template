@@ -1,10 +1,11 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   readTemplateReleaseInputs,
   validateTemplateReleaseCoordinates,
 } from "./template-release-policy.mjs";
+import { validateArtifactCoordinateBinding, validateArtifactFileDigests, validatePreparedArtifactBinding } from "./template-release-artifacts.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -20,6 +21,25 @@ export function createTemplateReleaseManifest({ policy, commit }) {
   return { schemaVersion: 1, ...policy, commit };
 }
 
+export function createPreparedTemplateReleaseManifest({ policy, commit, artifacts }) {
+  const manifest = createTemplateReleaseManifest({ policy, commit });
+  if (artifacts?.prepared !== true) return manifest;
+  const problems = validatePreparedArtifactBinding(artifacts, { version: policy.version });
+  if (problems.length) throw new Error(problems.join("; "));
+  return {
+    ...manifest,
+    schemaVersion: 2,
+    artifacts: {
+      mavenGroup: artifacts.mavenGroup,
+      npm: artifacts.npm,
+      maven: artifacts.maven,
+      files: artifacts.files,
+      coordinateDigest: artifacts.coordinateDigest,
+      fileDigest: artifacts.fileDigest,
+    },
+  };
+}
+
 export function resolveReleaseManifestOutput({
   output,
   root = repositoryRoot,
@@ -33,9 +53,22 @@ export function resolveReleaseManifestOutput({
   return resolvedOutput;
 }
 
-export function writeTemplateReleaseManifest({ output, policy, commit, root }) {
+export function writeTemplateReleaseManifest({ output, policy, commit, root = repositoryRoot }) {
   const resolvedOutput = resolveReleaseManifestOutput({ output, root });
-  const manifest = createTemplateReleaseManifest({ policy, commit });
+  const artifactPath = join(root, "contracts/template-release-artifacts.json");
+  const artifacts = JSON.parse(readFileSync(artifactPath, "utf8"));
+  const fileProblems = artifacts.prepared === true
+    ? validateArtifactFileDigests(artifacts, { repositoryRoot: root })
+    : [];
+  if (fileProblems.length) throw new Error(fileProblems.join("; "));
+  const coordinateProblems = artifacts.prepared === true
+    ? validateArtifactCoordinateBinding(artifacts, {
+      policy,
+      readFile: (path) => readFileSync(join(root, path)),
+    })
+    : [];
+  if (coordinateProblems.length) throw new Error(coordinateProblems.join("; "));
+  const manifest = createPreparedTemplateReleaseManifest({ policy, commit, artifacts });
   mkdirSync(dirname(resolvedOutput), { recursive: true });
   writeFileSync(resolvedOutput, `${JSON.stringify(manifest, null, 2)}\n`);
   return manifest;

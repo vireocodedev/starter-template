@@ -9,8 +9,16 @@ import {
 } from "./template-release-policy.mjs";
 import {
   createTemplateReleaseManifest,
+  createPreparedTemplateReleaseManifest,
   resolveReleaseManifestOutput,
 } from "./write-template-release-manifest.mjs";
+import {
+  artifactMavenModules,
+  artifactNpmPackages,
+  canonicalMavenGroup,
+  createPreparedArtifactBinding,
+  requiredArtifactFiles,
+} from "./template-release-artifacts.mjs";
 
 const policy = {
   schemaVersion: 1,
@@ -196,4 +204,31 @@ test("creates a deterministic manifest and rejects unsafe release inputs", () =>
     }),
     "/tmp/release-manifest.json",
   );
+});
+
+test("binds prepared npm and Maven release evidence into schema 2 manifests", () => {
+  const artifacts = {
+    schemaVersion: 1,
+    prepared: true,
+    templateVersion: policy.version,
+    createVireoVersion: policy.createVireoVersion,
+    npm: Object.fromEntries(
+      artifactNpmPackages.map((name) => [
+        name,
+        { version: "0.3.1", integrity: "sha512-test", tarball: `https://registry.npmjs.org/${name}/-/${name.split("/").at(-1)}-0.3.1.tgz`, attestation: "https://registry.npmjs.org/-/npm/v1/attestations/test", attestationBundleSha256: "c".repeat(64) },
+      ]),
+    ),
+    maven: {
+      group: canonicalMavenGroup,
+      version: "0.3.1",
+      modules: Object.fromEntries(
+        artifactMavenModules.map((name) => [name, { sha256: "a".repeat(64), signatureSha256: "b".repeat(64) }]),
+      ),
+    },
+  };
+  const binding = createPreparedArtifactBinding({ ...artifacts, files: Object.fromEntries(requiredArtifactFiles.map((path) => [path, "c".repeat(64)])) });
+  const manifest = createPreparedTemplateReleaseManifest({ policy, commit: "a".repeat(40), artifacts: binding });
+  assert.equal(manifest.schemaVersion, 2);
+  assert.equal(manifest.artifacts.npm["@vireocodedev/ui"].version, "0.3.1");
+  assert.match(manifest.artifacts.coordinateDigest, /^[0-9a-f]{64}$/u);
 });
