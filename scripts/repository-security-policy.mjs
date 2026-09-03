@@ -28,9 +28,11 @@ if (permissions.default_workflow_permissions !== "read" || permissions.can_appro
 const environment = readJson(".github/environments/template-release.json");
 const deploymentPolicies = readJson(".github/environments/template-release.deployment-branch-policies.json");
 const environmentLiveAssertions = readJson(".github/environments/template-release.live-assertions.json");
-if (environment.wait_timer !== 0 || environment.prevent_self_review !== false || environmentLiveAssertions.can_admins_bypass !== false) problems.push("template-release environment must retain its documented interim bypass and review policy");
-if (JSON.stringify(environment.reviewers) !== JSON.stringify([{ type: "User", id: 53398175 }])) problems.push("template-release must require exactly User reviewer 53398175");
-if (environment.deployment_branch_policy?.protected_branches !== false || environment.deployment_branch_policy?.custom_branch_policies !== true || JSON.stringify(deploymentPolicies) !== JSON.stringify([{ name: "main", type: "branch" }, { name: "starter-template@*", type: "tag" }])) problems.push("template-release must permit exactly main dispatches and template release tags");
+const wildcardTagRuleset = readJson(".github/rulesets/starter-template-tags.json");
+if (environment.wait_timer !== 0 || environment.prevent_self_review !== false || environmentLiveAssertions.can_admins_bypass !== false) problems.push("template-release environment must retain its documented no-bypass policy");
+if (!Array.isArray(environment.reviewers) || environment.reviewers.length !== 0) problems.push("template-release must not require a recurring reviewer");
+if (environment.deployment_branch_policy?.protected_branches !== false || environment.deployment_branch_policy?.custom_branch_policies !== true || JSON.stringify(deploymentPolicies) !== JSON.stringify([{ name: "main", type: "branch" }])) problems.push("template-release must permit exactly main deployment runs");
+if (wildcardTagRuleset.name !== "Protect starter-template release tags" || wildcardTagRuleset.target !== "tag" || wildcardTagRuleset.enforcement !== "active" || !Array.isArray(wildcardTagRuleset.bypass_actors) || wildcardTagRuleset.bypass_actors.length || JSON.stringify(wildcardTagRuleset.conditions?.ref_name) !== JSON.stringify({ include: ["refs/tags/starter-template@*"], exclude: [] }) || JSON.stringify(wildcardTagRuleset.rules?.map((rule) => rule.type).sort()) !== JSON.stringify(["deletion", "non_fast_forward", "update"])) problems.push("wildcard starter-template tag ruleset must exactly preserve immutable update, non-fast-forward, and deletion protection");
 if (readText(".github/CODEOWNERS").trim() !== "* @brunotot") problems.push("CODEOWNERS must retain the interim valid @brunotot owner");
 if (problems.length) {
   console.error("Repository security desired-state policy failed:\n");

@@ -31,9 +31,38 @@ human gaps.
 The source inventory retains immutable ruleset payloads for historical release
 tags, including the immediately prior `starter-template@0.8.6` tag and the
 superseded Template-only `starter-template@0.8.5` release that had no paired
-public `create-vireo@0.8.5` release. It also contains the
-exact no-bypass update-and-deletion payload for the prepared
-`starter-template@0.8.7` tag in
-`.github/rulesets/starter-template-0.8.7.json`. That checked-in payload is a
-reviewable desired state, not evidence that GitHub has applied it: create and
-read back the matching active provider ruleset before pushing the release tag.
+public `create-vireo@0.8.5` release. They are historical evidence only.
+
+The retained `.github/rulesets/starter-template-0.8.7.json` documents the
+already-published `starter-template@0.8.7` coordinate. It is not evidence that GitHub has applied it as a provider control for future versions.
+
+The authoritative desired state for every future Template release is
+`.github/rulesets/starter-template-tags.json`: an active, no-bypass,
+update/non-fast-forward/deletion ruleset matching `refs/tags/starter-template@*`. Apply that
+payload once through GitHub's ruleset API or UI and read it back. The main-push
+release workflow fails closed before tag or release mutation unless the live
+wildcard ruleset exactly matches the checked-in desired state. The
+`template-release` environment must retain reviewers `[]`, wait `0`, disabled
+administrator bypass, and branch policy limited to `main`. Merging the
+release-coordinate PR on `main`, rather than a recurring environment approval, is
+explicit publication authorization.
+
+## One-time activation for the automated release path
+
+Before merging the first release-coordinate PR that relies on this path, a repository
+administrator must:
+
+1. Create or update the live tag ruleset from
+   `.github/rulesets/starter-template-tags.json`, then read it back and confirm the
+   wildcard, active enforcement, no bypass actors, and exactly the
+   update/non-fast-forward/deletion rules.
+2. Update the `template-release` environment from
+   `.github/environments/template-release.json`, remove the former tag deployment
+   policy, and retain only the `main` policy in
+   `.github/environments/template-release.deployment-branch-policies.json`.
+3. Confirm GitHub's repository-level **immutable releases** setting remains enabled.
+
+The workflow has no credential that can replace these administrator-only controls.
+It does verify the live wildcard ruleset before every mutation and fails closed if it
+drifts. The environment no longer needs a recurring release approval after the
+release-coordinate PR has merged.

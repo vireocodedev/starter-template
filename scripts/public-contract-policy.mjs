@@ -12,13 +12,9 @@ const templateReleaseRecovery = JSON.parse(
 const projectUpgradeContract = JSON.parse(
   readFileSync(join(root, "contracts/project-upgrade-policy.json"), "utf8"),
 );
-const currentTemplateReleaseTagRuleset = JSON.parse(
+const templateReleaseTagRuleset = JSON.parse(
   readFileSync(
-    join(
-      root,
-      ".github/rulesets",
-      `starter-template-${templateReleasePolicy.version}.json`,
-    ),
+    join(root, ".github/rulesets", "starter-template-tags.json"),
     "utf8",
   ),
 );
@@ -59,7 +55,7 @@ const templateReleaseEnvironment = JSON.parse(
 const templateReleaseTag = templateReleasePolicy.tag;
 const templateReleaseContract = "template-release-policy.json";
 const templateReleaseContractUrl = `https://github.com/${templateReleasePolicy.repository}/blob/${encodeURIComponent(templateReleaseTag)}/contracts/${templateReleaseContract}`;
-const currentTemplateReleaseTagRulesetPath = `.github/rulesets/starter-template-${templateReleasePolicy.version}.json`;
+const templateReleaseTagRulesetPath = ".github/rulesets/starter-template-tags.json";
 const requiredFiles = [
   "README.md",
   "LICENSE",
@@ -93,7 +89,7 @@ const requiredFiles = [
   "contracts/template-release-policy.json",
   "contracts/template-release-recovery.json",
   "contracts/project-upgrade-policy.json",
-  currentTemplateReleaseTagRulesetPath,
+  templateReleaseTagRulesetPath,
   ...retainedTemplateReleaseTags.map(
     (tag) => `.github/rulesets/${tag.replace("@", "-")}.json`,
   ),
@@ -105,6 +101,8 @@ const requiredFiles = [
   ".github/settings/selected-actions.json",
   ".github/settings/workflow-permissions.json",
   "scripts/template-release-policy.mjs",
+  "scripts/template-release-coordinate-change.mjs",
+  "scripts/template-release-state.mjs",
   "scripts/template-release-recovery-policy.mjs",
   "scripts/repository-security-policy.mjs",
   "scripts/write-template-release-manifest.mjs",
@@ -163,7 +161,7 @@ requireText("README.md", [
   templateReleaseTag,
   templateReleaseContract,
   `create-vireo@${templateReleasePolicy.createVireoVersion}`,
-  "validates that exact tag before it can publish",
+  "Merging a\nrelease-coordinate change to `main` is explicit publication authorization",
 ]);
 requireText("SUPPORT.md", ["SECURITY.md", "CODE_OF_CONDUCT.md"]);
 requireText("SECURITY.md", [templateReleaseTag, templateReleaseContract]);
@@ -172,17 +170,17 @@ requireText("docs/provider-controls-2026-08-31.md", [
   `starter-template@${projectUpgradeContract.previousRelease}`,
   "starter-template@0.8.5",
   templateReleaseTag,
-  currentTemplateReleaseTagRulesetPath,
+  templateReleaseTagRulesetPath,
   "not evidence that GitHub has applied it",
 ]);
 requireText("SUPPORT.md", [
   "Never move, delete, or recreate an immutable release tag.",
-  "reviewed `main` workflow-dispatch path",
+  "pinned `main` workflow-dispatch path",
   "draft or published GitHub release",
   "`template-release` protected GitHub environment",
   "immutable releases are still enabled",
-  "update-and-deletion tag ruleset",
-  "active before recovery approval",
+  "wildcard update/non-fast-forward/deletion tag ruleset",
+  "active before release mutation",
 ]);
 if (templateReleaseRecovery.schemaVersion !== 1)
   problems.push("template release recovery schemaVersion must equal 1");
@@ -232,11 +230,30 @@ function validateImmutableTagRuleset({ ruleset, tag, role }) {
     );
 }
 
-validateImmutableTagRuleset({
-  ruleset: currentTemplateReleaseTagRuleset,
-  tag: templateReleasePolicy.tag,
-  role: "current",
-});
+function validateWildcardTemplateReleaseTagRuleset(ruleset) {
+  if (ruleset.name !== "Protect starter-template release tags")
+    problems.push("wildcard Template tag ruleset must have the canonical name");
+  if (ruleset.target !== "tag" || ruleset.enforcement !== "active")
+    problems.push("wildcard Template tag ruleset must be an active tag ruleset");
+  if (!Array.isArray(ruleset.bypass_actors) || ruleset.bypass_actors.length)
+    problems.push("wildcard Template tag ruleset must not grant bypass actors");
+  if (
+    JSON.stringify(ruleset.conditions?.ref_name?.include) !==
+      JSON.stringify(["refs/tags/starter-template@*"]) ||
+    JSON.stringify(ruleset.conditions?.ref_name?.exclude) !== JSON.stringify([])
+  )
+    problems.push("wildcard Template tag ruleset must match only starter-template tags");
+  const rules = ruleset.rules?.map((rule) => rule?.type)?.sort();
+  if (
+    JSON.stringify(rules) !==
+    JSON.stringify(["deletion", "non_fast_forward", "update"])
+  )
+    problems.push(
+      "wildcard Template tag ruleset must contain exactly update, non-fast-forward, and deletion rules",
+    );
+}
+
+validateWildcardTemplateReleaseTagRuleset(templateReleaseTagRuleset);
 for (const { tag, ruleset } of retainedTemplateReleaseTagRulesets)
   validateImmutableTagRuleset({
     ruleset,
@@ -253,15 +270,8 @@ if (templateReleaseEnvironment.prevent_self_review !== false)
     "template release environment prevent_self_review must equal false",
   );
 const environmentReviewers = templateReleaseEnvironment.reviewers;
-if (
-  !Array.isArray(environmentReviewers) ||
-  environmentReviewers.length !== 1 ||
-  environmentReviewers[0]?.type !== "User" ||
-  environmentReviewers[0]?.id !== 53398175
-)
-  problems.push(
-    "template release environment must require exactly User reviewer 53398175",
-  );
+if (!Array.isArray(environmentReviewers) || environmentReviewers.length !== 0)
+  problems.push("template release environment must have no recurring reviewers");
 if (
   templateReleaseEnvironment.deployment_branch_policy?.protected_branches !==
     false ||
@@ -278,10 +288,7 @@ if (
       ),
     ),
   ) !==
-    JSON.stringify([
-      { name: "main", type: "branch" },
-      { name: "starter-template@*", type: "tag" },
-    ]) ||
+    JSON.stringify([{ name: "main", type: "branch" }]) ||
   JSON.parse(
     readFileSync(
       join(root, ".github/environments/template-release.live-assertions.json"),
@@ -290,7 +297,7 @@ if (
   ).can_admins_bypass !== false
 )
   problems.push(
-    "template release environment must permit exactly main dispatches and template tags without administrator bypass",
+    "template release environment must permit exactly main runs without administrator bypass",
   );
 requireText("docs/generated-capabilities.md", [
   templateReleaseTag,
@@ -530,9 +537,26 @@ const templateReleaseRecoveryPolicy = readFileSync(
   "utf8",
 );
 for (const fragment of [
-  "starter-template@*",
+  "branches: [main]",
+  "workflow_dispatch:",
+  "Historical immutable recovery tag (only starter-template@0.6.0)",
+  "group: template-release-global",
+  "cancel-in-progress: false",
+  "name: Detect release-coordinate change",
+  "contracts/template-release-policy.json",
+  "name: Read live release state and plan",
+  "node scripts/template-release-state.mjs",
+  "name: Create annotated immutable release tag through GitHub REST",
+  "repos/$GITHUB_REPOSITORY/git/tags",
+  "repos/$GITHUB_REPOSITORY/git/refs",
+  "name: Refuse tag-creation races and resolve release recovery state",
+  "name: Validate draft manifest before publication",
+  "if: steps.draft-state.outputs.action == 'recover-release'",
+  "name: Verify immutable published release and exact manifest",
+  'gh release edit "$RELEASE_TAG" --draft=false --latest=false',
   "./scripts/verify-template.sh silent",
   "node scripts/template-release-policy.mjs",
+  "node scripts/template-release-recovery-policy.mjs",
   "node scripts/write-template-release-manifest.mjs",
   "gh release create",
   "--verify-tag",
@@ -542,88 +566,24 @@ for (const fragment of [
       `template release workflow must contain ${JSON.stringify(fragment)}`,
     );
 }
-const releasePreflight =
-  'node scripts/template-release-policy.mjs "$RELEASE_TAG"';
 const releaseSetup = "corepack npm run setup";
-if (
-  templateReleaseWorkflow.indexOf(releasePreflight) < 0 ||
-  templateReleaseWorkflow.indexOf(releasePreflight) >
-    templateReleaseWorkflow.indexOf(releaseSetup)
-) {
+const releaseVerification = templateReleaseWorkflow.indexOf(
+  "name: Verify exact release target before mutation",
+);
+const releaseManifest = templateReleaseWorkflow.indexOf(
+  "name: Write exact release manifest",
+);
+const tagCreation = templateReleaseWorkflow.indexOf(
+  "name: Create annotated immutable release tag through GitHub REST",
+);
+const releaseCreation = templateReleaseWorkflow.indexOf(
+  "name: Create draft release and attach manifest",
+);
+if (!(releaseVerification >= 0 && releaseVerification < releaseManifest && releaseManifest < tagCreation && tagCreation < releaseCreation)) {
   problems.push(
-    "template release workflow must validate its exact tag before setup",
+    "template release workflow must verify the exact release target before tag or release mutation",
   );
 }
-
-for (const fragment of [
-  "workflow_dispatch:",
-  "tag:",
-  "required: true",
-  "type: string",
-  "group: release-${{ github.workflow }}-${{ inputs.tag || github.ref_name }}",
-  "environment: template-release",
-  "name: Checkout policy source",
-  "ref: ${{ github.ref }}",
-  "name: Reject non-main recovery dispatch",
-  "if: github.event_name == 'workflow_dispatch'",
-  'test "$GITHUB_REF" = "refs/heads/main"',
-  "name: Checkout validated release tag",
-  "ref: refs/tags/${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}",
-  "name: Resolve exact release target",
-  "name: Resolve trusted recovery target",
-  "node scripts/template-release-recovery-policy.mjs",
-  "name: Require release absence before checkout",
-  "name: Require expected release commit from origin/main",
-  "name: Require trusted remote tag target before checkout",
-  "name: Revalidate release absence and exact tag target",
-  "gh release view",
-  "name: Verify exact release target",
-  "RELEASE_COMMIT: ${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}",
-  'run: env GITHUB_SHA="$RELEASE_COMMIT" ./scripts/verify-template.sh silent',
-  'git rev-parse "refs/tags/$RELEASE_TAG^{commit}"',
-  'git merge-base --is-ancestor "$EXPECTED_COMMIT" origin/main',
-  "git rev-parse HEAD",
-  'test "$tag_commit" = "$EXPECTED_COMMIT"',
-  'test "$head_commit" = "$EXPECTED_COMMIT"',
-  'printf \'tag=%s\\n\' "$RELEASE_TAG" >> "$GITHUB_OUTPUT"',
-  'printf \'commit=%s\\n\' "$GITHUB_SHA" >> "$GITHUB_OUTPUT"',
-  "corepack npm exec -- playwright install --with-deps chromium",
-  '"${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}"',
-  'gh release create "${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}"',
-  'gh release edit "${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}"',
-]) {
-  if (!templateReleaseWorkflow.includes(fragment))
-    problems.push(
-      `template release workflow must contain immutable recovery control ${JSON.stringify(fragment)}`,
-    );
-}
-
-const currentReleasePolicyStep = templateReleaseWorkflow.match(
-  /- name: Validate current release policy[\s\S]*?(?=\n      - name:|$)/u,
-)?.[0];
-if (
-  !currentReleasePolicyStep?.includes("if: github.event_name == 'push'") ||
-  !currentReleasePolicyStep.includes(
-    'node scripts/template-release-policy.mjs "$RELEASE_TAG"',
-  )
-)
-  problems.push(
-    "template release workflow must validate the current release policy only for a tag push",
-  );
-const recoveryTargetStep = templateReleaseWorkflow.match(
-  /- name: Resolve exact release target[\s\S]*?(?=\n      - name:|$)/u,
-)?.[0];
-if (
-  !recoveryTargetStep?.includes(
-    'node scripts/template-release-recovery-policy.mjs "$RUNNER_TEMP/template-release-recovery-target" "$RELEASE_TAG"',
-  ) ||
-  !recoveryTargetStep.includes(
-    'if [ "${{ github.event_name }}" = "push" ]; then',
-  )
-)
-  problems.push(
-    "template release workflow must validate a trusted historical dispatch directly against the recovery contract after checkout",
-  );
 
 for (const fragment of [
   "explicit recovery tag must exactly match the recovery contract",
@@ -637,80 +597,25 @@ for (const fragment of [
     );
 }
 
-const sourceCheckout = templateReleaseWorkflow.indexOf(
-  "name: Checkout policy source",
-);
-const nodeSetup = templateReleaseWorkflow.indexOf(
-  "uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
-);
-const mainDispatchGuard = templateReleaseWorkflow.indexOf(
-  "name: Reject non-main recovery dispatch",
-);
-const sourcePreflight = templateReleaseWorkflow.indexOf(releasePreflight);
-const recoveryResolution = templateReleaseWorkflow.indexOf(
-  "name: Resolve trusted recovery target",
-);
-const absenceBeforeCheckout = templateReleaseWorkflow.indexOf(
-  "name: Require release absence before checkout",
-);
-const originMainContainment = templateReleaseWorkflow.indexOf(
-  "name: Require expected release commit from origin/main",
-);
-const remoteBeforeCheckout = templateReleaseWorkflow.indexOf(
-  "name: Require trusted remote tag target before checkout",
-);
-const tagCheckout = templateReleaseWorkflow.indexOf(
-  "name: Checkout validated release tag",
-);
-const tagResolution = templateReleaseWorkflow.indexOf(
-  "name: Resolve exact release target",
-);
-const exactTargetVerification = templateReleaseWorkflow.indexOf(
-  "name: Verify exact release target",
-);
-const releaseManifest = templateReleaseWorkflow.indexOf(
-  "node scripts/write-template-release-manifest.mjs",
-);
-const absenceBeforeCreate = templateReleaseWorkflow.indexOf(
-  "name: Revalidate release absence and exact tag target",
-);
-const releaseCreate = templateReleaseWorkflow.indexOf("gh release create");
-if (!(
-  sourceCheckout < nodeSetup &&
-  nodeSetup < mainDispatchGuard &&
-  mainDispatchGuard < sourcePreflight &&
-  sourcePreflight < recoveryResolution &&
-  recoveryResolution < originMainContainment &&
-  originMainContainment < absenceBeforeCheckout &&
-  absenceBeforeCheckout < remoteBeforeCheckout &&
-  remoteBeforeCheckout < tagCheckout &&
-  tagCheckout < tagResolution &&
-  tagResolution < exactTargetVerification &&
-  exactTargetVerification < releaseManifest &&
-  releaseManifest < absenceBeforeCreate &&
-  absenceBeforeCreate < releaseCreate
-)) {
-  problems.push(
-    "template release workflow must verify the exact resolved target before writing its manifest and creating a release",
-  );
-}
-
 const verifyTemplateWorkflowLines = templateReleaseWorkflow
   .split("\n")
   .filter((line) => line.includes("./scripts/verify-template.sh silent"));
 if (
-  verifyTemplateWorkflowLines.length !== 1 ||
-  verifyTemplateWorkflowLines[0].trim() !==
-    'run: env GITHUB_SHA="$RELEASE_COMMIT" ./scripts/verify-template.sh silent'
+  verifyTemplateWorkflowLines.length !== 2 ||
+  verifyTemplateWorkflowLines.some(
+    (line) =>
+      line.trim() !==
+      'run: env GITHUB_SHA="$RELEASE_COMMIT" ./scripts/verify-template.sh silent',
+  )
 )
   problems.push(
-    "template release workflow must invoke verify-template exactly once with the resolved release commit as GITHUB_SHA",
+    "template release workflow must invoke verify-template for normal publication and pinned historical recovery with the resolved release commit as GITHUB_SHA",
   );
 
 const releaseIdentityCommands = templateReleaseWorkflow
   .split("\n")
   .filter((line) =>
-    /(?:write-template-release-manifest\.mjs|gh release (?:create|edit))/u.test(
+    /(?:write-template-release-manifest\.mjs|gh release (?:create|edit)|git\/tags|git\/refs)/u.test(
       line,
     ),
   );

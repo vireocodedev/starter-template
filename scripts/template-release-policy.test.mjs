@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   readTemplateReleaseInputs,
+  hasTemplateReleaseCoordinateChange,
   resolveTemplateReleaseTag,
   validateTemplateRelease,
   validateTemplateReleaseCoordinates,
@@ -52,6 +53,14 @@ test("validates canonical template release coordinates", () => {
   assert.deepEqual(
     validateTemplateRelease({ ...validInputs, tag: policy.tag }),
     [],
+  );
+});
+
+test("detects semantic release-coordinate changes but ignores JSON field ordering", () => {
+  assert.equal(hasTemplateReleaseCoordinateChange(policy, { ...policy }), false);
+  assert.equal(
+    hasTemplateReleaseCoordinateChange(policy, { ...policy, version: "0.8.8" }),
+    true,
   );
 });
 
