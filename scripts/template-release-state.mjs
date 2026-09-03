@@ -23,8 +23,9 @@ export function validateWildcardTagRuleset(ruleset) {
     ruleset?.name !== expected.name ||
     ruleset?.target !== expected.target ||
     ruleset?.enforcement !== expected.enforcement ||
-    !Array.isArray(ruleset?.bypass_actors) ||
-    ruleset.bypass_actors.length !== 0 ||
+    (ruleset?.bypass_actors !== undefined &&
+      (!Array.isArray(ruleset.bypass_actors) ||
+        ruleset.bypass_actors.length !== 0)) ||
     JSON.stringify(ruleset?.conditions?.ref_name?.include) !==
       JSON.stringify(expected.include) ||
     JSON.stringify(ruleset?.conditions?.ref_name?.exclude) !==

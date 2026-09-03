@@ -66,7 +66,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state.json" "${{ steps.coordinates.outputs.changed }}" | tee "$RUNNER_TEMP/template-release-plan.out"
+          node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state.json" "${{ steps.coordinates.outputs.changed }}" > "$RUNNER_TEMP/template-release-plan.out"
+          cat "$RUNNER_TEMP/template-release-plan.out"
           sed -n 's/^action=//p' "$RUNNER_TEMP/template-release-plan.out" | tail -n 1 | sed 's/^/action=/' >> "$GITHUB_OUTPUT"
           sed -n 's/^commit=//p' "$RUNNER_TEMP/template-release-plan.out" | tail -n 1 | sed 's/^/commit=/' >> "$GITHUB_OUTPUT"
           node -e 'const state = require(process.argv[1]); if (state.plan.release) process.stdout.write(`release=${state.plan.release}\n`)' "$RUNNER_TEMP/template-release-state.json" >> "$GITHUB_OUTPUT"
@@ -120,7 +121,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-after-verify.json" "${{ needs.plan.outputs.coordinates_changed }}" | tee "$RUNNER_TEMP/template-release-plan-after-verify.out"
+          node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-after-verify.json" "${{ needs.plan.outputs.coordinates_changed }}" > "$RUNNER_TEMP/template-release-plan-after-verify.out"
+          cat "$RUNNER_TEMP/template-release-plan-after-verify.out"
           sed -n 's/^action=//p' "$RUNNER_TEMP/template-release-plan-after-verify.out" | tail -n 1 | sed 's/^/action=/' >> "$GITHUB_OUTPUT"
       - name: Create annotated immutable release tag through GitHub REST
         if: steps.recheck.outputs.action == 'create-tag'
@@ -138,7 +140,8 @@ jobs:
         run: |
           git fetch --tags --force origin
           for attempt in 1 2 3 4 5 6; do
-            if node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-before-release.json" "${{ needs.plan.outputs.coordinates_changed }}" | tee "$RUNNER_TEMP/template-release-plan-before-release.out"; then
+            if node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-before-release.json" "${{ needs.plan.outputs.coordinates_changed }}" > "$RUNNER_TEMP/template-release-plan-before-release.out"; then
+              cat "$RUNNER_TEMP/template-release-plan-before-release.out"
               action="$(node -p 'require(process.argv[1]).plan.action' "$RUNNER_TEMP/template-release-state-before-release.json")"
               if test "$action" = 'recover-release' || test "$action" = 'no-op'; then
                 echo "action=$action" >> "$GITHUB_OUTPUT"
@@ -146,6 +149,7 @@ jobs:
                 exit 0
               fi
             fi
+            echo "Release-state planner attempt $attempt did not reach a safe recovery state." >&2
             test "$attempt" = 6 && exit 1
             sleep 10
           done
@@ -167,7 +171,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           for attempt in 1 2 3 4 5 6; do
-            if node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-draft.json" "${{ needs.plan.outputs.coordinates_changed }}" | tee "$RUNNER_TEMP/template-release-plan-draft.out"; then
+            if node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-draft.json" "${{ needs.plan.outputs.coordinates_changed }}" > "$RUNNER_TEMP/template-release-plan-draft.out"; then
+              cat "$RUNNER_TEMP/template-release-plan-draft.out"
               action="$(node -p 'require(process.argv[1]).plan.action' "$RUNNER_TEMP/template-release-state-draft.json")"
               release="$(node -p 'require(process.argv[1]).plan.release || ""' "$RUNNER_TEMP/template-release-state-draft.json")"
               if test "$action" = 'no-op' || { test "$action" = 'recover-release' && test "$release" = 'draft'; }; then
@@ -176,6 +181,7 @@ jobs:
                 exit 0
               fi
             fi
+            echo "Draft-state planner attempt $attempt did not observe a validated draft." >&2
             test "$attempt" = 6 && exit 1
             sleep 10
           done
@@ -195,11 +201,13 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           for attempt in 1 2 3 4 5 6; do
-            if node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-final.json" "${{ needs.plan.outputs.coordinates_changed }}" | tee "$RUNNER_TEMP/template-release-plan-final.out"; then
+            if node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-final.json" "${{ needs.plan.outputs.coordinates_changed }}" > "$RUNNER_TEMP/template-release-plan-final.out"; then
+              cat "$RUNNER_TEMP/template-release-plan-final.out"
               if test "$(sed -n 's/^action=//p' "$RUNNER_TEMP/template-release-plan-final.out" | tail -n 1)" = 'no-op'; then
                 exit 0
               fi
             fi
+            echo "Final release-state planner attempt $attempt did not observe immutable publication." >&2
             test "$attempt" = 6 && exit 1
             sleep 10
           done

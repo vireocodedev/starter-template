@@ -41,7 +41,9 @@ The authoritative desired state for every future Template release is
 update/non-fast-forward/deletion ruleset matching `refs/tags/starter-template@*`. Apply that
 payload once through GitHub's ruleset API or UI and read it back. The main-push
 release workflow fails closed before tag or release mutation unless the live
-wildcard ruleset exactly matches the checked-in desired state. The
+wildcard ruleset matches every field observable to its read-only token. GitHub can
+omit `bypass_actors` from that response, so no-bypass remains administrator-confirmed
+desired/live state rather than a per-run proof. The
 `template-release` environment must retain reviewers `[]`, wait `0`, disabled
 administrator bypass, and branch policy limited to `main`. Merging the
 release-coordinate PR on `main`, rather than a recurring environment approval, is
@@ -63,6 +65,6 @@ administrator must:
 3. Confirm GitHub's repository-level **immutable releases** setting remains enabled.
 
 The workflow has no credential that can replace these administrator-only controls.
-It does verify the live wildcard ruleset before every mutation and fails closed if it
-drifts. The environment no longer needs a recurring release approval after the
+It does verify every observable live wildcard-ruleset field before every mutation and
+fails closed if one drifts. The environment no longer needs a recurring release approval after the
 release-coordinate PR has merged.

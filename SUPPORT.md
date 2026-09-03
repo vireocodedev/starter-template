@@ -48,7 +48,9 @@ no administrator bypass, and main-only deployment policy. The workflow deliberat
 does not attempt the administration-only immutable-release setting check with its
 repository token. The wildcard update/non-fast-forward/deletion tag ruleset for
 `starter-template@*` must be active before release mutation; the workflow reads and
-compares that live ruleset before creating a tag or release. Historical exact-tag
+compares every observable live field before creating a tag or release. GitHub can
+omit `bypass_actors` from the read-only workflow token; no-bypass remains a checked-in
+desired state and an administrator-confirmed live assertion. Historical exact-tag
 ruleset files remain evidence for old tags and the pinned 0.6.0 recovery path.
 The workflow also requires that immutable releases are still enabled through the
 repository's administrator-controlled GitHub setting.
