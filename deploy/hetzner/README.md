@@ -105,6 +105,10 @@ destroys only the prior flagship slot volume. It makes no durable-backup claim a
 must never be connected to non-synthetic data. Inspect retained transaction evidence
 and the public revision proof with:
 
+Before the first immutable blue/green release is accepted, the timer reports
+`awaiting-first-immutable-release` and exits successfully without changing the
+legacy service. It never rebuilds the mutable host checkout as a substitute bundle.
+
 ```bash
 journalctl -u vireo-flagship-demo-reset.service
 curl --fail https://demo.vireocode.com/.well-known/vireo-deployment.json

@@ -116,8 +116,12 @@ rollback(){
 status(){ lock; local s; s="$(read_state)"; "$node_bin" -e 'const s=JSON.parse(process.argv[1]);process.stdout.write(JSON.stringify({generation:s.generation,accepted:{transaction:s.accepted?.transaction||null,tag:s.accepted?.revision?.tag||null,target:s.accepted?.endpoint?.target||s.accepted?.endpoint?.kind},pending:s.pending&&{transaction:s.pending.transaction,phase:s.pending.phase,target:s.pending.target,expiresAt:s.pending.expiresAt}}))' "$s"; }
 watchdog(){ local s tx g expired; s="$(read_state)"; tx="$(value "$s" 's.pending?.transaction||""')"; g="$(value "$s" 's.generation')"; expired="$(value "$s" 'String(Date.parse(s.pending?.expiresAt||"")<=Date.now())')"; [[ -n "$tx" && "$expired" == true ]] || exit 0; rollback "$tx" "$g"; }
 reset(){
-  local s generation archive manifest transaction transfer result prepared_generation activated_generation commit public_url
-  s="$(read_state)"; generation="$(value "$s" 's.generation')"; archive="$(value "$s" 's.accepted?.bundle?.archive||""')"; manifest="$(value "$s" 's.accepted?.bundle?.manifest||""')"; transaction="$(value "$s" 's.accepted?.transaction||""')"; commit="$(value "$s" 's.accepted?.revision?.commit||""')"
+  local s generation archive manifest transaction target transfer result prepared_generation activated_generation commit public_url
+  s="$(read_state)"; generation="$(value "$s" 's.generation')"; archive="$(value "$s" 's.accepted?.bundle?.archive||""')"; manifest="$(value "$s" 's.accepted?.bundle?.manifest||""')"; transaction="$(value "$s" 's.accepted?.transaction||""')"; target="$(value "$s" 's.accepted?.endpoint?.target||s.accepted?.endpoint?.kind||""')"; commit="$(value "$s" 's.accepted?.revision?.commit||""')"
+  if [[ "$target" == legacy && -z "$transaction" && -z "$archive" && -z "$manifest" ]]; then
+    printf '{"status":"skipped","reason":"awaiting-first-immutable-release","target":"legacy","generation":%s}\n' "$generation"
+    return
+  fi
   [[ -f "$archive" && -f "$manifest" ]] || fail "No accepted immutable bundle exists for reset." 65
   transfer="0-1"; mkdir -p "$root/incoming/$transfer/$transaction"; cp "$archive" "$root/incoming/$transfer/$transaction/bundle.tar.gz"; cp "$manifest" "$root/incoming/$transfer/$transaction/manifest.json"
   result="$(stage "$transfer" "$transaction" "$generation" true)"; prepared_generation="$(printf '%s' "$result" | "$node_bin" -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(String(JSON.parse(s).generation)))')"
