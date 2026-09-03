@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { chmodSync, closeSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, openSync, readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -16,6 +16,27 @@ import {
 const root = resolve(import.meta.dirname, "..");
 const helper = join(root, "scripts/compose-database-contract.sh");
 const deploy = join(root, "deploy/hetzner/deploy.sh");
+
+function spawnReceiver(directory, payload, originalCommand, extraEnvironment = {}) {
+  const inputPath = join(directory, "receiver-input.bin");
+  writeFileSync(inputPath, payload, { mode: 0o600 });
+  const input = openSync(inputPath, "r");
+  try {
+    return spawnSync(join(root, "deploy/hetzner/vireo-flagship-receiver.sh"), [], {
+      cwd: root,
+      encoding: "utf8",
+      stdio: [input, "pipe", "pipe"],
+      env: {
+        ...process.env,
+        ...extraEnvironment,
+        VIREO_FLAGSHIP_ROOT: directory,
+        SSH_ORIGINAL_COMMAND: originalCommand,
+      },
+    });
+  } finally {
+    closeSync(input);
+  }
+}
 
 test("flagship policy binds guarded production reset and host-operated availability evidence", () => {
   const policy = JSON.parse(readFileSync(join(root, "contracts/flagship-demo-policy.json"), "utf8"));
@@ -430,11 +451,7 @@ test("forced receiver writes only a transaction-scoped bounded upload path", () 
   const payload = Buffer.from("bundle-bytes");
   const digest = createHash("sha256").update(payload).digest("hex");
   const transaction = "a".repeat(64);
-  const result = spawnSync("bash", ["-c", 'printf %s "$VIREO_TEST_PAYLOAD" | "$1"', "bash", join(root, "deploy/hetzner/vireo-flagship-receiver.sh")], {
-    cwd: root,
-    encoding: "utf8",
-    env: { ...process.env, VIREO_TEST_PAYLOAD: payload.toString("utf8"), VIREO_FLAGSHIP_ROOT: directory, SSH_ORIGINAL_COMMAND: `upload 123 1 ${transaction} ${payload.length} ${digest}` },
-  });
+  const result = spawnReceiver(directory, payload, `upload 123 1 ${transaction} ${payload.length} ${digest}`);
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /"uploaded"/u);
   assert.equal(readFileSync(join(directory, "incoming", "123-1", transaction, "bundle.tar.gz"), "utf8"), "bundle-bytes");
@@ -445,11 +462,11 @@ test("forced receiver rejects bytes after a declared bounded upload", () => {
   const payload = Buffer.from("bundle-bytes");
   const digest = createHash("sha256").update(payload).digest("hex");
   const transaction = "b".repeat(64);
-  const result = spawnSync("bash", ["-c", 'printf %s "$VIREO_TEST_PAYLOAD" | "$1"', "bash", join(root, "deploy/hetzner/vireo-flagship-receiver.sh")], {
-    cwd: root,
-    encoding: "utf8",
-    env: { ...process.env, VIREO_TEST_PAYLOAD: Buffer.concat([payload, Buffer.from("trailing")]).toString("utf8"), VIREO_FLAGSHIP_ROOT: directory, SSH_ORIGINAL_COMMAND: `upload 123 1 ${transaction} ${payload.length} ${digest}` },
-  });
+  const result = spawnReceiver(
+    directory,
+    Buffer.concat([payload, Buffer.from("trailing")]),
+    `upload 123 1 ${transaction} ${payload.length} ${digest}`,
+  );
   assert.notEqual(result.status, 0);
   assert.doesNotMatch(result.stdout, /uploaded/u);
 });
@@ -496,11 +513,12 @@ test("forced receiver rejects a manifest stream with trailing bytes despite the 
   const release = makeHostBundle(directory, "starter-template@1.0.0", "127", "1");
   const payload = readFileSync(release.manifest);
   const digest = createHash("sha256").update(payload).digest("hex");
-  const result = spawnSync("bash", ["-c", 'printf %s "$VIREO_TEST_PAYLOAD" | "$1"', "bash", join(root, "deploy/hetzner/vireo-flagship-receiver.sh")], {
-    cwd: root,
-    encoding: "utf8",
-    env: { ...process.env, VIREO_TEST_PAYLOAD: `${payload}x`, VIREO_FLAGSHIP_ROOT: directory, VIREO_FLAGSHIP_LIBEXEC: join(root, "deploy/hetzner"), SSH_ORIGINAL_COMMAND: `manifest 127 1 ${release.transaction} ${digest}` },
-  });
+  const result = spawnReceiver(
+    directory,
+    Buffer.concat([payload, Buffer.from("x")]),
+    `manifest 127 1 ${release.transaction} ${digest}`,
+    { VIREO_FLAGSHIP_LIBEXEC: join(root, "deploy/hetzner") },
+  );
   assert.notEqual(result.status, 0);
   assert.doesNotMatch(result.stdout, /"manifest"/u);
 });
