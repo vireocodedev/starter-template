@@ -4,53 +4,69 @@ on:
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
+    inputs:
+      mode:
+        description: Monitor is read-only; preflight qualifies one immutable tag; deploy performs a release deployment.
+        required: true
+        default: monitor
+        type: choice
+        options: [monitor, preflight, deploy]
+      tag:
+        description: Exact immutable starter-template tag for preflight or deployment.
+        required: false
+        type: string
+      commit:
+        description: Exact annotated tag commit for preflight or deployment.
+        required: false
+        type: string
+      release:
+        description: Exact immutable GitHub Release URL for preflight or deployment.
+        required: false
+        type: string
 
 permissions: {}
 
 concurrency:
-  group: flagship-demo
-  cancel-in-progress: true
+  # GitHub replaces pending runs in a global queue. Same-tag duplicates serialize;
+  # distinct releases use the host's flock and compare-and-swap state instead.
+  group: flagship-demo-${{ inputs.mode == 'deploy' && inputs.tag || github.event_name == 'schedule' && 'monitor' || github.run_id }}
+  cancel-in-progress: false
 
 jobs:
   synthetic-journey:
-    if: ${{ vars.VIREO_DEMO_BASE_URL != '' }}
+    if: ${{ (github.event_name == 'schedule' || inputs.mode == 'monitor') && vars.VIREO_DEMO_BASE_URL != '' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: read
-
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24.18.1
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-
       - name: Install frontend dependencies
         run: corepack npm ci --prefix frontend
-
       - name: Install Chromium
         working-directory: frontend
         run: corepack npm exec -- playwright install --with-deps chromium
-
-      - name: Verify public health boundaries
+      - name: Verify public health and immutable revision proof
         env:
           VIREO_DEMO_BASE_URL: ${{ vars.VIREO_DEMO_BASE_URL }}
+          VIREO_DEMO_REQUIRE_DEPLOYMENT_PROOF: ${{ vars.VIREO_DEMO_REQUIRE_DEPLOYMENT_PROOF }}
         run: |
           curl --fail --silent --show-error --retry 3 "${VIREO_DEMO_BASE_URL}/healthz"
           curl --fail --silent --show-error --retry 3 "${VIREO_DEMO_BASE_URL}/actuator/health/readiness" | grep --quiet '"status":"UP"'
-
+          if test "$VIREO_DEMO_REQUIRE_DEPLOYMENT_PROOF" = true; then curl --fail --silent --show-error --retry 3 "${VIREO_DEMO_BASE_URL}/.well-known/vireo-deployment.json" | node -e 'const chunks=[];process.stdin.on("data",c=>chunks.push(c));process.stdin.on("end",()=>{const p=JSON.parse(Buffer.concat(chunks));if(p.dataClassification!=="public-synthetic-only"||!/^[0-9a-f]{40}$/.test(p.commit))process.exit(1)})'; fi
       - name: Exercise public evaluation journey
         env:
           VIREO_DEMO_BASE_URL: ${{ vars.VIREO_DEMO_BASE_URL }}
           VIREO_DEMO_USERNAME: ${{ vars.VIREO_DEMO_USERNAME }}
           VIREO_DEMO_PASSWORD: ${{ secrets.VIREO_DEMO_PASSWORD }}
         run: corepack npm --prefix frontend run test:demo
-
       - name: Upload failed journey trace
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -58,4 +74,250 @@ jobs:
           name: flagship-demo-trace-${{ github.run_id }}-${{ github.run_attempt }}
           path: frontend/test-results
           if-no-files-found: ignore
+          retention-days: 14
+
+  deploy-release:
+    needs: qualify-release
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'deploy' }}
+    runs-on: ubuntu-24.04
+    # A stalled predecessor may need its 50-minute host expiry plus the
+    # watchdog window before this exact release can safely proceed.
+    timeout-minutes: 90
+    environment: flagship-demo
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      transaction: ${{ steps.prepare.outputs.transaction }}
+      status: ${{ steps.prepare.outputs.status }}
+      generation: ${{ steps.activate.outputs.generation || steps.prepare.outputs.generation }}
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: flagship-demo-release-bundle-${{ github.run_id }}-${{ github.run_attempt }}
+          path: release-input
+      - name: Configure native OpenSSH with strict known-host verification
+        env:
+          FLAGSHIP_DEMO_SSH_PRIVATE_KEY: ${{ secrets.FLAGSHIP_DEMO_SSH_PRIVATE_KEY }}
+          FLAGSHIP_DEMO_KNOWN_HOSTS: ${{ vars.FLAGSHIP_DEMO_KNOWN_HOSTS }}
+        run: |
+          test -n "$FLAGSHIP_DEMO_SSH_PRIVATE_KEY" && test -n "$FLAGSHIP_DEMO_KNOWN_HOSTS"
+          install -d -m 0700 ~/.ssh
+          umask 077; printf '%s\n' "$FLAGSHIP_DEMO_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$FLAGSHIP_DEMO_KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Upload bounded immutable bytes through the forced receiver
+        id: prepare
+        env:
+          HOST: ${{ vars.FLAGSHIP_DEMO_HOST }}
+          USER: ${{ vars.FLAGSHIP_DEMO_SSH_USER }}
+          PORT: ${{ vars.FLAGSHIP_DEMO_SSH_PORT }}
+        run: |
+          test -n "$HOST" && test -n "$USER" && test -n "$PORT"
+          ssh_command=(ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts -p "$PORT" "$USER@$HOST")
+          archive="$(find release-input -name '*.tar.gz' -type f -print -quit)"
+          manifest="$(find release-input -name flagship-demo-manifest.json -type f -print -quit)"
+          transaction="$(node -p 'require(process.argv[1]).transaction' "$manifest")"
+          archive_bytes="$(wc -c <"$archive")"; archive_sha="$(sha256sum "$archive" | awk '{print $1}')"
+          manifest_sha="$(sha256sum "$manifest" | awk '{print $1}')"
+          "${ssh_command[@]}" "upload $GITHUB_RUN_ID $GITHUB_RUN_ATTEMPT $transaction $archive_bytes $archive_sha" <"$archive"
+          "${ssh_command[@]}" "manifest $GITHUB_RUN_ID $GITHUB_RUN_ATTEMPT $transaction $manifest_sha" <"$manifest"
+          generation="$("${ssh_command[@]}" status | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(String(JSON.parse(s).generation)))')"
+          result=''
+          # A stalled release is retained until its 50-minute expiry and the
+          # watchdog may need another five minutes. Poll rather than replacing
+          # its host transaction or silently missing this immutable release.
+          for attempt in $(seq 1 61); do
+            prepare_stderr="$RUNNER_TEMP/flagship-prepare-$attempt.stderr"
+            if result="$("${ssh_command[@]}" "prepare $GITHUB_RUN_ID $GITHUB_RUN_ATTEMPT $transaction $generation" 2>"$prepare_stderr")"; then
+              :
+            else
+              prepare_exit=$?
+              # CAS 75 means another transaction changed state after our status
+              # read. Refresh and retry; all other receiver/controller failures
+              # remain fatal and retain their diagnostic output.
+              if test "$prepare_exit" = 75 && grep -Fxq 'CAS generation changed.' "$prepare_stderr"; then
+                cat "$prepare_stderr" >&2
+                result='{"status":"retry"}'
+              else
+                cat "$prepare_stderr" >&2
+                exit "$prepare_exit"
+              fi
+            fi
+            status="$(printf '%s' "$result" | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(JSON.parse(s).status))')"
+            test "$status" != busy && test "$status" != retry && break
+            test "$attempt" = 61 && { printf 'A different host transaction remained busy.\n' >&2; exit 75; }
+            sleep 60
+            generation="$("${ssh_command[@]}" status | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(String(JSON.parse(s).generation)))')"
+          done
+          printf '%s\n' "$result"
+          echo "transaction=$transaction" >> "$GITHUB_OUTPUT"
+          echo "status=$(printf '%s' "$result" | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(JSON.parse(s).status))')" >> "$GITHUB_OUTPUT"
+          echo "generation=$(printf '%s' "$result" | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(String(JSON.parse(s).generation)))')" >> "$GITHUB_OUTPUT"
+      - name: Cut over while retaining the complete prior endpoint
+        id: activate
+        if: ${{ steps.prepare.outputs.status == 'prepared' }}
+        env:
+          HOST: ${{ vars.FLAGSHIP_DEMO_HOST }}
+          USER: ${{ vars.FLAGSHIP_DEMO_SSH_USER }}
+          PORT: ${{ vars.FLAGSHIP_DEMO_SSH_PORT }}
+        run: |
+          result="$(ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts -p "$PORT" "$USER@$HOST" "activate ${{ steps.prepare.outputs.transaction }} ${{ steps.prepare.outputs.generation }}")"
+          printf '%s\n' "$result"
+          echo "generation=$(printf '%s' "$result" | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(String(JSON.parse(s).generation)))')" >> "$GITHUB_OUTPUT"
+
+  qualify-public-release:
+    needs: deploy-release
+    if: ${{ needs.deploy-release.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: corepack npm ci --prefix frontend
+      - run: corepack npm exec -- playwright install --with-deps chromium
+        working-directory: frontend
+      - name: Verify exact public revision, security headers, API proxy and readiness
+        env:
+          VIREO_DEMO_BASE_URL: ${{ vars.VIREO_DEMO_BASE_URL }}
+          EXPECTED_COMMIT: ${{ inputs.commit }}
+        run: |
+          curl --fail --silent --show-error "$VIREO_DEMO_BASE_URL/healthz"
+          curl --fail --silent --show-error "$VIREO_DEMO_BASE_URL/actuator/health/readiness" | grep -q '"status":"UP"'
+          curl --fail --silent --show-error -D "$RUNNER_TEMP/headers" "$VIREO_DEMO_BASE_URL/.well-known/vireo-deployment.json" | node -e 'const c=[];process.stdin.on("data",x=>c.push(x));process.stdin.on("end",()=>{const p=JSON.parse(Buffer.concat(c));if(p.commit!==process.env.EXPECTED_COMMIT||p.dataClassification!=="public-synthetic-only")process.exit(1)})'
+          grep -Eqi '^content-security-policy:' "$RUNNER_TEMP/headers"
+          grep -Eqi '^x-frame-options:' "$RUNNER_TEMP/headers"
+      - name: Exercise the existing public Playwright demo journey
+        env:
+          VIREO_DEMO_BASE_URL: ${{ vars.VIREO_DEMO_BASE_URL }}
+          VIREO_DEMO_USERNAME: ${{ vars.VIREO_DEMO_USERNAME }}
+          VIREO_DEMO_PASSWORD: ${{ secrets.VIREO_DEMO_PASSWORD }}
+        run: corepack npm --prefix frontend run test:demo
+
+  accept-release:
+    needs: [deploy-release, qualify-public-release]
+    if: ${{ needs.qualify-public-release.result == 'success' && needs.deploy-release.outputs.status != 'accepted' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: flagship-demo
+    permissions:
+      contents: read
+    steps:
+      - name: Accept only after public qualification
+        env:
+          FLAGSHIP_DEMO_SSH_PRIVATE_KEY: ${{ secrets.FLAGSHIP_DEMO_SSH_PRIVATE_KEY }}
+          FLAGSHIP_DEMO_KNOWN_HOSTS: ${{ vars.FLAGSHIP_DEMO_KNOWN_HOSTS }}
+          HOST: ${{ vars.FLAGSHIP_DEMO_HOST }}
+          USER: ${{ vars.FLAGSHIP_DEMO_SSH_USER }}
+          PORT: ${{ vars.FLAGSHIP_DEMO_SSH_PORT }}
+        run: |
+          install -d -m 0700 ~/.ssh; umask 077; printf '%s\n' "$FLAGSHIP_DEMO_SSH_PRIVATE_KEY" >~/.ssh/id_ed25519; printf '%s\n' "$FLAGSHIP_DEMO_KNOWN_HOSTS" >~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts -p "$PORT" "$USER@$HOST" "accept ${{ needs.deploy-release.outputs.transaction }} ${{ needs.deploy-release.outputs.generation }}"
+
+  rollback-release:
+    needs: [deploy-release, qualify-public-release, accept-release]
+    if: ${{ always() && !cancelled() && failure() && needs.deploy-release.outputs.transaction != '' && needs.deploy-release.outputs.status != 'accepted' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: flagship-demo
+    permissions:
+      contents: read
+    steps:
+      - name: Roll back the exact pending transaction after failed public qualification
+        env:
+          FLAGSHIP_DEMO_SSH_PRIVATE_KEY: ${{ secrets.FLAGSHIP_DEMO_SSH_PRIVATE_KEY }}
+          FLAGSHIP_DEMO_KNOWN_HOSTS: ${{ vars.FLAGSHIP_DEMO_KNOWN_HOSTS }}
+          HOST: ${{ vars.FLAGSHIP_DEMO_HOST }}
+          USER: ${{ vars.FLAGSHIP_DEMO_SSH_USER }}
+          PORT: ${{ vars.FLAGSHIP_DEMO_SSH_PORT }}
+        run: |
+          install -d -m 0700 ~/.ssh; umask 077; printf '%s\n' "$FLAGSHIP_DEMO_SSH_PRIVATE_KEY" >~/.ssh/id_ed25519; printf '%s\n' "$FLAGSHIP_DEMO_KNOWN_HOSTS" >~/.ssh/known_hosts
+          ssh_command=(ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts -p "$PORT" "$USER@$HOST")
+          generation="$("${ssh_command[@]}" status | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(String(JSON.parse(s).generation)))')"
+          "${ssh_command[@]}" "rollback ${{ needs.deploy-release.outputs.transaction }} $generation"
+
+  qualify-release:
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.mode == 'preflight' || inputs.mode == 'deploy') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    outputs:
+      transaction: ${{ steps.bundle.outputs.transaction }}
+    steps:
+      - name: Require an exact release identity
+        env:
+          TAG: ${{ inputs.tag }}
+          COMMIT: ${{ inputs.commit }}
+          RELEASE: ${{ inputs.release }}
+        run: |
+          [[ "$TAG" =~ ^starter-template@[0-9]+\.[0-9]+\.[0-9]+([-+][A-Za-z0-9_.-]+)?$ ]]
+          [[ "$COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$RELEASE" = "https://github.com/vireocodedev/vireo-template/releases/tag/${TAG/@/%40}"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require the annotated tag to resolve exactly
+        env:
+          TAG: ${{ inputs.tag }}
+          COMMIT: ${{ inputs.commit }}
+        run: |
+          test "$GITHUB_REF" = "refs/tags/$TAG"
+          test "$(git cat-file -t "refs/tags/$TAG")" = tag
+          test "$(git rev-parse "refs/tags/$TAG^{commit}")" = "$COMMIT"
+          test "$(git rev-parse HEAD)" = "$COMMIT"
+      - name: Require the authoritative immutable tagged release state
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          COMMIT: ${{ inputs.commit }}
+          RELEASE: ${{ inputs.release }}
+        run: |
+          node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state.json" true >"$RUNNER_TEMP/template-release-state.out"
+          test "$(sed -n 's/^action=//p' "$RUNNER_TEMP/template-release-state.out" | tail -n 1)" = no-op
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+      - run: corepack npm run setup
+      - name: Build exact production artifacts without deployment credentials
+        run: |
+          ./gradlew clean bootJar
+          corepack npm --prefix frontend run build
+      - name: Refuse links and create the deterministic allowlisted bundle
+        id: bundle
+        env:
+          TAG: ${{ inputs.tag }}
+          COMMIT: ${{ inputs.commit }}
+          RELEASE: ${{ inputs.release }}
+        run: |
+          find build/libs frontend/dist -type l -print -quit | grep -q . && exit 1 || true
+          archive="$RUNNER_TEMP/flagship-demo-$TAG.tar.gz"
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner -czf "$archive" Dockerfile compose.yaml compose.demo.yaml build/libs/app.jar deploy/backend-healthcheck.sh frontend/Dockerfile frontend/nginx.conf frontend/dist deploy/postgres/init-runtime-role.sh
+          node deploy/hetzner/flagship-deployment-bundle.mjs manifest "$archive" "$RUNNER_TEMP/flagship-demo-manifest.json" "$GITHUB_REPOSITORY" "$TAG" "$COMMIT" "$RELEASE" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+          transaction="$(node -p 'require(process.argv[1]).transaction' "$RUNNER_TEMP/flagship-demo-manifest.json")"
+          echo "transaction=$transaction" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: flagship-demo-release-bundle-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/flagship-demo-${{ inputs.tag }}.tar.gz
+            ${{ runner.temp }}/flagship-demo-manifest.json
+          if-no-files-found: error
           retention-days: 14

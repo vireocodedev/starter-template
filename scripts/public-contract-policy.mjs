@@ -111,11 +111,16 @@ const requiredFiles = [
   "scripts/template-release-prepare.mjs",
   "scripts/template-release-artifacts.mjs",
   "scripts/template-release-coordinate-change.mjs",
+  "scripts/template-release-reconciliation.mjs",
   "scripts/template-release-state.mjs",
   "scripts/template-release-recovery-policy.mjs",
   "scripts/repository-security-policy.mjs",
   "scripts/write-template-release-manifest.mjs",
+  "deploy/hetzner/flagship-deployment-bundle.mjs",
+  "deploy/hetzner/flagship-host-deploy.sh",
+  "deploy/hetzner/vireo-flagship-ingress.sh",
   ".github/workflows/template-release.yml",
+  ".github/workflows/template-release-recover.yml",
   "contracts/platform-support-policy.json",
   ".github/CODEOWNERS",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -174,6 +179,7 @@ requireText("docs/template-release-preparation.md", [
   "vireo-release-signing-key.asc",
   "npm@12.0.2 audit signatures",
   "--include-attestations",
+  "reconcile=true",
 ]);
 requireText("docs/flagship.md", [
   "https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml",
@@ -579,7 +585,7 @@ for (const fragment of [
   "branches: [main]",
   "workflow_dispatch:",
   "Historical immutable recovery tag (only starter-template@0.6.0)",
-  "group: template-release-global",
+  "group: template-release-${{ github.event_name == 'push' && github.sha || inputs.tag",
   "cancel-in-progress: false",
   "name: Set up release planner Node.js without package caching",
   "package-manager-cache: false",
@@ -602,6 +608,20 @@ for (const fragment of [
   "node scripts/write-template-release-manifest.mjs",
   "gh release create",
   "--verify-tag",
+  "name: Dispatch the exact immutable release deployment",
+  "name: Produce every automation-era durable tag for fail-closed exact validation",
+  "uses: ./.github/workflows/template-release-recover.yml",
+  "max-parallel: 1",
+  "git fetch --tags --force origin +refs/heads/main:refs/remotes/origin/main",
+  "name: Reconcile and verify GitHub latest after immutable publication",
+  "name: Independently reconcile and verify GitHub latest",
+  "name: Compare the newest eligible immutable release with public deployment proof",
+  "name: Dispatch the newest eligible immutable release when proof differs or is unavailable",
+  "node scripts/template-release-reconciliation.mjs assert-automation-tag",
+  "needs.recover-durable-tags.result == 'success'",
+  "node scripts/template-release-reconciliation.mjs",
+  "actions: write",
+  "gh workflow run flagship-demo.yml",
 ]) {
   if (!templateReleaseWorkflow.includes(fragment))
     problems.push(
@@ -611,6 +631,10 @@ for (const fragment of [
 if (/node scripts\/template-release-state\.mjs[^\n]*\|\s*tee/u.test(templateReleaseWorkflow))
   problems.push(
     "template release workflow must not mask planner failures with a tee pipeline",
+  );
+if (templateReleaseWorkflow.includes("reconcile_tag") || templateReleaseWorkflow.includes("  reconcile-durable-tag:"))
+  problems.push(
+    "template release workflow must use the reusable exact-tag recovery path rather than a duplicated inline recovery job",
   );
 if (
   !templateReleaseState.includes("ruleset?.bypass_actors !== undefined") ||
@@ -650,11 +674,24 @@ for (const fragment of [
     );
 }
 
-const verifyTemplateWorkflowLines = templateReleaseWorkflow
-  .split("\n")
-  .filter((line) => line.includes("./scripts/verify-template.sh silent"));
+const reusableTemplateRecoveryWorkflow = readFileSync(
+  join(root, ".github/workflows/template-release-recover.yml"),
+  "utf8",
+);
 if (
-  verifyTemplateWorkflowLines.length !== 2 ||
+  reusableTemplateRecoveryWorkflow.includes("workflow_dispatch:") ||
+  reusableTemplateRecoveryWorkflow.includes("actions: write")
+) {
+  problems.push(
+    "the reusable durable recovery workflow must be parent-only and retain contents-only release permissions",
+  );
+}
+const verifyTemplateWorkflowLines = [
+  ...templateReleaseWorkflow.split("\n"),
+  ...reusableTemplateRecoveryWorkflow.split("\n"),
+].filter((line) => line.includes("./scripts/verify-template.sh silent"));
+if (
+  verifyTemplateWorkflowLines.length !== 3 ||
   verifyTemplateWorkflowLines.some(
     (line) =>
       line.trim() !==
@@ -662,7 +699,7 @@ if (
   )
 )
   problems.push(
-    "template release workflow must invoke verify-template for normal publication and pinned historical recovery with the resolved release commit as GITHUB_SHA",
+    "Template publication and both bounded recovery workflows must invoke verify-template with the resolved release commit as GITHUB_SHA",
   );
 
 const releaseIdentityCommands = templateReleaseWorkflow

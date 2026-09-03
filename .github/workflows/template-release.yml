@@ -3,17 +3,27 @@ name: Template release
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: "43 */6 * * *"
   workflow_dispatch:
     inputs:
       tag:
         description: Historical immutable recovery tag (only starter-template@0.6.0)
-        required: true
+        required: false
         type: string
+      reconcile:
+        description: Scan durable annotated Template tags for absent or draft releases.
+        required: false
+        default: false
+        type: boolean
 
 permissions: {}
 
 concurrency:
-  group: template-release-global
+  # GitHub replaces pending entries in a repository-global group. Publication
+  # identity and exact live-state checks provide the race guard; this group only
+  # serializes retries of the same source transaction.
+  group: template-release-${{ github.event_name == 'push' && github.sha || inputs.tag || github.event_name == 'schedule' && 'durable-scan' || 'manual-scan' }}
   cancel-in-progress: false
 
 jobs:
@@ -138,6 +148,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_COMMIT: ${{ needs.plan.outputs.commit }}
         run: |
+          # Refuse a release superseded by a newer main release policy only at
+          # the durable tag boundary; tagged recovery is subsequently tag-owned.
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          release_tag="$(node -p 'require("./contracts/template-release-policy.json").tag')"
+          test "$release_tag" = "$(git show origin/main:contracts/template-release-policy.json | node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync(0,"utf8")).tag)')"
           release_tag="$(node -p 'require("./contracts/template-release-policy.json").tag')"
           tag_object="$(gh api --method POST "repos/$GITHUB_REPOSITORY/git/tags" -f tag="$release_tag" -f message="Release $release_tag" -f object="$RELEASE_COMMIT" -f type=commit --jq .sha)"
           gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$release_tag" -f sha="$tag_object" >/dev/null
@@ -203,7 +218,7 @@ jobs:
           test "$ACTION" = 'recover-release'
           test "$RELEASE_STATE" = 'draft'
           release_tag="$(node -p 'require("./contracts/template-release-policy.json").tag')"
-          gh release edit "$release_tag" --draft=false --latest
+          gh release edit "$release_tag" --draft=false --latest=false
       - name: Verify immutable published release and exact manifest
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -219,9 +234,17 @@ jobs:
             test "$attempt" = 6 && exit 1
             sleep 10
           done
+      - name: Reconcile and verify GitHub latest after immutable publication
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          latest_tag="$(node scripts/template-release-reconciliation.mjs latest)"
+          gh release edit "$latest_tag" --latest
+          test "$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name)" = "$latest_tag"
 
   historical-recovery:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && inputs.tag != ''
     runs-on: ubuntu-24.04
     environment: template-release
     timeout-minutes: 45
@@ -289,3 +312,159 @@ jobs:
           node scripts/write-template-release-manifest.mjs "$RUNNER_TEMP/template-release-manifest.json" "$RELEASE_COMMIT"
           gh release create "$RELEASE_TAG" "$RUNNER_TEMP/template-release-manifest.json" --draft --generate-notes --verify-tag --title "$RELEASE_TAG"
           gh release edit "$RELEASE_TAG" --draft=false --latest=false
+
+  scan-durable-releases:
+    if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.reconcile) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    outputs:
+      matrix: ${{ steps.tags.outputs.matrix }}
+      has_tags: ${{ steps.tags.outputs.has_tags }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - name: Produce every automation-era durable tag for fail-closed exact validation
+        id: tags
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git fetch --tags --force origin +refs/heads/main:refs/remotes/origin/main
+          node scripts/template-release-reconciliation.mjs scan > "$RUNNER_TEMP/durable-tags.json"
+          node -e 'const tags=require(process.argv[1]);process.stdout.write(JSON.stringify({include:tags.map(tag=>({tag}))}))' "$RUNNER_TEMP/durable-tags.json" | sed 's/^/matrix=/' >> "$GITHUB_OUTPUT"
+          node -e 'process.stdout.write(require(process.argv[1]).length ? "true" : "false")' "$RUNNER_TEMP/durable-tags.json" | sed 's/^/has_tags=/' >> "$GITHUB_OUTPUT"
+
+  recover-durable-tags:
+    needs: scan-durable-releases
+    if: ${{ needs.scan-durable-releases.outputs.has_tags == 'true' }}
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.scan-durable-releases.outputs.matrix) }}
+    uses: ./.github/workflows/template-release-recover.yml
+    permissions:
+      contents: write
+    with:
+      tag: ${{ matrix.tag }}
+
+  reconcile-durable-latest:
+    needs: [scan-durable-releases, recover-durable-tags]
+    if: ${{ always() && needs.scan-durable-releases.result == 'success' && (needs.recover-durable-tags.result == 'success' || needs.recover-durable-tags.result == 'skipped') }}
+    runs-on: ubuntu-24.04
+    environment: template-release
+    timeout-minutes: 15
+    permissions:
+      actions: write
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - name: Independently reconcile and verify GitHub latest after all exact conclusions
+        id: latest
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git fetch --tags --force origin +refs/heads/main:refs/remotes/origin/main
+          latest_tag="$(node scripts/template-release-reconciliation.mjs latest)"
+          gh release edit "$latest_tag" --latest
+          test "$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name)" = "$latest_tag"
+          echo "tag=$latest_tag" >> "$GITHUB_OUTPUT"
+      - name: Compare the newest eligible immutable release with public deployment proof
+        id: flagship-proof
+        env:
+          RELEASE_TAG: ${{ steps.latest.outputs.tag }}
+          VIREO_DEMO_BASE_URL: ${{ vars.VIREO_DEMO_BASE_URL }}
+        run: |
+          # Older releases predate the exact-tag flagship workflow inputs. They
+          # remain eligible for GitHub latest, but cannot be dispatched here.
+          if ! node scripts/template-release-reconciliation.mjs assert-automation-tag "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo 'dispatch=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          release_commit="$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")"
+          release="$(git show "$release_commit:contracts/template-release-policy.json" | node -e '
+            const source = require("fs").readFileSync(0, "utf8");
+            const policy = JSON.parse(source);
+            const tag = process.env.RELEASE_TAG;
+            const expected = `https://github.com/${process.env.GITHUB_REPOSITORY}/releases/tag/${encodeURIComponent(tag)}`;
+            if (policy.repository !== process.env.GITHUB_REPOSITORY || policy.tag !== tag || policy.releaseUrl !== expected) throw new Error("tag-owned policy does not bind the exact public release");
+            process.stdout.write(policy.releaseUrl);
+          ')"
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "commit=$release_commit" >> "$GITHUB_OUTPUT"
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+          proof="${VIREO_DEMO_BASE_URL%/}/.well-known/vireo-deployment.json"
+          if test -n "$VIREO_DEMO_BASE_URL" && curl --fail --silent --show-error "$proof" | RELEASE_COMMIT="$release_commit" node -e '
+            const chunks = [];
+            process.stdin.on("data", (chunk) => chunks.push(chunk));
+            process.stdin.on("end", () => {
+              try { process.exit(JSON.parse(Buffer.concat(chunks)).commit === process.env.RELEASE_COMMIT ? 0 : 1); }
+              catch { process.exit(1); }
+            });
+          '; then
+            echo 'dispatch=false' >> "$GITHUB_OUTPUT"
+          else
+            # Before the first blue/green cutover the proof is deliberately
+            # absent. Afterwards, an unavailable or mismatched proof is also a
+            # safe reason to dispatch only this highest immutable release.
+            echo 'dispatch=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Dispatch the newest eligible immutable release when proof differs or is unavailable
+        if: steps.flagship-proof.outputs.dispatch == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.flagship-proof.outputs.tag }}
+          RELEASE_COMMIT: ${{ steps.flagship-proof.outputs.commit }}
+          RELEASE_URL: ${{ steps.flagship-proof.outputs.release }}
+        run: |
+          gh workflow run flagship-demo.yml --repo "$GITHUB_REPOSITORY" --ref "$RELEASE_TAG" -f mode=deploy -f tag="$RELEASE_TAG" -f commit="$RELEASE_COMMIT" -f release="$RELEASE_URL"
+
+  dispatch-flagship-demo:
+    needs: [plan, release]
+    # A rerun of the exact coordinate-changing push has plan=no-op after a
+    # successful publication. Revalidate immutable state and dispatch again so
+    # an interrupted first dispatch never loses the release deployment.
+    if: ${{ always() && !cancelled() && github.event_name == 'push' && needs.plan.outputs.coordinates_changed == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.plan.outputs.commit }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require the final immutable published release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_COMMIT: ${{ needs.plan.outputs.commit }}
+        run: |
+          test "$RELEASE_COMMIT" = "$(git rev-parse HEAD)"
+          node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-before-flagship-dispatch.json" true > "$RUNNER_TEMP/template-release-state-before-flagship-dispatch.out"
+          test "$(sed -n 's/^action=//p' "$RUNNER_TEMP/template-release-state-before-flagship-dispatch.out" | tail -n 1)" = no-op
+      - name: Dispatch the exact immutable release deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_COMMIT: ${{ needs.plan.outputs.commit }}
+        run: |
+          tag="$(node -p 'require("./contracts/template-release-policy.json").tag')"
+          release="$(node -p 'require("./contracts/template-release-policy.json").releaseUrl')"
+          gh workflow run flagship-demo.yml --repo "$GITHUB_REPOSITORY" --ref "$tag" -f mode=deploy -f tag="$tag" -f commit="$RELEASE_COMMIT" -f release="$release"

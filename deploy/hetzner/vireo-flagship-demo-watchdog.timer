@@ -1,0 +1,11 @@
+[Unit]
+Description=Check Vireo flagship pending cutovers for runner interruption
+
+[Timer]
+OnBootSec=5m
+OnUnitActiveSec=5m
+Persistent=true
+Unit=vireo-flagship-demo-watchdog.service
+
+[Install]
+WantedBy=timers.target

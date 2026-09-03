@@ -1,0 +1,12 @@
+[Unit]
+Description=Rollback an expired pending Vireo flagship demo cutover
+Requires=docker.service
+After=docker.service network-online.target
+ConditionPathExists=/opt/apps/vireo-flagship-demo/operations/deployment-state.json
+
+[Service]
+Type=oneshot
+User=deploy
+WorkingDirectory=/opt/apps/vireo-flagship-demo
+ExecStart=/usr/local/libexec/vireo-flagship-demo/vireo-flagship-demo-watchdog.sh
+UMask=0077
