@@ -536,6 +536,10 @@ const templateReleaseRecoveryPolicy = readFileSync(
   join(root, "scripts/template-release-recovery-policy.mjs"),
   "utf8",
 );
+const templateReleaseState = readFileSync(
+  join(root, "scripts/template-release-state.mjs"),
+  "utf8",
+);
 for (const fragment of [
   "branches: [main]",
   "workflow_dispatch:",
@@ -568,6 +572,17 @@ for (const fragment of [
       `template release workflow must contain ${JSON.stringify(fragment)}`,
     );
 }
+if (/node scripts\/template-release-state\.mjs[^\n]*\|\s*tee/u.test(templateReleaseWorkflow))
+  problems.push(
+    "template release workflow must not mask planner failures with a tee pipeline",
+  );
+if (
+  !templateReleaseState.includes("ruleset?.bypass_actors !== undefined") ||
+  !templateReleaseState.includes("ruleset.bypass_actors.length !== 0")
+)
+  problems.push(
+    "template release state must accept an unobservable bypass field but reject a visible nonempty bypass list",
+  );
 const releaseSetup = "corepack npm run setup";
 const releaseVerification = templateReleaseWorkflow.indexOf(
   "name: Verify exact release target before mutation",

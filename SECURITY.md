@@ -8,8 +8,11 @@ The [`starter-template@0.8.7` release contract](contracts/template-release-polic
 requires GitHub immutable releases before publishing the corresponding
 [release](https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.7).
 Repository administrators must enable that GitHub setting; the release workflow's
-default token cannot verify it. The workflow does verify the live no-bypass wildcard
-tag ruleset before mutation and verifies the published release API reports
+default token cannot verify it. The checked-in wildcard tag desired state requires
+no bypass actors, and an administrator must confirm that condition through an
+authenticated provider read. The read-only workflow token validates every observable
+wildcard rule before mutation, but GitHub may omit `bypass_actors` from that token's
+ruleset response. The workflow also verifies the published release API reports
 `immutable: true` with the exact attached release manifest.
 
 ## Reporting a vulnerability

@@ -160,7 +160,12 @@ test("refuses duplicate release tags and unbounded release pagination", async ()
 });
 
 test("fails closed for tag, release, manifest, and wildcard-ruleset drift", () => {
+  assert.equal(
+    validateWildcardTagRuleset({ ...ruleset, bypass_actors: undefined }),
+    undefined,
+  );
   assert.ok(validateWildcardTagRuleset({ ...ruleset, bypass_actors: [{ actor_id: 1 }] }));
+  assert.ok(validateWildcardTagRuleset({ ...ruleset, bypass_actors: "visible-but-invalid" }));
   assert.ok(
     validateWildcardTagRuleset({
       ...ruleset,
