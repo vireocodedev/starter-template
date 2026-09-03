@@ -1,0 +1,266 @@
+name: Prepare Template release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: Planned matching starter-template and create-vireo version (strict 0.x.y)
+        required: true
+        type: string
+      jvm_version:
+        description: Exact published Vireo JVM version (strict 0.x.y)
+        required: true
+        type: string
+      npm_versions:
+        description: JSON object with exactly the seven Vireo library package names and published versions
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: template-release-preparation-${{ inputs.release_version }}
+  cancel-in-progress: false
+
+jobs:
+  prepare-and-verify:
+    name: Prepare and verify exact main
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    outputs:
+      main_commit: ${{ steps.main.outputs.commit }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve and detach the exact main commit
+        id: main
+        run: |
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          main_commit="$(git rev-parse origin/main)"
+          git checkout --detach "$main_commit"
+          test "$(git rev-parse HEAD)" = "$main_commit"
+          printf 'commit=%s\n' "$main_commit" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+          registry-url: https://registry.npmjs.org
+          scope: "@vireocodedev"
+
+      - name: Validate strict release inputs
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          JVM_VERSION: ${{ inputs.jvm_version }}
+          NPM_VERSIONS: ${{ inputs.npm_versions }}
+        run: |
+          node scripts/template-release-preparation-workflow.mjs validate-input \
+            --release-version "$RELEASE_VERSION" \
+            --jvm-version "$JVM_VERSION" \
+            --npm-versions "$NPM_VERSIONS" > "$RUNNER_TEMP/template-release-preparation-input.json"
+
+      - name: Install frontend dependencies
+        run: corepack npm run setup
+
+      - name: Apply public release preparation on the exact main commit
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          JVM_VERSION: ${{ inputs.jvm_version }}
+          NPM_VERSIONS: ${{ inputs.npm_versions }}
+        run: |
+          corepack npm run release:prepare -- \
+            --template-version "$RELEASE_VERSION" \
+            --create-vireo-version "$RELEASE_VERSION" \
+            --jvm-version "$JVM_VERSION" \
+            --npm-json "$NPM_VERSIONS" \
+            --apply \
+            --json > "$RUNNER_TEMP/template-release-preparation-plan.json"
+          node scripts/template-release-preparation-workflow.mjs assert-generated-paths \
+            --base-commit "${{ steps.main.outputs.commit }}" \
+            --release-version "$RELEASE_VERSION" \
+            --jvm-version "$JVM_VERSION" \
+            --npm-versions "$NPM_VERSIONS"
+
+      - name: Install Chromium
+        working-directory: frontend
+        run: corepack npm exec -- playwright install --with-deps chromium
+
+      # This job intentionally receives no App token or protected environment.
+      # Every heavyweight Template qualification finishes before any PR credential
+      # can be minted in the following job.
+      - name: Run complete Template qualification before credentials
+        run: ./scripts/verify-template.sh silent
+
+      - name: Verify production PWA lifecycle before credentials
+        working-directory: frontend
+        run: corepack npm run test:pwa
+
+      - name: Enforce Lighthouse production budgets before credentials
+        working-directory: frontend
+        run: corepack npm run performance:audit
+
+      - name: Verify production-like deployment before credentials
+        env:
+          POSTGRES_OWNER_PASSWORD: ci-owner-only-password
+          POSTGRES_RUNTIME_PASSWORD: ci-runtime-only-password
+        run: |
+          docker compose config --quiet
+          ./scripts/verify-deployment.sh
+
+      - name: Write exact verified preparation evidence
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          JVM_VERSION: ${{ inputs.jvm_version }}
+          NPM_VERSIONS: ${{ inputs.npm_versions }}
+        run: |
+          git diff --binary "${{ steps.main.outputs.commit }}" > "$RUNNER_TEMP/prepared-template-release.patch"
+          test -s "$RUNNER_TEMP/prepared-template-release.patch"
+          node scripts/template-release-preparation-workflow.mjs write-evidence \
+            --output "$RUNNER_TEMP/prepared-template-release.json" \
+            --base-commit "${{ steps.main.outputs.commit }}" \
+            --release-version "$RELEASE_VERSION" \
+            --jvm-version "$JVM_VERSION" \
+            --npm-versions "$NPM_VERSIONS"
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: prepared-template-release-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/prepared-template-release.patch
+            ${{ runner.temp }}/prepared-template-release.json
+          if-no-files-found: error
+          retention-days: 1
+
+  create-or-reuse-pr:
+    name: Create or reuse verified preparation PR
+    needs: prepare-and-verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: template-preparation
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare-and-verify.outputs.main_commit }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v7.0.0
+        with:
+          name: prepared-template-release-${{ github.run_id }}
+          path: ${{ runner.temp }}/prepared-template-release
+
+      - name: Refuse a moved main before requesting credentials
+        run: |
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          test "$(git rev-parse origin/main)" = "${{ needs.prepare-and-verify.outputs.main_commit }}"
+          test "$(git rev-parse HEAD)" = "${{ needs.prepare-and-verify.outputs.main_commit }}"
+
+      - name: Verify downloaded exact preparation evidence
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          JVM_VERSION: ${{ inputs.jvm_version }}
+          NPM_VERSIONS: ${{ inputs.npm_versions }}
+        run: |
+          node scripts/template-release-preparation-workflow.mjs assert-evidence \
+            --evidence "$RUNNER_TEMP/prepared-template-release/prepared-template-release.json" \
+            --base-commit "${{ needs.prepare-and-verify.outputs.main_commit }}" \
+            --release-version "$RELEASE_VERSION" \
+            --jvm-version "$JVM_VERSION" \
+            --npm-versions "$NPM_VERSIONS"
+          git apply --index "$RUNNER_TEMP/prepared-template-release/prepared-template-release.patch"
+          expected_tree="$(node -p 'require(process.argv[1]).tree' "$RUNNER_TEMP/prepared-template-release/prepared-template-release.json")"
+          node scripts/template-release-preparation-workflow.mjs assert-working-tree \
+            --base-commit "${{ needs.prepare-and-verify.outputs.main_commit }}" \
+            --expected-tree "$expected_tree" \
+            --release-version "$RELEASE_VERSION" \
+            --jvm-version "$JVM_VERSION" \
+            --npm-versions "$NPM_VERSIONS"
+
+      - name: Mint repository-scoped GitHub App token after qualification
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.TEMPLATE_RELEASE_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.TEMPLATE_RELEASE_AUTOMATION_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Commit, create, or exactly reuse the App-authored PR
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          MAIN_COMMIT: ${{ needs.prepare-and-verify.outputs.main_commit }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          JVM_VERSION: ${{ inputs.jvm_version }}
+          NPM_VERSIONS: ${{ inputs.npm_versions }}
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/prepared-template-release/prepared-template-release.json"
+          expected_tree="$(node -p 'require(process.argv[1]).tree' "$evidence")"
+          marker="$(node -p 'require(process.argv[1]).pullRequest.marker' "$evidence")"
+          branch="$(node -p 'require(process.argv[1]).pullRequest.branch' "$evidence")"
+          title="$(node -p 'require(process.argv[1]).pullRequest.title' "$evidence")"
+          node -e 'const fs=require("fs"); fs.writeFileSync(process.argv[2], require(process.argv[1]).pullRequest.body)' "$evidence" "$RUNNER_TEMP/prepared-template-release-body.md"
+          app_user_id="$(gh api "/users/${APP_SLUG}[bot]" --jq .id)"
+          export GIT_AUTHOR_DATE='2026-01-01T00:00:00+00:00'
+          export GIT_COMMITTER_DATE='2026-01-01T00:00:00+00:00'
+          git -c user.name="${APP_SLUG}[bot]" -c user.email="${app_user_id}+${APP_SLUG}[bot]@users.noreply.github.com" commit \
+            -m "$title" \
+            -m "$marker"
+          expected_head="$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD^{tree})" = "$expected_tree"
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          test "$(git rev-parse origin/main)" = "$MAIN_COMMIT"
+          gh auth setup-git
+          remote=origin
+          query_pull_requests() {
+            gh pr list --repo "$GITHUB_REPOSITORY" --state all --head "$branch" --base main \
+              --json number,state,headRefName,headRefOid,baseRefName,author,title,body > "$RUNNER_TEMP/prepared-template-release-prs.json"
+          }
+          assert_pull_requests() {
+            node scripts/template-release-preparation-workflow.mjs assert-existing-pr \
+              --pull-requests "$RUNNER_TEMP/prepared-template-release-prs.json" \
+              --base-commit "$MAIN_COMMIT" \
+              --tree "$expected_tree" \
+              --app-slug "$APP_SLUG" \
+              --expected-head "$expected_head" \
+              --release-version "$RELEASE_VERSION" \
+              --jvm-version "$JVM_VERSION" \
+              --npm-versions "$NPM_VERSIONS"
+          }
+          query_pull_requests
+          state="$(assert_pull_requests)"
+          if test "$(node -p 'JSON.parse(process.argv[1]).action' "$state")" = create; then
+            remote_head="$(git ls-remote "$remote" "refs/heads/$branch" | awk '{print $1}')"
+            if test -n "$remote_head"; then
+              test "$remote_head" = "$expected_head"
+            elif ! git push "$remote" "HEAD:refs/heads/$branch"; then
+              remote_head="$(git ls-remote "$remote" "refs/heads/$branch" | awk '{print $1}')"
+              test "$remote_head" = "$expected_head"
+            fi
+            query_pull_requests
+            if test "$(node -p 'JSON.parse(process.argv[1]).action' "$(assert_pull_requests)")" = create; then
+              gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$branch" --title "$title" --body-file "$RUNNER_TEMP/prepared-template-release-body.md"
+            fi
+          fi
+          query_pull_requests
+          assert_pull_requests

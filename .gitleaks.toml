@@ -17,3 +17,10 @@ commits = ["a0657624120da26c2b22cbb634db9063ea070201"]
 regexTarget = "line"
 regexes = ["secret scans, signed/provenanced releases"]
 paths = ['''^scripts/workflow-security-policy\.mjs$''']
+
+[[allowlists]]
+description = "Treat the pinned create-github-app-token action commit as public workflow metadata"
+condition = "AND"
+regexTarget = "line"
+regexes = ['''"actions/create-github-app-token": "[a-f0-9]{40}"''']
+paths = ['''^contracts/github-actions-policy\.json$''']

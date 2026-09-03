@@ -104,11 +104,18 @@ const requiredFiles = [
   ".github/environments/template-release.json",
   ".github/environments/template-release.deployment-branch-policies.json",
   ".github/environments/template-release.live-assertions.json",
+  ".github/environments/template-preparation.json",
+  ".github/environments/template-preparation.deployment-branch-policies.json",
+  ".github/environments/template-preparation.live-assertions.json",
+  ".github/environments/template-preparation.required-credentials.json",
+  ".github/settings/template-release-automation.required-variables.json",
   ".github/settings/actions.json",
   ".github/settings/selected-actions.json",
   ".github/settings/workflow-permissions.json",
   "scripts/template-release-policy.mjs",
   "scripts/template-release-prepare.mjs",
+  "scripts/template-release-preparation-workflow.mjs",
+  "scripts/template-release-preparation-reconciler.mjs",
   "scripts/template-release-artifacts.mjs",
   "scripts/template-release-coordinate-change.mjs",
   "scripts/template-release-reconciliation.mjs",
@@ -121,6 +128,8 @@ const requiredFiles = [
   "deploy/hetzner/vireo-flagship-ingress.sh",
   ".github/workflows/template-release.yml",
   ".github/workflows/template-release-recover.yml",
+  ".github/workflows/template-release-preparation.yml",
+  ".github/workflows/template-release-preparation-reconcile.yml",
   "contracts/platform-support-policy.json",
   ".github/CODEOWNERS",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -180,6 +189,16 @@ requireText("docs/template-release-preparation.md", [
   "npm@12.0.2 audit signatures",
   "--include-attestations",
   "reconcile=true",
+  "Hosted preparation PR",
+  "Prepare Template release",
+  "TEMPLATE_RELEASE_AUTOMATION_APP_ID",
+  "TEMPLATE_RELEASE_AUTOMATION_APP_PRIVATE_KEY",
+  "TEMPLATE_RELEASE_AUTOMATION_APP_SLUG",
+  "repository-scoped App token",
+  "It never force-pushes",
+  "Reconcile Template preparation PRs",
+  "persistent auto-merge",
+  "expected-head SHA REST squash-merge",
 ]);
 requireText("docs/flagship.md", [
   "https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml",
@@ -717,6 +736,120 @@ for (const unsafeIdentity of releaseIdentityCommands) {
       `template release workflow must not use unverified GitHub identity ${JSON.stringify(unsafeIdentity)}`,
     );
 }
+
+const templatePreparationWorkflow = readFileSync(
+  join(root, ".github/workflows/template-release-preparation.yml"),
+  "utf8",
+);
+for (const fragment of [
+  "name: Prepare Template release",
+  "workflow_dispatch:",
+  "release_version:",
+  "jvm_version:",
+  "npm_versions:",
+  "permissions: {}",
+  "group: template-release-preparation-${{ inputs.release_version }}",
+  "cancel-in-progress: false",
+  "ref: main",
+  "git checkout --detach \"$main_commit\"",
+  "corepack npm run release:prepare --",
+  "--npm-json \"$NPM_VERSIONS\"",
+  "assert-generated-paths",
+  "assert-working-tree",
+  "Run complete Template qualification before credentials",
+  "Verify production PWA lifecycle before credentials",
+  "Enforce Lighthouse production budgets before credentials",
+  "Verify production-like deployment before credentials",
+  "environment: template-preparation",
+  "Mint repository-scoped GitHub App token after qualification",
+  "actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1",
+  "app-id: ${{ vars.TEMPLATE_RELEASE_AUTOMATION_APP_ID }}",
+  "private-key: ${{ secrets.TEMPLATE_RELEASE_AUTOMATION_APP_PRIVATE_KEY }}",
+  "repositories: ${{ github.event.repository.name }}",
+  "permission-contents: write",
+  "permission-pull-requests: write",
+  "git apply --index",
+  "gh auth setup-git",
+  "git push \"$remote\" \"HEAD:refs/heads/$branch\"",
+  "assert-existing-pr",
+]) {
+  if (!templatePreparationWorkflow.includes(fragment))
+    problems.push(`template preparation workflow must contain ${JSON.stringify(fragment)}`);
+}
+if (templatePreparationWorkflow.includes("GITHUB_TOKEN") || templatePreparationWorkflow.includes("gh pr merge") || templatePreparationWorkflow.includes("--force"))
+  problems.push("template preparation workflow must not use GITHUB_TOKEN for writes, auto-merge, or force-push");
+const completeQualification = templatePreparationWorkflow.indexOf("Run complete Template qualification before credentials");
+const appTokenMint = templatePreparationWorkflow.indexOf("Mint repository-scoped GitHub App token after qualification");
+if (!(completeQualification >= 0 && completeQualification < appTokenMint))
+  problems.push("template preparation workflow must mint its App token only after complete qualification");
+if (templatePreparationWorkflow.includes("git add --all"))
+  problems.push("template preparation workflow must validate all generated and untracked paths before any staging");
+if ((templatePreparationWorkflow.match(/git rev-parse origin\/main/g) ?? []).length < 2)
+  problems.push("template preparation workflow must reject a moved main both before credentials and immediately before PR mutation");
+
+const templatePreparationReconciler = readFileSync(
+  join(root, ".github/workflows/template-release-preparation-reconcile.yml"),
+  "utf8",
+);
+for (const fragment of [
+  "name: Reconcile Template preparation PRs",
+  "schedule:",
+  "workflow_dispatch:",
+  "permissions: {}",
+  "group: template-release-preparation-reconciler",
+  "environment: template-preparation",
+  "Read-only inspect every marked automation preparation PR",
+  "candidate-numbers",
+  "inspect-local",
+  "Mint repository-scoped GitHub App token after read-only eligibility",
+  "Immediately revalidate and squash merge the expected head",
+  "Perform one expected-head App-token squash merge",
+  "actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1",
+  "ACTUAL_APP_SLUG: ${{ steps.app-token.outputs.app-slug }}",
+  "EXPECTED_APP_SLUG: ${{ vars.TEMPLATE_RELEASE_AUTOMATION_APP_SLUG }}",
+  "--app-slug \"$ACTUAL_APP_SLUG\"",
+  "--expected-tree \"$EXPECTED_TREE\"",
+  "corepack npm run release:prepare --",
+  "git worktree add --detach",
+  "git write-tree",
+  "permission-contents: write",
+  "permission-pull-requests: write",
+  "gh api --method PUT \"repos/$GITHUB_REPOSITORY/pulls/$NUMBER/merge\"",
+  'merge_method: "squash"',
+  'require(process.argv[1]).merged !== true',
+  "git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main",
+]) {
+  if (!templatePreparationReconciler.includes(fragment))
+    problems.push(`template preparation reconciler must contain ${JSON.stringify(fragment)}`);
+}
+if (templatePreparationReconciler.includes("gh pr merge") || templatePreparationReconciler.includes("auto-merge") || templatePreparationReconciler.includes("--force"))
+  problems.push("template preparation reconciler must use only a one-shot expected-head REST squash merge");
+const readOnlyInspection = templatePreparationReconciler.indexOf("Read-only inspect every marked automation preparation PR");
+const reconcilerAppTokenMint = templatePreparationReconciler.indexOf("Mint repository-scoped GitHub App token after read-only eligibility");
+const immediateRevalidation = templatePreparationReconciler.indexOf("Immediately revalidate and squash merge the expected head");
+const expectedHeadMerge = templatePreparationReconciler.indexOf("Perform one expected-head App-token squash merge");
+if (!(readOnlyInspection >= 0 && readOnlyInspection < reconcilerAppTokenMint && reconcilerAppTokenMint < immediateRevalidation && immediateRevalidation < expectedHeadMerge))
+  problems.push("template preparation reconciler must inspect before token minting and revalidate immediately afterward");
+const reconcilerInspectionJob = templatePreparationReconciler.slice(
+  templatePreparationReconciler.indexOf("  inspect:"),
+  templatePreparationReconciler.indexOf("  revalidate-and-merge:"),
+);
+const reconcilerMutationJob = templatePreparationReconciler.slice(
+  templatePreparationReconciler.indexOf("  revalidate-and-merge:"),
+);
+if (reconcilerInspectionJob.includes("environment: template-preparation") || reconcilerInspectionJob.includes("TEMPLATE_RELEASE_AUTOMATION_APP_ID") || reconcilerInspectionJob.includes("TEMPLATE_RELEASE_AUTOMATION_APP_PRIVATE_KEY") || !reconcilerInspectionJob.includes("pull-requests: read") || !reconcilerInspectionJob.includes("checks: read") || !reconcilerInspectionJob.includes("EXPECTED_APP_SLUG: ${{ vars.TEMPLATE_RELEASE_AUTOMATION_APP_SLUG }}") || !reconcilerInspectionJob.includes("reconciliation is a successful no-op until the dedicated App is configured") || !reconcilerInspectionJob.includes("TEMPLATE_RELEASE_AUTOMATION_APP_SLUG must be a GitHub App slug") || !reconcilerInspectionJob.includes("--app-slug \"$EXPECTED_APP_SLUG\"") || !reconcilerInspectionJob.includes("git worktree add --detach") || !reconcilerInspectionJob.includes("corepack npm run release:prepare --") || !reconcilerInspectionJob.includes("git write-tree"))
+  problems.push("template preparation read-only inspection must run outside the protected environment, verify the public App slug, and independently regenerate an expected tree before mutation");
+if (!reconcilerMutationJob.includes("needs: inspect") || !reconcilerMutationJob.includes("if: needs.inspect.outputs.merge == 'true'") || !reconcilerMutationJob.includes("environment: template-preparation") || !reconcilerMutationJob.includes("pull-requests: read") || !reconcilerMutationJob.includes("checks: read"))
+  problems.push("template preparation App mutation must be a protected job reachable only from an eligible read-only inspection");
+const revalidationStep = reconcilerMutationJob.slice(
+  reconcilerMutationJob.indexOf("Immediately revalidate and squash merge the expected head"),
+  reconcilerMutationJob.indexOf("Perform one expected-head App-token squash merge"),
+);
+const mergeStep = reconcilerMutationJob.slice(
+  reconcilerMutationJob.indexOf("Perform one expected-head App-token squash merge"),
+);
+if (!revalidationStep.includes("GH_TOKEN: ${{ github.token }}") || revalidationStep.includes("GH_TOKEN: ${{ steps.app-token.outputs.token }}") || !revalidationStep.includes("EXPECTED_TREE: ${{ needs.inspect.outputs.expected_tree }}") || !revalidationStep.includes("test \"$ACTUAL_APP_SLUG\" = \"$EXPECTED_APP_SLUG\"") || !revalidationStep.includes("--expected-tree \"$EXPECTED_TREE\"") || !mergeStep.includes("GH_TOKEN: ${{ steps.app-token.outputs.token }}") || !mergeStep.includes("EXPECTED_HEAD: ${{ steps.revalidate.outputs.head }}") || !mergeStep.includes("EXPECTED_MAIN: ${{ steps.revalidate.outputs.main }}"))
+  problems.push("template preparation reconciler must use github.token only for final reads and reserve the App token for the expected-head merge");
 
 const markdownFiles = [];
 function collectMarkdown(directory) {

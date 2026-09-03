@@ -1,0 +1,237 @@
+name: Reconcile Template preparation PRs
+
+on:
+  schedule:
+    - cron: "23 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: template-release-preparation-reconciler
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    name: Read-only eligibility inspection
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: read
+    outputs:
+      merge: ${{ steps.inspect.outputs.merge }}
+      number: ${{ steps.inspect.outputs.number }}
+      expected_tree: ${{ steps.inspect.outputs.expected_tree }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+
+      - name: Read-only inspect every marked automation preparation PR
+        id: inspect
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_APP_SLUG: ${{ vars.TEMPLATE_RELEASE_AUTOMATION_APP_SLUG }}
+        run: |
+          set -euo pipefail
+          if test -z "$EXPECTED_APP_SLUG"; then
+            echo 'TEMPLATE_RELEASE_AUTOMATION_APP_SLUG is not configured; reconciliation is a successful no-op until the dedicated App is configured.'
+            echo 'merge=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node -e 'if (!/^[a-z0-9][a-z0-9-]*$/.test(process.argv[1])) throw new Error("TEMPLATE_RELEASE_AUTOMATION_APP_SLUG must be a GitHub App slug")' "$EXPECTED_APP_SLUG"
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          main_commit="$(git rev-parse origin/main)"
+          git checkout --detach "$main_commit"
+          gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 --json number,state,headRefName,body > "$RUNNER_TEMP/template-preparation-pr-list.json"
+          test "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).length' "$RUNNER_TEMP/template-preparation-pr-list.json")" -lt 100
+          node scripts/template-release-preparation-reconciler.mjs candidate-numbers \
+            --pull-requests "$RUNNER_TEMP/template-preparation-pr-list.json" > "$RUNNER_TEMP/template-preparation-candidates.json"
+          eligible=""
+          while read -r number; do
+            test -n "$number" || continue
+            git fetch --no-tags origin "+refs/pull/$number/head:refs/remotes/origin/template-preparation/$number"
+            query='query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){number state isDraft mergeStateStatus headRefName headRefOid baseRefName title body author{login} reviewThreads(first:100){totalCount pageInfo{hasNextPage} nodes{isResolved}} commits(first:2){totalCount nodes{commit{oid tree{oid} parents(first:2){totalCount nodes{oid}} author{user{login}} committer{user{login}} messageHeadline messageBody}}}}}}'
+            gh api graphql -f query="$query" -F owner="${GITHUB_REPOSITORY%/*}" -F name="${GITHUB_REPOSITORY#*/}" -F number="$number" > "$RUNNER_TEMP/template-preparation-pr-$number.json"
+            head="$(node -p 'require(process.argv[1]).data.repository.pullRequest.headRefOid' "$RUNNER_TEMP/template-preparation-pr-$number.json")"
+            gh api -H 'Accept: application/vnd.github+json' "repos/$GITHUB_REPOSITORY/commits/$head/check-runs?filter=latest&per_page=100" > "$RUNNER_TEMP/template-preparation-checks-$number.json"
+            decision="$(node scripts/template-release-preparation-reconciler.mjs inspect-local \
+              --main-commit "$main_commit" \
+              --pull-request "$RUNNER_TEMP/template-preparation-pr-$number.json" \
+              --checks "$RUNNER_TEMP/template-preparation-checks-$number.json" \
+              --ruleset .github/rulesets/main.json \
+              --app-slug "$EXPECTED_APP_SLUG")"
+            action="$(node -p 'JSON.parse(process.argv[1]).action' "$decision")"
+            if test "$action" = tampered; then
+              printf '%s\n' "$decision" >&2
+              exit 1
+            fi
+            if test "$action" = qualify; then
+              if test -n "$eligible"; then
+                echo "More than one structurally eligible Template preparation PR exists; refusing ambiguous merge." >&2
+                exit 1
+              fi
+              eligible="$decision"
+            fi
+          done < <(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).join("\n")' "$RUNNER_TEMP/template-preparation-candidates.json")
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          if test "$(git rev-parse origin/main)" != "$main_commit"; then
+            echo 'main moved during read-only inspection; leaving candidates for the next reconciliation run.'
+            echo 'merge=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if test -z "$eligible"; then
+            echo 'merge=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          printf '%s\n' "$eligible" > "$RUNNER_TEMP/template-preparation-eligible.json"
+          number="$(node -p 'require(process.argv[1]).number' "$RUNNER_TEMP/template-preparation-eligible.json")"
+          pr_json="$RUNNER_TEMP/template-preparation-pr-$number.json"
+          checks_json="$RUNNER_TEMP/template-preparation-checks-$number.json"
+          release_version="$(node -p 'require(process.argv[1]).input.templateVersion' "$RUNNER_TEMP/template-preparation-eligible.json")"
+          jvm_version="$(node -p 'require(process.argv[1]).input.jvmVersion' "$RUNNER_TEMP/template-preparation-eligible.json")"
+          npm_versions="$(node -p 'JSON.stringify(require(process.argv[1]).input.npmVersions)' "$RUNNER_TEMP/template-preparation-eligible.json")"
+          worktree="$(mktemp -d "$RUNNER_TEMP/template-preparation-expected-tree-XXXXXX")"
+          cleanup_worktree() {
+            git -C "$worktree" restore --source=HEAD --staged --worktree . >/dev/null 2>&1 || true
+            git -C "$worktree" clean -fd >/dev/null 2>&1 || true
+            git worktree remove "$worktree" >/dev/null 2>&1 || true
+          }
+          trap cleanup_worktree EXIT
+          git worktree add --detach "$worktree" "$main_commit"
+          (
+            cd "$worktree"
+            corepack npm run release:prepare -- \
+              --template-version "$release_version" \
+              --create-vireo-version "$release_version" \
+              --jvm-version "$jvm_version" \
+              --npm-json "$npm_versions" \
+              --apply \
+              --json > "$RUNNER_TEMP/template-preparation-independent-plan.json"
+            node scripts/template-release-preparation-workflow.mjs assert-generated-paths \
+              --base-commit "$main_commit" \
+              --release-version "$release_version" \
+              --jvm-version "$jvm_version" \
+              --npm-versions "$npm_versions"
+            git add --all
+            git write-tree > "$RUNNER_TEMP/template-preparation-expected-tree.txt"
+          )
+          expected_tree="$(cat "$RUNNER_TEMP/template-preparation-expected-tree.txt")"
+          cleanup_worktree
+          trap - EXIT
+          test "${#expected_tree}" = 40
+          decision="$(node scripts/template-release-preparation-reconciler.mjs inspect-local \
+            --main-commit "$main_commit" \
+            --pull-request "$pr_json" \
+            --checks "$checks_json" \
+            --ruleset .github/rulesets/main.json \
+            --app-slug "$EXPECTED_APP_SLUG" \
+            --expected-tree "$expected_tree")"
+          test "$(node -p 'JSON.parse(process.argv[1]).action' "$decision")" = merge
+          echo 'merge=true' >> "$GITHUB_OUTPUT"
+          printf 'number=%s\n' "$number" >> "$GITHUB_OUTPUT"
+          printf 'expected_tree=%s\n' "$expected_tree" >> "$GITHUB_OUTPUT"
+
+  revalidate-and-merge:
+    name: Protected App revalidation and merge
+    needs: inspect
+    if: needs.inspect.outputs.merge == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: template-preparation
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+
+      - name: Mint repository-scoped GitHub App token after read-only eligibility
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.TEMPLATE_RELEASE_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.TEMPLATE_RELEASE_AUTOMATION_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Immediately revalidate and squash merge the expected head
+        id: revalidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTUAL_APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          EXPECTED_APP_SLUG: ${{ vars.TEMPLATE_RELEASE_AUTOMATION_APP_SLUG }}
+          EXPECTED_TREE: ${{ needs.inspect.outputs.expected_tree }}
+          NUMBER: ${{ needs.inspect.outputs.number }}
+        run: |
+          set -euo pipefail
+          test -n "$ACTUAL_APP_SLUG"
+          test -n "$EXPECTED_TREE"
+          test "$ACTUAL_APP_SLUG" = "$EXPECTED_APP_SLUG"
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main "+refs/pull/$NUMBER/head:refs/remotes/origin/template-preparation/$NUMBER"
+          main_commit="$(git rev-parse origin/main)"
+          git checkout --detach "$main_commit"
+          query='query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){number state isDraft mergeStateStatus headRefName headRefOid baseRefName title body author{login} reviewThreads(first:100){totalCount pageInfo{hasNextPage} nodes{isResolved}} commits(first:2){totalCount nodes{commit{oid tree{oid} parents(first:2){totalCount nodes{oid}} author{user{login}} committer{user{login}} messageHeadline messageBody}}}}}}'
+          gh api graphql -f query="$query" -F owner="${GITHUB_REPOSITORY%/*}" -F name="${GITHUB_REPOSITORY#*/}" -F number="$NUMBER" > "$RUNNER_TEMP/template-preparation-pr-revalidated.json"
+          head="$(node -p 'require(process.argv[1]).data.repository.pullRequest.headRefOid' "$RUNNER_TEMP/template-preparation-pr-revalidated.json")"
+          gh api -H 'Accept: application/vnd.github+json' "repos/$GITHUB_REPOSITORY/commits/$head/check-runs?filter=latest&per_page=100" > "$RUNNER_TEMP/template-preparation-checks-revalidated.json"
+          decision="$(node scripts/template-release-preparation-reconciler.mjs inspect-local \
+            --main-commit "$main_commit" \
+            --pull-request "$RUNNER_TEMP/template-preparation-pr-revalidated.json" \
+            --checks "$RUNNER_TEMP/template-preparation-checks-revalidated.json" \
+            --ruleset .github/rulesets/main.json \
+            --app-slug "$ACTUAL_APP_SLUG" \
+            --expected-tree "$EXPECTED_TREE")"
+          action="$(node -p 'JSON.parse(process.argv[1]).action' "$decision")"
+          if test "$action" = wait; then
+            echo 'candidate became stale or pending during protected revalidation; leaving it for a later reconciliation run.'
+            exit 0
+          fi
+          test "$action" = merge
+          test "$(node -p 'JSON.parse(process.argv[1]).number' "$decision")" = "$NUMBER"
+          test "$(node -p 'JSON.parse(process.argv[1]).expectedTree' "$decision")" = "$EXPECTED_TREE"
+          expected_head="$(node -p 'JSON.parse(process.argv[1]).head' "$decision")"
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          test "$(git rev-parse origin/main)" = "$main_commit"
+          printf 'head=%s\n' "$expected_head" >> "$GITHUB_OUTPUT"
+          printf 'main=%s\n' "$main_commit" >> "$GITHUB_OUTPUT"
+
+      - name: Perform one expected-head App-token squash merge
+        if: steps.revalidate.outputs.head != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          NUMBER: ${{ needs.inspect.outputs.number }}
+          EXPECTED_HEAD: ${{ steps.revalidate.outputs.head }}
+          EXPECTED_MAIN: ${{ steps.revalidate.outputs.main }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          if test "$(git rev-parse origin/main)" != "$EXPECTED_MAIN"; then
+            echo 'main moved after protected revalidation; refusing merge until the next reconciliation run.'
+            exit 0
+          fi
+          node -e 'const fs=require("fs"); fs.writeFileSync(process.argv[1], JSON.stringify({sha: process.argv[2], merge_method: "squash"}))' "$RUNNER_TEMP/template-preparation-merge.json" "$EXPECTED_HEAD"
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/pulls/$NUMBER/merge" --input "$RUNNER_TEMP/template-preparation-merge.json" > "$RUNNER_TEMP/template-preparation-merge-response.json"
+          node -e 'if (require(process.argv[1]).merged !== true) throw new Error("expected-head squash merge was not accepted")' "$RUNNER_TEMP/template-preparation-merge-response.json"

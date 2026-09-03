@@ -58,6 +58,14 @@ const artifacts = {
 test("parses explicit apply/json flags while defaulting to a preflight dry run", () => {
   assert.deepEqual(parseReleasePrepareArgs([]), { npm: [], apply: false, json: false, preflight: true });
   assert.deepEqual(parseReleasePrepareArgs(["--apply", "--json", "--no-preflight"]), { npm: [], apply: true, json: true, preflight: false });
+  assert.deepEqual(
+    parseReleasePrepareArgs(["--npm-json", JSON.stringify({ "@vireocodedev/history": "0.2.3" })]).npm,
+    ["@vireocodedev/history@0.2.3"],
+  );
+  assert.throws(
+    () => parseReleasePrepareArgs(["--npm", "@vireocodedev/history@0.2.3", "--npm-json", "{}"]),
+    /cannot be combined/u,
+  );
 });
 
 test("requires strict coordinated versions and exactly seven unique npm coordinates", () => {

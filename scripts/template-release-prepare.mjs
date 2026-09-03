@@ -27,6 +27,25 @@ import {
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const npmPackages = artifactNpmPackages;
 export const mavenModules = artifactMavenModules;
+// This list is deliberately explicit: hosted preparation may create a PR only
+// when release:prepare changed exactly these release-owned files.
+export const releasePreparationGeneratedPaths = Object.freeze([
+  ".vireo/template.json",
+  "README.md",
+  "SECURITY.md",
+  "SUPPORT.md",
+  "contracts/project-upgrade-policy.json",
+  "contracts/template-release-artifacts.json",
+  "contracts/template-release-policy.json",
+  "contracts/vireo-package-compatibility.json",
+  "docs/generated-capabilities.md",
+  "docs/project-upgrades.md",
+  "docs/starter-compatibility.md",
+  "frontend/package-lock.json",
+  "frontend/package.json",
+  "gradle.properties",
+  "package.json",
+]);
 const versionPattern = /^0\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/u;
 const canonicalNpmRegistry = "https://registry.npmjs.org";
 const canonicalMavenRepository = "https://repo1.maven.org/maven2";
@@ -53,22 +72,40 @@ function isDirectSuccessor(previous, next) {
 
 export function parseReleasePrepareArgs(argv) {
   const result = { npm: [], apply: false, json: false, preflight: true };
+  let npmJsonSpecified = false;
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index];
     if (value === "--help" || value === "-h") result.help = true;
     else if (value === "--apply") result.apply = true;
     else if (value === "--json") result.json = true;
     else if (value === "--no-preflight") result.preflight = false;
-    else if (["--template-version", "--create-vireo-version", "--jvm-version", "--npm"].includes(value)) {
+    else if (["--template-version", "--create-vireo-version", "--jvm-version", "--npm", "--npm-json"].includes(value)) {
       const argument = argv[++index];
       if (!argument) throw new Error(`${value} requires a value`);
       if (value === "--template-version") result.templateVersion = argument;
       if (value === "--create-vireo-version") result.createVireoVersion = argument;
       if (value === "--jvm-version") result.jvmVersion = argument;
-      if (value === "--npm") result.npm.push(argument);
+      if (value === "--npm") {
+        if (npmJsonSpecified) throw new Error("--npm cannot be combined with --npm-json");
+        result.npm.push(argument);
+      }
+      if (value === "--npm-json") {
+        if (result.npm.length) throw new Error("--npm-json cannot be combined with --npm");
+        result.npm = parseNpmVersionsJson(argument);
+        npmJsonSpecified = true;
+      }
     } else throw new Error(`Unknown release preparation argument: ${value}`);
   }
   return result;
+}
+
+export function parseNpmVersionsJson(value) {
+  let versions;
+  try { versions = JSON.parse(value); }
+  catch { throw new Error("--npm-json must be a JSON object of package names to versions"); }
+  if (!versions || Array.isArray(versions) || typeof versions !== "object")
+    throw new Error("--npm-json must be a JSON object of package names to versions");
+  return Object.entries(versions).map(([name, version]) => `${name}@${version}`);
 }
 
 export function validateReleasePrepareInput(input) {
@@ -447,7 +484,7 @@ export function applyReleasePreparation({ repositoryRoot = root, plan, regenerat
   return { ...plan, writes: writes.map(({ path, sha256: digest }) => ({ path, sha256: digest })) };
 }
 
-function help() { return "Usage: corepack npm run release:prepare -- --template-version 0.x.y --create-vireo-version 0.x.y --jvm-version 0.x.y --npm @vireocodedev/name@0.x.y (exactly seven) [--json] [--apply] [--no-preflight]"; }
+function help() { return "Usage: corepack npm run release:prepare -- --template-version 0.x.y --create-vireo-version 0.x.y --jvm-version 0.x.y (--npm @vireocodedev/name@0.x.y ... | --npm-json '{\"@vireocodedev/history\":\"0.x.y\",...}') (exactly seven) [--json] [--apply] [--no-preflight]"; }
 async function main() {
   const input = parseReleasePrepareArgs(process.argv.slice(2));
   if (input.help) { console.log(help()); return; }
