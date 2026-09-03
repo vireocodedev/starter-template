@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { canonicalMavenGroup, validateArtifactCoordinateBinding, validatePreparedArtifactBinding } from "./template-release-artifacts.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const templateReleasePolicy = JSON.parse(
@@ -8,6 +9,9 @@ const templateReleasePolicy = JSON.parse(
 );
 const templateReleaseRecovery = JSON.parse(
   readFileSync(join(root, "contracts/template-release-recovery.json"), "utf8"),
+);
+const templateReleaseArtifacts = JSON.parse(
+  readFileSync(join(root, "contracts/template-release-artifacts.json"), "utf8"),
 );
 const projectUpgradeContract = JSON.parse(
   readFileSync(join(root, "contracts/project-upgrade-policy.json"), "utf8"),
@@ -86,7 +90,10 @@ const requiredFiles = [
   "docs/provider-controls-2026-08-31.md",
   "docs/platform-support-evidence.md",
   "docs/verification-performance.md",
+  "docs/template-release-preparation.md",
   "contracts/template-release-policy.json",
+  "contracts/template-release-artifacts.json",
+  "contracts/vireo-release-signing-key.asc",
   "contracts/template-release-recovery.json",
   "contracts/project-upgrade-policy.json",
   templateReleaseTagRulesetPath,
@@ -101,6 +108,8 @@ const requiredFiles = [
   ".github/settings/selected-actions.json",
   ".github/settings/workflow-permissions.json",
   "scripts/template-release-policy.mjs",
+  "scripts/template-release-prepare.mjs",
+  "scripts/template-release-artifacts.mjs",
   "scripts/template-release-coordinate-change.mjs",
   "scripts/template-release-state.mjs",
   "scripts/template-release-recovery-policy.mjs",
@@ -152,6 +161,19 @@ requireText("README.md", [
   "docs/TEMPORAL_VALUES.md",
   "https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml",
   "https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml",
+  "docs/template-release-preparation.md",
+]);
+requireText("docs/template-release-preparation.md", [
+  "release:prepare",
+  "--apply",
+  "registry.npmjs.org",
+  "Maven Central",
+  "excluded from generated applications",
+  "adjacent Vireo projection policy",
+  "C8C362C561046CD11C0F0DE01174796DD298F009",
+  "vireo-release-signing-key.asc",
+  "npm@12.0.2 audit signatures",
+  "--include-attestations",
 ]);
 requireText("docs/flagship.md", [
   "https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml",
@@ -188,6 +210,19 @@ if (!/^starter-template@0\.6\.0$/u.test(templateReleaseRecovery.tag ?? ""))
   problems.push(
     "template release recovery must retain the protected immutable 0.6.0 tag",
   );
+if (templateReleaseArtifacts.schemaVersion !== 1 || typeof templateReleaseArtifacts.prepared !== "boolean" || templateReleaseArtifacts.mavenGroup !== canonicalMavenGroup)
+  problems.push("template release artifact binding must use schemaVersion 1 with a prepared boolean");
+if (templateReleaseArtifacts.prepared === true) {
+  const artifactProblems = validatePreparedArtifactBinding(templateReleaseArtifacts, { version: templateReleasePolicy.version });
+  if (artifactProblems.length)
+    problems.push(`prepared artifact binding must bind exact public coordinates: ${artifactProblems.join("; ")}`);
+  const coordinateProblems = validateArtifactCoordinateBinding(templateReleaseArtifacts, {
+    policy: templateReleasePolicy,
+    readFile: (path) => readFileSync(join(root, path)),
+  });
+  if (coordinateProblems.length)
+    problems.push(`prepared artifact binding must match Template dependency and JVM coordinates: ${coordinateProblems.join("; ")}`);
+}
 if (!/^[0-9a-f]{40}$/u.test(templateReleaseRecovery.expectedCommit ?? ""))
   problems.push(
     "template release recovery expectedCommit must be a lowercase 40-hex Git SHA",
@@ -312,7 +347,7 @@ if (
   projectUpgradeContract.contractId !== "vireo-template-project-upgrades" ||
   projectUpgradeContract.publicRelease !== templateReleasePolicy.version ||
   projectUpgradeContract.candidateRelease !== undefined ||
-  projectUpgradeContract.previousRelease !== "0.8.6" ||
+  !/^0\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/u.test(projectUpgradeContract.previousRelease ?? "") ||
   projectUpgradeContract.publicationState !== "final" ||
   !projectUpgradeContract.supportedEdges?.some(
     (edge) =>
@@ -385,7 +420,7 @@ requireText("docs/project-upgrades.md", [
   "no paired",
   "create-vireo@0.8.5",
   "0.8.4-to-0.8.6",
-  "0.8.6-to-0.8.7",
+  `${projectUpgradeContract.previousRelease}-to-${templateReleasePolicy.version}`,
   ".vireo/example-manifest.json",
   "transactionally",
   "target Template commit",
@@ -549,6 +584,7 @@ for (const fragment of [
   "name: Set up release planner Node.js without package caching",
   "package-manager-cache: false",
   "name: Detect release-coordinate change",
+  "name: Require prepared public artifact binding for a successor",
   "contracts/template-release-policy.json",
   "name: Read live release state and plan",
   "node scripts/template-release-state.mjs",

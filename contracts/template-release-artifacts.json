@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "prepared": false,
+  "mavenGroup": "com.vireocode",
+  "note": "release:prepare writes anonymous canonical npm and Maven Central evidence for the next immutable release manifest."
+}

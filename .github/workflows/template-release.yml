@@ -61,6 +61,14 @@ jobs:
           esac
       - name: Fetch main ancestry
         run: git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+      - name: Require prepared public artifact binding for a successor
+        env:
+          COORDINATES_CHANGED: ${{ steps.coordinates.outputs.changed }}
+        run: |
+          if test "$COORDINATES_CHANGED" = true; then
+            node scripts/write-template-release-manifest.mjs "$RUNNER_TEMP/prepared-template-release-manifest.json" "$(git rev-parse HEAD)"
+            test "$(node -p 'require(process.argv[1]).schemaVersion' "$RUNNER_TEMP/prepared-template-release-manifest.json")" = 2
+          fi
       - name: Read live release state and plan
         id: live-state
         env:
