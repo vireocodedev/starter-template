@@ -224,8 +224,9 @@ test("uses only canonical anonymous npm and Maven endpoints during preflight", a
     verifyNpmAttestations: ({ npm: requested }) => Object.fromEntries(Object.entries(requested).map(([name, evidence]) => [name, { version: evidence.version, attestationBundleSha256: "c".repeat(64) }])),
     fetchImpl: async (url, options) => {
       urls.push({ url, options });
-      if (url.includes("registry.npmjs.org")) {
-        const [encodedName, version] = url.replace("https://registry.npmjs.org/", "").split("/");
+      const parsedUrl = new URL(url);
+      if (parsedUrl.protocol === "https:" && parsedUrl.hostname === "registry.npmjs.org") {
+        const [encodedName, version] = parsedUrl.pathname.slice(1).split("/");
         const name = decodeURIComponent(encodedName);
         return { ok: true, text: async () => JSON.stringify({ name, version, dist: { integrity: "sha512-test", tarball: `https://registry.npmjs.org/${name}/-/${name.split("/").at(-1)}-${version}.tgz`, attestations: { url: "https://registry.npmjs.org/-/npm/v1/attestations/test" } } }) };
       }
