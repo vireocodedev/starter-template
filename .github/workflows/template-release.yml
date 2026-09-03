@@ -35,9 +35,11 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - name: Set up release planner Node.js without package caching
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24.18.1
+          package-manager-cache: false
       - name: Validate release intent
         run: node scripts/template-release-policy.mjs
       - name: Detect release-coordinate change

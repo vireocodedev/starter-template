@@ -542,6 +542,8 @@ for (const fragment of [
   "Historical immutable recovery tag (only starter-template@0.6.0)",
   "group: template-release-global",
   "cancel-in-progress: false",
+  "name: Set up release planner Node.js without package caching",
+  "package-manager-cache: false",
   "name: Detect release-coordinate change",
   "contracts/template-release-policy.json",
   "name: Read live release state and plan",
