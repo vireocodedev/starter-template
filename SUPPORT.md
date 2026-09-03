@@ -26,21 +26,32 @@ and its draft-and-publish
 [GitHub release](https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.7).
 Repository administrators must enable GitHub immutable releases before publishing.
 
+Merging the release-coordinate pull request is explicit publication authorization.
+When it reaches `main`, GitHub Actions validates the exact commit,
+creates its annotated immutable tag through GitHub's REST API, creates or recovers a
+matching draft release, attaches the exact manifest, and publishes only after the
+manifest and immutable-release API state match. Ordinary later `main` commits are a
+verified no-op for the already published coordinate.
+
 ## Immutable release recovery
 
 Never move, delete, or recreate an immutable release tag. If a release workflow
-needs recovery, use the reviewed `main` workflow-dispatch path with the existing
+needs recovery, use the pinned `main` workflow-dispatch path with the existing
 release tag and its expected commit
 [`5b123e60bd1ce733ae70711796552a17aaa60fe3`](contracts/template-release-recovery.json).
 Stop immediately if that tag already has a draft or published GitHub release;
 investigate the existing release rather than attempting to replace it.
 
-The `template-release` protected GitHub environment is the administrative
-preflight gate. Its required reviewer checks immutable releases are still enabled
-before approving a recovery or new release run. The workflow deliberately
-does not attempt that administration-only API check with its repository token.
-The update-and-deletion tag ruleset for `starter-template@0.6.0` must also be
-active before recovery approval.
+The `template-release` protected GitHub environment has no recurring reviewer: the
+merged `main` release-coordinate PR is the publication gate. It retains zero wait,
+no administrator bypass, and main-only deployment policy. The workflow deliberately
+does not attempt the administration-only immutable-release setting check with its
+repository token. The wildcard update/non-fast-forward/deletion tag ruleset for
+`starter-template@*` must be active before release mutation; the workflow reads and
+compares that live ruleset before creating a tag or release. Historical exact-tag
+ruleset files remain evidence for old tags and the pinned 0.6.0 recovery path.
+The workflow also requires that immutable releases are still enabled through the
+repository's administrator-controlled GitHub setting.
 
 ## Support boundary
 

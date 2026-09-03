@@ -11,8 +11,9 @@ the `create-vireo@0.8.7` release line, including frontend-only project and entit
 generation for separately owned backend systems.
 
 The canonical current [`starter-template@0.8.7` release contract](contracts/template-release-policy.json)
-defines its tag, generator line, and immutable-release prerequisite. Its tag-triggered
-workflow validates that exact tag before it can publish a release.
+defines its tag, generator line, and immutable-release prerequisite. Merging a
+release-coordinate change to `main` is explicit publication authorization: the workflow
+verifies that exact commit before it creates the annotated immutable tag and release.
 
 ## Evaluate before adopting
 

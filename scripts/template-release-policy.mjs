@@ -55,6 +55,26 @@ export function validateTemplateReleaseCoordinates(policy) {
   return problems;
 }
 
+export function templateReleaseCoordinates(policy) {
+  return {
+    schemaVersion: policy?.schemaVersion,
+    version: policy?.version,
+    tag: policy?.tag,
+    createVireoVersion: policy?.createVireoVersion,
+    ecosystemRelease: policy?.ecosystemRelease,
+    repository: policy?.repository,
+    releaseUrl: policy?.releaseUrl,
+    immutableReleasesRequired: policy?.immutableReleasesRequired,
+  };
+}
+
+export function hasTemplateReleaseCoordinateChange(before, after) {
+  return (
+    JSON.stringify(templateReleaseCoordinates(before)) !==
+    JSON.stringify(templateReleaseCoordinates(after))
+  );
+}
+
 export function validateTemplateRelease({
   policy,
   packageJson,

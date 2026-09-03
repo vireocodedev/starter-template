@@ -24,7 +24,7 @@
       "cancelInProgress": true
     },
     "template-release.yml": {
-      "group": "release-${{ github.workflow }}-${{ inputs.tag || github.ref_name }}",
+      "group": "template-release-global",
       "cancelInProgress": false
     }
   }

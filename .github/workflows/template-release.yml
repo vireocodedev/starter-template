@@ -2,33 +2,86 @@ name: Template release
 
 on:
   push:
-    tags: ["starter-template@*"]
+    branches: [main]
   workflow_dispatch:
     inputs:
       tag:
-        description: Immutable release tag to publish from main
+        description: Historical immutable recovery tag (only starter-template@0.6.0)
         required: true
         type: string
 
 permissions: {}
 
 concurrency:
-  group: release-${{ github.workflow }}-${{ inputs.tag || github.ref_name }}
+  group: template-release-global
   cancel-in-progress: false
 
 jobs:
+  plan:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      action: ${{ steps.live-state.outputs.action }}
+      commit: ${{ steps.live-state.outputs.commit }}
+      release: ${{ steps.live-state.outputs.release }}
+      coordinates_changed: ${{ steps.coordinates.outputs.changed }}
+    steps:
+      - name: Checkout pushed main commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+      - name: Validate release intent
+        run: node scripts/template-release-policy.mjs
+      - name: Detect release-coordinate change
+        id: coordinates
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          test "$AFTER" = "$(git rev-parse HEAD)"
+          case "$BEFORE" in
+            0000000000000000000000000000000000000000) echo 'changed=false' >> "$GITHUB_OUTPUT" ;;
+            *)
+              git cat-file -e "$BEFORE:contracts/template-release-policy.json"
+              git show "$BEFORE:contracts/template-release-policy.json" > "$RUNNER_TEMP/template-release-policy-before.json"
+              changed="$(node scripts/template-release-coordinate-change.mjs "$RUNNER_TEMP/template-release-policy-before.json")"
+              test "$changed" = true || test "$changed" = false
+              echo "changed=$changed" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+      - name: Fetch main ancestry
+        run: git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+      - name: Read live release state and plan
+        id: live-state
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state.json" "${{ steps.coordinates.outputs.changed }}" | tee "$RUNNER_TEMP/template-release-plan.out"
+          sed -n 's/^action=//p' "$RUNNER_TEMP/template-release-plan.out" | tail -n 1 | sed 's/^/action=/' >> "$GITHUB_OUTPUT"
+          sed -n 's/^commit=//p' "$RUNNER_TEMP/template-release-plan.out" | tail -n 1 | sed 's/^/commit=/' >> "$GITHUB_OUTPUT"
+          node -e 'const state = require(process.argv[1]); if (state.plan.release) process.stdout.write(`release=${state.plan.release}\n`)' "$RUNNER_TEMP/template-release-state.json" >> "$GITHUB_OUTPUT"
+
   release:
+    needs: plan
+    if: github.event_name == 'push' && needs.plan.outputs.action != 'no-op'
     runs-on: ubuntu-24.04
     environment: template-release
     timeout-minutes: 45
     permissions:
       contents: write
-
     steps:
-      - name: Checkout policy source
+      - name: Checkout verified main release target
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ needs.plan.outputs.commit }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -36,77 +89,14 @@ jobs:
           node-version: 24.18.1
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - name: Reject non-main recovery dispatch
-        if: github.event_name == 'workflow_dispatch'
-        run: test "$GITHUB_REF" = "refs/heads/main"
-      - name: Validate current release policy
-        if: github.event_name == 'push'
+      - name: Require unchanged release target
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: node scripts/template-release-policy.mjs "$RELEASE_TAG"
-      - name: Resolve trusted recovery target
-        id: release-target
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          RELEASE_TAG: ${{ inputs.tag }}
-        run: node scripts/template-release-recovery-policy.mjs "$GITHUB_OUTPUT" "$RELEASE_TAG"
-      - name: Resolve pushed release target
-        id: pushed-release-target
-        if: github.event_name == 'push'
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_COMMIT: ${{ needs.plan.outputs.commit }}
         run: |
-          test "$GITHUB_SHA" = "$(git rev-parse HEAD)"
-          printf 'tag=%s\n' "$RELEASE_TAG" >> "$GITHUB_OUTPUT"
-          printf 'commit=%s\n' "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
-      - name: Require expected release commit from origin/main
-        env:
-          EXPECTED_COMMIT: ${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}
-        run: |
+          test "$RELEASE_COMMIT" = "$(git rev-parse HEAD)"
           git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
-          git merge-base --is-ancestor "$EXPECTED_COMMIT" origin/main
-      - name: Require release absence before checkout
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}
-        run: |
-          release_view="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" 2>&1)" && {
-            printf '%s\n' "$release_view"
-            echo "A draft or published release already exists for $RELEASE_TAG."
-            exit 1
-          }
-          if ! printf '%s' "$release_view" | grep -Fqi "release not found"; then
-            printf '%s\n' "$release_view"
-            echo "Unable to prove that no release exists for $RELEASE_TAG."
-            exit 1
-          fi
-      - name: Require trusted remote tag target before checkout
-        env:
-          RELEASE_TAG: ${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}
-          EXPECTED_COMMIT: ${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}
-        run: |
-          remote_commit="$(git ls-remote origin "refs/tags/$RELEASE_TAG^{}" | awk '{print $1}')"
-          test "$remote_commit" = "$EXPECTED_COMMIT"
-      - name: Checkout validated release tag
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: refs/tags/${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Resolve exact release target
-        env:
-          RELEASE_TAG: ${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}
-          EXPECTED_COMMIT: ${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}
-        run: |
-          tag_commit="$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")"
-          head_commit="$(git rev-parse HEAD)"
-          test "$tag_commit" = "$EXPECTED_COMMIT"
-          test "$head_commit" = "$EXPECTED_COMMIT"
-          if [ "${{ github.event_name }}" = "push" ]; then
-            node scripts/template-release-policy.mjs "$RELEASE_TAG"
-          else
-            node scripts/template-release-recovery-policy.mjs "$RUNNER_TEMP/template-release-recovery-target" "$RELEASE_TAG"
-          fi
+          git merge-base --is-ancestor "$RELEASE_COMMIT" origin/main
+          node scripts/template-release-policy.mjs
       - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
         with:
           distribution: temurin
@@ -115,33 +105,169 @@ jobs:
       - run: corepack npm run setup
       - run: corepack npm exec -- playwright install --with-deps chromium
         working-directory: frontend
-      - name: Verify exact release target
+      - name: Verify exact release target before mutation
         env:
-          RELEASE_COMMIT: ${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}
+          RELEASE_COMMIT: ${{ needs.plan.outputs.commit }}
         run: env GITHUB_SHA="$RELEASE_COMMIT" ./scripts/verify-template.sh silent
-      - run: node scripts/write-template-release-manifest.mjs "$RUNNER_TEMP/template-release-manifest.json" "${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}"
-      - name: Revalidate release absence and exact tag target
+      - name: Write exact release manifest
         env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}
-          EXPECTED_COMMIT: ${{ steps.release-target.outputs.commit || steps.pushed-release-target.outputs.commit }}
+          RELEASE_COMMIT: ${{ needs.plan.outputs.commit }}
+        run: node scripts/write-template-release-manifest.mjs "$RUNNER_TEMP/template-release-manifest.json" "$RELEASE_COMMIT"
+      - name: Recheck live state after verification
+        id: recheck
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
-          release_view="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" 2>&1)" && {
-            printf '%s\n' "$release_view"
-            echo "A draft or published release already exists for $RELEASE_TAG."
-            exit 1
-          }
-          if ! printf '%s' "$release_view" | grep -Fqi "release not found"; then
-            printf '%s\n' "$release_view"
-            echo "Unable to prove that no release exists for $RELEASE_TAG."
-            exit 1
-          fi
-          remote_commit="$(git ls-remote origin "refs/tags/$RELEASE_TAG^{}" | awk '{print $1}')"
-          test "$remote_commit" = "$EXPECTED_COMMIT"
-          test "$(git rev-parse HEAD)" = "$EXPECTED_COMMIT"
-      - run: gh release create "${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}" "$RUNNER_TEMP/template-release-manifest.json" --draft --generate-notes --verify-tag --title "${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}"
+          node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-after-verify.json" "${{ needs.plan.outputs.coordinates_changed }}" | tee "$RUNNER_TEMP/template-release-plan-after-verify.out"
+          sed -n 's/^action=//p' "$RUNNER_TEMP/template-release-plan-after-verify.out" | tail -n 1 | sed 's/^/action=/' >> "$GITHUB_OUTPUT"
+      - name: Create annotated immutable release tag through GitHub REST
+        if: steps.recheck.outputs.action == 'create-tag'
         env:
           GH_TOKEN: ${{ github.token }}
-      - run: gh release edit "${{ steps.release-target.outputs.tag || steps.pushed-release-target.outputs.tag }}" --draft=false --latest
+          RELEASE_COMMIT: ${{ needs.plan.outputs.commit }}
+        run: |
+          release_tag="$(node -p 'require("./contracts/template-release-policy.json").tag')"
+          tag_object="$(gh api --method POST "repos/$GITHUB_REPOSITORY/git/tags" -f tag="$release_tag" -f message="Release $release_tag" -f object="$RELEASE_COMMIT" -f type=commit --jq .sha)"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$release_tag" -f sha="$tag_object" >/dev/null
+      - name: Refuse tag-creation races and resolve release recovery state
+        id: recovery-state
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git fetch --tags --force origin
+          for attempt in 1 2 3 4 5 6; do
+            if node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-before-release.json" "${{ needs.plan.outputs.coordinates_changed }}" | tee "$RUNNER_TEMP/template-release-plan-before-release.out"; then
+              action="$(node -p 'require(process.argv[1]).plan.action' "$RUNNER_TEMP/template-release-state-before-release.json")"
+              if test "$action" = 'recover-release' || test "$action" = 'no-op'; then
+                echo "action=$action" >> "$GITHUB_OUTPUT"
+                node -e 'const state = require(process.argv[1]); if (state.plan.release) process.stdout.write(`release=${state.plan.release}\n`)' "$RUNNER_TEMP/template-release-state-before-release.json" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+            fi
+            test "$attempt" = 6 && exit 1
+            sleep 10
+          done
+      - name: Require safe draft recovery state
+        env:
+          ACTION: ${{ steps.recovery-state.outputs.action }}
+        run: test "$ACTION" = 'recover-release' || test "$ACTION" = 'no-op'
+      - name: Create draft release and attach manifest
+        if: steps.recovery-state.outputs.action == 'recover-release' && steps.recovery-state.outputs.release == 'absent'
         env:
           GH_TOKEN: ${{ github.token }}
+        run: |
+          release_tag="$(node -p 'require("./contracts/template-release-policy.json").tag')"
+          gh release create "$release_tag" "$RUNNER_TEMP/template-release-manifest.json" --draft --generate-notes --verify-tag --title "$release_tag"
+      - name: Validate draft manifest before publication
+        id: draft-state
+        if: steps.recovery-state.outputs.action != 'no-op'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-draft.json" "${{ needs.plan.outputs.coordinates_changed }}" | tee "$RUNNER_TEMP/template-release-plan-draft.out"; then
+              action="$(node -p 'require(process.argv[1]).plan.action' "$RUNNER_TEMP/template-release-state-draft.json")"
+              release="$(node -p 'require(process.argv[1]).plan.release || ""' "$RUNNER_TEMP/template-release-state-draft.json")"
+              if test "$action" = 'no-op' || { test "$action" = 'recover-release' && test "$release" = 'draft'; }; then
+                echo "action=$action" >> "$GITHUB_OUTPUT"
+                echo "release=$release" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+            fi
+            test "$attempt" = 6 && exit 1
+            sleep 10
+          done
+      - name: Publish validated draft release
+        if: steps.draft-state.outputs.action == 'recover-release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTION: ${{ steps.draft-state.outputs.action }}
+          RELEASE_STATE: ${{ steps.draft-state.outputs.release }}
+        run: |
+          test "$ACTION" = 'recover-release'
+          test "$RELEASE_STATE" = 'draft'
+          release_tag="$(node -p 'require("./contracts/template-release-policy.json").tag')"
+          gh release edit "$release_tag" --draft=false --latest
+      - name: Verify immutable published release and exact manifest
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-final.json" "${{ needs.plan.outputs.coordinates_changed }}" | tee "$RUNNER_TEMP/template-release-plan-final.out"; then
+              if test "$(sed -n 's/^action=//p' "$RUNNER_TEMP/template-release-plan-final.out" | tail -n 1)" = 'no-op'; then
+                exit 0
+              fi
+            fi
+            test "$attempt" = 6 && exit 1
+            sleep 10
+          done
+
+  historical-recovery:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    environment: template-release
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main recovery policy
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Resolve pinned historical recovery target
+        id: recovery
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          test "$GITHUB_REF" = 'refs/heads/main'
+          node scripts/template-release-recovery-policy.mjs "$GITHUB_OUTPUT" "$RELEASE_TAG"
+      - name: Require exact live wildcard tag protection before recovery
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          node scripts/template-release-state.mjs "$RUNNER_TEMP/template-release-state-historical-preflight.json" false
+      - name: Require exact immutable historical tag
+        env:
+          RELEASE_TAG: ${{ steps.recovery.outputs.tag }}
+          RELEASE_COMMIT: ${{ steps.recovery.outputs.commit }}
+        run: |
+          git fetch --tags --force origin
+          test "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" = "$RELEASE_COMMIT"
+          git merge-base --is-ancestor "$RELEASE_COMMIT" origin/main
+      - name: Checkout exact historical target
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ steps.recovery.outputs.tag }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+      - run: corepack npm run setup
+      - run: corepack npm exec -- playwright install --with-deps chromium
+        working-directory: frontend
+      - name: Verify historical target before mutation
+        env:
+          RELEASE_COMMIT: ${{ steps.recovery.outputs.commit }}
+        run: env GITHUB_SHA="$RELEASE_COMMIT" ./scripts/verify-template.sh silent
+      - name: Create historical release only when absent
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.recovery.outputs.tag }}
+          RELEASE_COMMIT: ${{ steps.recovery.outputs.commit }}
+        run: |
+          release_view="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" 2>&1)" && exit 1
+          printf '%s' "$release_view" | grep -Fqi 'release not found'
+          node scripts/write-template-release-manifest.mjs "$RUNNER_TEMP/template-release-manifest.json" "$RELEASE_COMMIT"
+          gh release create "$RELEASE_TAG" "$RUNNER_TEMP/template-release-manifest.json" --draft --generate-notes --verify-tag --title "$RELEASE_TAG"
+          gh release edit "$RELEASE_TAG" --draft=false --latest=false

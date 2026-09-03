@@ -8,7 +8,9 @@ The [`starter-template@0.8.7` release contract](contracts/template-release-polic
 requires GitHub immutable releases before publishing the corresponding
 [release](https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.7).
 Repository administrators must enable that GitHub setting; the release workflow's
-default token cannot verify it.
+default token cannot verify it. The workflow does verify the live no-bypass wildcard
+tag ruleset before mutation and verifies the published release API reports
+`immutable: true` with the exact attached release manifest.
 
 ## Reporting a vulnerability
 
