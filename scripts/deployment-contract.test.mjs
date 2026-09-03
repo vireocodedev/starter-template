@@ -546,6 +546,38 @@ function readHostState(host) {
   return JSON.parse(readFileSync(join(host.directory, "operations", "deployment-state.json"), "utf8"));
 }
 
+test("host reset safely waits for the first accepted immutable release", () => {
+  const host = fakeHost();
+  const result = hostController(host, ["reset"]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(JSON.parse(result.stdout), {
+    status: "skipped",
+    reason: "awaiting-first-immutable-release",
+    target: "legacy",
+    generation: 0,
+  });
+  assert.equal(existsSync(host.log), false);
+  assert.equal(existsSync(join(host.directory, "operations", "deployment-state.json")), false);
+});
+
+test("host reset fails closed when accepted release evidence is incomplete", () => {
+  const host = fakeHost();
+  const operations = join(host.directory, "operations");
+  mkdirSync(operations, { recursive: true });
+  writeFileSync(join(operations, "deployment-state.json"), JSON.stringify({
+    schemaVersion: 2,
+    generation: 1,
+    accepted: {
+      transaction: "a".repeat(64),
+      endpoint: { kind: "legacy", target: "legacy", project: "vireo-flagship-demo", port: 3000, root: null },
+    },
+    pending: null,
+  }));
+  const result = hostController(host, ["reset"]);
+  assert.equal(result.status, 65);
+  assert.match(result.stderr, /No accepted immutable bundle exists for reset/u);
+});
+
 test("host controller prepares, cuts over, accepts, resumes, serializes, rolls back and resets through fake boundaries", { timeout: 30_000 }, () => {
   const host = fakeHost();
   const first = makeHostBundle(host.directory, "starter-template@1.0.0", "123", "1");

@@ -62,6 +62,12 @@ then destroys only the prior flagship slot volume so migrations restore the
 deterministic seed. Run it at least every 24 hours and after abuse, unexpected
 content, or a failed evaluation journey. It is not a backup mechanism:
 
+During the one-time migration from the legacy port-3000 deployment, the timer exits
+successfully without changing that deployment until the first immutable blue/green
+release has been accepted. This avoids rebuilding unpublished `main` bytes under a
+published release identity. Daily destructive resets begin automatically after that
+first acceptance.
+
 ```bash
 VIREO_DEMO_RESET_CONFIRM=reset-vireo-demo \
 VIREO_FLAGSHIP_PRODUCTION_RESET=true \
