@@ -1,0 +1,111 @@
+name: Recover durable Template release
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  recover:
+    runs-on: ubuntu-24.04
+    environment: template-release
+    timeout-minutes: 70
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - name: Enforce the shared stable automation-era predicate before tagged scripts
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: node scripts/template-release-reconciliation.mjs assert-automation-tag "$RELEASE_TAG"
+      - name: Resolve immutable annotated target
+        id: target
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          git fetch --tags --force origin +refs/heads/main:refs/remotes/origin/main
+          test "$(git cat-file -t "refs/tags/$RELEASE_TAG")" = tag
+          commit="$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")"
+          git merge-base --is-ancestor "$commit" origin/main
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require tag-owned policy and exact release state
+        id: state
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_COMMIT: ${{ steps.target.outputs.commit }}
+        run: |
+          test "$RELEASE_TAG" = "$(node -p 'require("./contracts/template-release-policy.json").tag')"
+          test "$RELEASE_COMMIT" = "$(git rev-parse HEAD)"
+          node scripts/template-release-policy.mjs
+          node scripts/template-release-state.mjs "$RUNNER_TEMP/state.json" false > "$RUNNER_TEMP/plan.out"
+          echo "action=$(sed -n 's/^action=//p' "$RUNNER_TEMP/plan.out" | tail -n 1)" >> "$GITHUB_OUTPUT"
+          node -e 'const s=require(process.argv[1]);process.stdout.write(`release=${s.plan.release || ""}\ncommit=${s.plan.commit || ""}\n`)' "$RUNNER_TEMP/state.json" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        if: steps.state.outputs.action == 'recover-release'
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        if: steps.state.outputs.action == 'recover-release'
+      - if: steps.state.outputs.action == 'recover-release'
+        run: corepack npm run setup
+      - if: steps.state.outputs.action == 'recover-release'
+        run: corepack npm exec -- playwright install --with-deps chromium
+        working-directory: frontend
+      - if: steps.state.outputs.action == 'recover-release'
+        env:
+          RELEASE_COMMIT: ${{ steps.state.outputs.commit }}
+        run: env GITHUB_SHA="$RELEASE_COMMIT" ./scripts/verify-template.sh silent
+      - if: steps.state.outputs.action == 'recover-release'
+        env:
+          RELEASE_COMMIT: ${{ steps.state.outputs.commit }}
+        run: node scripts/write-template-release-manifest.mjs "$RUNNER_TEMP/template-release-manifest.json" "$RELEASE_COMMIT"
+      - if: steps.state.outputs.action == 'recover-release' && steps.state.outputs.release == 'absent'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: gh release create "$RELEASE_TAG" "$RUNNER_TEMP/template-release-manifest.json" --draft --generate-notes --verify-tag --title "$RELEASE_TAG"
+      - name: Validate and publish only a matching draft
+        if: steps.state.outputs.action == 'recover-release'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          node scripts/template-release-state.mjs "$RUNNER_TEMP/final-state.json" false > "$RUNNER_TEMP/final-plan.out"
+          test "$(sed -n 's/^action=//p' "$RUNNER_TEMP/final-plan.out" | tail -n 1)" = recover-release
+          test "$(node -p 'require(process.argv[1]).plan.release' "$RUNNER_TEMP/final-state.json")" = draft
+          gh release edit "$RELEASE_TAG" --draft=false --latest=false
+      - name: Require immutable publication after recovery
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if node scripts/template-release-state.mjs "$RUNNER_TEMP/immutable-state.json" false > "$RUNNER_TEMP/immutable-plan.out"; then
+              cat "$RUNNER_TEMP/immutable-plan.out"
+              if test "$(sed -n 's/^action=//p' "$RUNNER_TEMP/immutable-plan.out" | tail -n 1)" = no-op; then
+                exit 0
+              fi
+            fi
+            echo "Recovered release-state planner attempt $attempt did not observe immutable publication." >&2
+            test "$attempt" = 6 && exit 1
+            sleep 10
+          done

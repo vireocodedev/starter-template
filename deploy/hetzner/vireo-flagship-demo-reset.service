@@ -11,5 +11,6 @@ WorkingDirectory=/opt/apps/vireo-flagship-demo
 Environment=VIREO_DEMO_COMPOSE_PROJECT=vireo-flagship-demo
 Environment=VIREO_DEMO_ENV_FILE=/opt/apps/vireo-flagship-demo/.env
 Environment=VIREO_DEMO_RESET_CONFIRM=reset-vireo-demo
+Environment=VIREO_FLAGSHIP_PRODUCTION_RESET=true
 ExecStart=/opt/apps/vireo-flagship-demo/scripts/reset-flagship-demo.sh
 UMask=0077

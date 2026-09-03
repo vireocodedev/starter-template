@@ -60,10 +60,11 @@ for (const fileName of workflowFiles) {
     }
   }
   for (const job of jobs) {
+    const jobLines = lines.slice(job.start, job.end);
     if (
-      !lines
-        .slice(job.start, job.end)
+      !jobLines
         .some((line) => /^ {4}timeout-minutes: \d+\s*$/u.test(line))
+      && !jobLines.some((line) => /^ {4}uses:\s+\.\/\.github\/workflows\//u.test(line))
     ) {
       problems.push(`${fileName}:${job.name} must declare timeout-minutes`);
     }
@@ -76,6 +77,7 @@ for (const fileName of workflowFiles) {
       const separator = use.lastIndexOf("@");
       const action = separator >= 0 ? use.slice(0, separator) : use;
       const revision = separator >= 0 ? use.slice(separator + 1) : "";
+      if (action.startsWith("./.github/workflows/")) continue;
       const expected = policy.actions[action];
       if (!expected)
         problems.push(

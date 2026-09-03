@@ -1,13 +1,12 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "publicUrl": "https://demo.vireocode.com",
   "availabilityClaim": "best-effort-no-sla",
   "dataClassification": "public-synthetic-only",
   "operations": {
-    "deploymentRevision": "0557990f024a8736b6e661f8fc264861deb99b65",
-    "activatedAt": "2026-09-03T00:19:18Z",
     "owner": "Vireo repository maintainers",
-    "incidentPath": "https://github.com/vireocodedev/vireo-template/issues/new?template=bug_report.yml"
+    "incidentPath": "https://github.com/vireocodedev/vireo-template/issues/new?template=bug_report.yml",
+    "releaseIdentity": "immutable-starter-template-tag-and-public-deployment-proof"
   },
   "credentials": {
     "username": "demo",
@@ -15,22 +14,50 @@
     "scope": "isolated-demo-only"
   },
   "healthPaths": ["/healthz", "/actuator/health/readiness"],
+  "automation": {
+    "workflow": ".github/workflows/flagship-demo.yml",
+    "templateReleaseWorkflow": ".github/workflows/template-release.yml",
+    "deploymentEnvironment": {
+      "name": "flagship-demo",
+      "wait_timer": 0,
+      "prevent_self_review": false,
+      "reviewers": [],
+      "deployment_branch_policy": { "protected_branches": false, "custom_branch_policies": true },
+      "allowedBranchPolicies": [{ "name": "starter-template@*", "type": "tag" }],
+      "can_admins_bypass": false
+    },
+    "ssh": {
+      "hostVariable": "FLAGSHIP_DEMO_HOST",
+      "userVariable": "FLAGSHIP_DEMO_SSH_USER",
+      "portVariable": "FLAGSHIP_DEMO_SSH_PORT",
+      "knownHostsVariable": "FLAGSHIP_DEMO_KNOWN_HOSTS",
+      "privateKeySecret": "FLAGSHIP_DEMO_SSH_PRIVATE_KEY",
+      "nativeOpenSshOnly": true,
+      "strictHostKeyChecking": true
+    },
+    "bundle": {
+      "schemaVersion": 1,
+      "archive": "deterministic-allowlisted-tar-gzip",
+      "requiredProofPath": "/.well-known/vireo-deployment.json",
+      "maxBytes": 188743680
+    },
+    "slots": {
+      "names": ["blue", "green"],
+      "ports": { "blue": 3001, "green": 3002 },
+      "projectPrefix": "vireo-flagship-demo-",
+      "hostLock": "operations/deployment.lock"
+    }
+  },
   "reset": {
-    "strategy": "destroy-dedicated-volume-and-redeploy",
+    "strategy": "deploy-current-immutable-bundle-into-alternate-slot-and-destroy-only-prior-slot-volume",
     "maximumIntervalHours": 24,
-    "command": "VIREO_DEMO_RESET_CONFIRM=reset-vireo-demo ./scripts/reset-flagship-demo.sh",
-    "lastRehearsedAt": "2026-08-28T09:21:51Z",
-    "evidenceLocation": "/opt/apps/vireo-flagship-demo/operations/evidence/reset-20260828T092151Z.log"
+    "command": "VIREO_FLAGSHIP_PRODUCTION_RESET=true VIREO_DEMO_RESET_CONFIRM=reset-vireo-demo ./scripts/reset-flagship-demo.sh",
+    "durableBackupClaim": false
   },
   "monitor": {
-    "workflow": ".github/workflows/flagship-demo.yml",
     "command": "corepack npm --prefix frontend run test:demo",
     "schedule": "hourly",
-    "evidenceRuns": [
-      "https://github.com/vireocodedev/vireo-template/actions/runs/33158935391",
-      "https://github.com/vireocodedev/vireo-template/actions/runs/33159094461",
-      "https://github.com/vireocodedev/vireo-template/actions/runs/33687209258",
-      "https://github.com/vireocodedev/vireo-template/actions/runs/33698943532"
-    ]
+    "deploymentProofVariable": "VIREO_DEMO_REQUIRE_DEPLOYMENT_PROOF",
+    "deploymentProofRequiredAfterFirstAcceptedRelease": true
   }
 }

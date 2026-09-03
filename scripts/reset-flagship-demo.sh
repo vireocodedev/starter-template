@@ -1,38 +1,17 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
-
-repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$repository_root"
-
-if [[ "${VIREO_DEMO_RESET_CONFIRM:-}" != "reset-vireo-demo" ]]; then
-  printf 'Refusing to destroy demo data. Set VIREO_DEMO_RESET_CONFIRM=reset-vireo-demo for the dedicated demo deployment.\n' >&2
-  exit 2
+[[ "${VIREO_DEMO_RESET_CONFIRM:-}" == reset-vireo-demo ]] || { printf 'Refusing destructive demo reset without VIREO_DEMO_RESET_CONFIRM=reset-vireo-demo.\n' >&2; exit 2; }
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ "${VIREO_FLAGSHIP_PRODUCTION_RESET:-}" == true ]]; then
+  exec /usr/local/libexec/vireo-flagship-demo/flagship-host-deploy.sh reset
 fi
-
-deployment_project="${VIREO_DEMO_COMPOSE_PROJECT:-vireo-flagship-demo}"
-if [[ ! "$deployment_project" =~ ^[a-z0-9][a-z0-9_-]{2,62}$ ]]; then
-  printf 'VIREO_DEMO_COMPOSE_PROJECT must be a scoped Compose project name.\n' >&2
-  exit 2
-fi
-
-if docker compose version >/dev/null 2>&1; then
-  compose_command=(docker compose)
-elif command -v docker-compose >/dev/null 2>&1 && docker-compose version >/dev/null 2>&1; then
-  compose_command=(docker-compose)
-else
-  printf 'Docker Compose is required to reset the flagship demo.\n' >&2
-  exit 1
-fi
-
-environment_file="${VIREO_DEMO_ENV_FILE:-.env}"
-compose_environment=()
-if [[ -f "$environment_file" ]]; then
-  compose_environment=(--env-file "$environment_file")
-fi
-
-compose_files=(-f compose.yaml -f compose.demo.yaml --project-name "$deployment_project")
-"${compose_command[@]}" "${compose_environment[@]}" "${compose_files[@]}" down --volumes --remove-orphans
-"${compose_command[@]}" "${compose_environment[@]}" "${compose_files[@]}" up --build --detach --wait
-
-printf 'Flagship demo reset complete for Compose project %s.\n' "$deployment_project"
+# Local rehearsal remains scoped and intentionally mutable. It never uses the
+# production SSH/controller path or claims immutable deployment recovery.
+project="${VIREO_DEMO_COMPOSE_PROJECT:-vireo-flagship-demo-local}"
+[[ "$project" =~ ^vireo-flagship-demo(-local)?$ ]] || { printf 'Local reset requires a scoped flagship Compose project.\n' >&2; exit 2; }
+env_file="${VIREO_DEMO_ENV_FILE:-.env}"
+cd "$root"
+compose_env=()
+[[ -f "$env_file" ]] && compose_env=(--env-file "$env_file")
+docker compose "${compose_env[@]}" -f compose.yaml -f compose.demo.yaml --project-name "$project" down --volumes --remove-orphans
+docker compose "${compose_env[@]}" -f compose.yaml -f compose.demo.yaml --project-name "$project" up --build --detach --wait

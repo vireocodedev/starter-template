@@ -4,6 +4,13 @@ set -euo pipefail
 
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$repository_root"
+
+# This script remains a maintainer-only mutable local/rehearsal deployment. The
+# public host accepts immutable bundles only through its forced SSH receiver.
+if [[ -n "${VIREO_FLAGSHIP_BUNDLE:-}" || -n "${VIREO_FLAGSHIP_MANIFEST:-}" ]]; then
+  printf 'Immutable public recovery must use the root-installed forced SSH receiver; deploy.sh does not accept bundle paths.\n' >&2
+  exit 2
+fi
 source "$repository_root/scripts/compose-database-contract.sh"
 
 environment_file="${VIREO_DEMO_ENV_FILE:-.env}"
@@ -24,8 +31,7 @@ for variable in \
   POSTGRES_OWNER_PASSWORD \
   POSTGRES_RUNTIME_USER \
   POSTGRES_RUNTIME_PASSWORD \
-  SESSION_COOKIE_SECURE \
-  FRONTEND_PORT; do
+  SESSION_COOKIE_SECURE; do
   if [[ -v "$variable" ]]; then
     printf 'Unset inherited %s so the deployment environment file remains authoritative.\n' "$variable" >&2
     exit 2
@@ -39,8 +45,7 @@ for variable in \
   POSTGRES_OWNER_PASSWORD \
   POSTGRES_RUNTIME_USER \
   POSTGRES_RUNTIME_PASSWORD \
-  SESSION_COOKIE_SECURE \
-  FRONTEND_PORT; do
+  SESSION_COOKIE_SECURE; do
   validate_compose_environment_literal "$variable" || exit 2
 done
 
@@ -95,8 +100,8 @@ if [[ "$session_cookie_secure" != "true" ]]; then
   printf 'SESSION_COOKIE_SECURE must be true for deployment.\n' >&2
   exit 2
 fi
-if [[ "$frontend_port" != "3000" ]]; then
-  printf 'The audited Caddy integration requires FRONTEND_PORT=3000.\n' >&2
+if [[ "$frontend_port" != "3000" && "$frontend_port" != "3001" && "$frontend_port" != "3002" ]]; then
+  printf 'Mutable rehearsal deploys require FRONTEND_PORT=3000, 3001, or 3002.\n' >&2
   exit 2
 fi
 if [[ ! -f build/libs/app.jar || ! -f frontend/dist/index.html ]]; then
