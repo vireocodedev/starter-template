@@ -1,4 +1,5 @@
-name: Template release
+name: Release · Publish Template
+run-name: Publish Template · ${{ github.event_name }} · ${{ inputs.tag || github.sha }}
 
 on:
   push:

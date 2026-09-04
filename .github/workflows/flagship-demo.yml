@@ -1,4 +1,5 @@
-name: Flagship demo
+name: Deploy · Flagship demo
+run-name: Flagship demo · ${{ github.event_name }} · ${{ inputs.mode || 'monitor' }}
 
 on:
   schedule:

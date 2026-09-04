@@ -8,7 +8,7 @@ history, infrastructure, localization, query, shell, sqlite, and ui.
 ## Hosted preparation PR
 
 After the seven npm libraries and JVM modules are publicly available, dispatch
-**Prepare Template release** from this repository's `main` branch. Supply the
+**Release · Prepare Template version PR** from this repository's `main` branch. Supply the
 planned matching Template/CLI version, the JVM version, and exactly these seven
 npm package versions as one JSON object:
 
@@ -52,7 +52,7 @@ requires the minted token to report the same slug. Until this variable is set,
 scheduled reconciliation is a successful no-op with an explicit configuration
 notice; an invalid slug fails closed.
 
-The scheduled **Reconcile Template preparation PRs** workflow and its manual
+The scheduled **Release · Reconcile Template preparation PRs** workflow and its manual
 dispatch inspect only marked `automation/template-release-X.Y.Z` PRs. It never
 uses persistent auto-merge. Its unprotected inspection first verifies the
 configured non-secret App slug, then reconstructs the canonical public input and
@@ -146,10 +146,10 @@ that tag when the proof is missing or differs. Automated durable recovery begins
 checked out by this newer recovery tooling; `starter-template@0.6.0` remains a
 separately selected, deliberately bounded historical path.
 
-The scanner supplies eligible tags to the local **Recover durable Template release**
+The scanner supplies eligible tags to the local **Recovery · Template release**
 reusable workflow as a sequential matrix and waits for every exact-tag conclusion;
 a failed tagged validation fails the parent scan. To run this recovery manually,
-dispatch the parent **Template release** workflow with `reconcile=true`; that keeps
+dispatch the parent **Release · Publish Template** workflow with `reconcile=true`; that keeps
 the exact-tag recovery, latest reconciliation, proof comparison, and flagship
 dispatch in one convergent transaction. The reusable workflow is callable only by
 that parent and enforces the shared `0.8.8+` stable predicate before it runs any

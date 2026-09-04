@@ -31,7 +31,6 @@ export const mavenModules = artifactMavenModules;
 // when release:prepare changed exactly these release-owned files.
 export const releasePreparationGeneratedPaths = Object.freeze([
   ".vireo/template.json",
-  "README.md",
   "SECURITY.md",
   "SUPPORT.md",
   "contracts/project-upgrade-policy.json",
@@ -211,7 +210,7 @@ export function createReleasePreparationPlan({ repositoryRoot = root, input, art
   writes.set("gradle.properties", replaceStrict(readFileSync(join(repositoryRoot, "gradle.properties"), "utf8"), `starterVersion=${policy.ecosystemRelease.match(/jvm-(.+)$/u)[1]}`, `starterVersion=${input.jvmVersion}`, "gradle.properties"));
   const currentEdge = `${upgrades.previousRelease}-to-${policy.version}`;
   const nextEdge = `${previous}-to-${input.templateVersion}`;
-  for (const path of ["README.md", "SUPPORT.md", "SECURITY.md", "docs/generated-capabilities.md"]) {
+  for (const path of ["SUPPORT.md", "SECURITY.md", "docs/generated-capabilities.md"]) {
     let text = readFileSync(join(repositoryRoot, path), "utf8");
     text = replaceStrict(text, `starter-template@${previous}`, nextTag, path);
     if (text.includes(encodeURIComponent(`starter-template@${previous}`)))

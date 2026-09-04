@@ -1,4 +1,5 @@
-name: CodeQL
+name: Security · Code scanning
+run-name: Code scanning · ${{ github.event_name }} · ${{ github.event.pull_request.number || github.sha }}
 
 on:
   push:
@@ -7,42 +8,164 @@ on:
     branches: [main]
   schedule:
     - cron: "37 3 * * 1"
+  workflow_dispatch:
 
 permissions: {}
 
 jobs:
-  analyze:
+  changes:
+    name: Plan CodeQL languages
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      routing-ready: ${{ steps.plan.outcome == 'success' && 'true' || 'false' }}
+      java: ${{ steps.plan.outputs.codeql-java }}
+      javascript: ${{ steps.plan.outputs.codeql-javascript }}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Plan exact CodeQL languages from trusted base policy
+        id: plan
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            planner_root="$RUNNER_TEMP/ci-change-plan-base"
+            if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json" && git show "$BASE_SHA:contracts/ci-change-plan-policy.json" | node -e 'const policy=JSON.parse(require("node:fs").readFileSync(0,"utf8")); process.exit(policy.schemaVersion===1&&["frontend","jvm","verification","deployment","codeqlJava","codeqlJavaScript","dependencyReview","documentation"].every(name=>policy.scopes?.[name])?0:1)'; then
+              git worktree add --detach "$planner_root" "$BASE_SHA"
+              trap 'git worktree remove --force "$planner_root"' EXIT
+              node "$planner_root/scripts/ci-change-plan.mjs" --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
+            else
+              cat >> "$GITHUB_OUTPUT" <<'EOF'
+          frontend=true
+          jvm=true
+          verification=true
+          deployment=true
+          codeql-java=true
+          codeql-javascript=true
+          dependency-review=true
+          documentation=true
+          full=true
+          reason=base-planner-unavailable; running every lane
+          EOF
+            fi
+          elif [ "$GITHUB_EVENT_NAME" = schedule ] || [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] || [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = 0000000000000000000000000000000000000000 ]; then
+            node scripts/ci-change-plan.mjs --all --github-output "$GITHUB_OUTPUT"
+          else
+            node scripts/ci-change-plan.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
+          fi
+      - name: Summarize CodeQL routing
+        env:
+          JAVA: ${{ steps.plan.outputs.codeql-java }}
+          JAVASCRIPT: ${{ steps.plan.outputs.codeql-javascript }}
+        run: |
+          for selected in "$JAVA" "$JAVASCRIPT"; do case "$selected" in true|false) ;; *) exit 1 ;; esac; done
+          printf '## Code scanning routing\n\n- Java: `%s`\n- JavaScript/TypeScript: `%s`\n' "$JAVA" "$JAVASCRIPT" >> "$GITHUB_STEP_SUMMARY"
+
+  analyze-javascript:
+    name: CodeQL JavaScript analysis
+    needs: changes
+    if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       actions: read
       contents: read
       security-events: write
-
     steps:
+      - name: Require successful routing and explain selection
+        env:
+          ROUTING_READY: ${{ needs.changes.outputs.routing-ready }}
+          PLAN_SELECTED: ${{ needs.changes.outputs.javascript }}
+        run: |
+          test "$ROUTING_READY" = true
+          case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
+          printf 'CodeQL JavaScript selected=%s. It runs on every pull request to retain GitHub’s independent CodeQL protection.\n' "$PLAN_SELECTED"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.event_name == 'pull_request' || needs.changes.outputs.javascript == 'true'
         with:
           persist-credentials: false
+      - uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        if: github.event_name == 'pull_request' || needs.changes.outputs.javascript == 'true'
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        if: github.event_name == 'pull_request' || needs.changes.outputs.javascript == 'true'
 
+  analyze-java:
+    name: CodeQL Java analysis
+    needs: changes
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Require successful routing and explain selection
+        env:
+          ROUTING_READY: ${{ needs.changes.outputs.routing-ready }}
+          PLAN_SELECTED: ${{ needs.changes.outputs.java }}
+        run: |
+          test "$ROUTING_READY" = true
+          case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
+          printf 'CodeQL Java selected=%s\n' "$PLAN_SELECTED"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.changes.outputs.java == 'true'
+        with:
+          persist-credentials: false
       - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        if: needs.changes.outputs.java == 'true'
         with:
           distribution: temurin
           java-version: "21"
-
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24.18.1
-          package-manager-cache: false
-          registry-url: https://registry.npmjs.org
-          scope: "@vireocodedev"
-
-      - run: corepack npm ci
-        working-directory: frontend
-
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        if: needs.changes.outputs.java == 'true'
       - uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        if: needs.changes.outputs.java == 'true'
         with:
-          languages: java-kotlin,javascript-typescript
-
-      - uses: github/codeql-action/autobuild@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
-
+          languages: java-kotlin
+      - name: Compile JVM sources for analysis
+        if: needs.changes.outputs.java == 'true'
+        run: ./gradlew classes --no-build-cache
       - uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        if: needs.changes.outputs.java == 'true'
+
+  analyze:
+    name: CodeQL analysis
+    needs: [changes, analyze-javascript, analyze-java]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Require successful planned analysis
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          JAVASCRIPT_RESULT: ${{ needs.analyze-javascript.result }}
+          JAVA_RESULT: ${{ needs.analyze-java.result }}
+          JAVASCRIPT_SELECTED: ${{ needs.changes.outputs.javascript }}
+          JAVA_SELECTED: ${{ needs.changes.outputs.java }}
+        run: |
+          test "$CHANGES_RESULT" = success
+          test "$JAVASCRIPT_RESULT" = success
+          test "$JAVA_RESULT" = success
+          for selected in "$JAVASCRIPT_SELECTED" "$JAVA_SELECTED"; do case "$selected" in true|false) ;; *) exit 1 ;; esac; done
+      - name: Report aggregate CodeQL result
+        env:
+          JAVASCRIPT_SELECTED: ${{ needs.changes.outputs.javascript }}
+          JAVA_SELECTED: ${{ needs.changes.outputs.java }}
+        run: |
+          printf 'Java=%s JavaScript=%s\n' "$JAVA_SELECTED" "$JAVASCRIPT_SELECTED"
+          printf '## Code scanning outcome\n\n- Java: `%s`\n- JavaScript/TypeScript: `%s`\n' "$JAVA_SELECTED" "$JAVASCRIPT_SELECTED" >> "$GITHUB_STEP_SUMMARY"

@@ -15,10 +15,10 @@ const mainCommit = "a".repeat(40);
 const head = "c".repeat(40);
 const tree = "b".repeat(40);
 const requiredChecks = [
-  { context: "verify", integrationId: 15368 },
-  { context: "analyze", integrationId: 15368 },
+  { context: "Application and deployment verification", integrationId: 15368 },
+  { context: "CodeQL analysis", integrationId: 15368 },
   { context: "CodeQL", integrationId: 57789 },
-  { context: "dependency-review", integrationId: 15368 },
+  { context: "Dependency review", integrationId: 15368 },
   { context: "Secret history scan", integrationId: 15368 },
 ];
 const digest = (value) => createHash("sha256").update(value).digest("hex");
