@@ -2,7 +2,7 @@
 
 The merge gate remains intentionally fast and deterministic: Ubuntu 24.04, Java 21,
 Node 24.18.1/npm 12.0.2, H2, and desktop/mobile Chromium. The scheduled and manually
-dispatchable `Support evidence` workflow samples compatibility outside that canonical
+dispatchable `Scheduled · Platform support evidence` workflow samples compatibility outside that canonical
 lane without making ordinary pull requests depend on a large matrix.
 
 The identical machine-readable snapshot in

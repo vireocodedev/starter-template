@@ -112,6 +112,11 @@ test("creates a deterministic no-write coordinate plan and preserves historical 
   const plan = createReleasePreparationPlan({ input, artifacts });
   assert.equal(JSON.stringify(createReleasePreparationPlan({ input, artifacts: undefined })), before);
   assert.equal(plan.action, "apply");
+  assert.equal(
+    plan.writes.some((write) => write.path === "README.md"),
+    false,
+    "the evergreen repository README must not be rewritten for each release",
+  );
   assert.ok(plan.writes.some((write) => write.path === "contracts/project-upgrade-policy.json"));
   const upgrades = JSON.parse(plan.writes.find((write) => write.path === "contracts/project-upgrade-policy.json").content);
   assert.ok(upgrades.supportedEdges.some((edge) => edge.from === "0.8.6" && edge.to === "0.8.7" && edge.status === "historical"));

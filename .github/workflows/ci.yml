@@ -1,7 +1,9 @@
-name: Verify
+name: Verify · Template application
+run-name: Template verification · ${{ github.event_name }} · ${{ github.event.pull_request.number || github.sha }}
 
 on:
   pull_request:
+    branches: [main]
   push:
     branches: [main]
   schedule:
@@ -15,81 +17,173 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Policy and verification routing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      routing-ready: ${{ steps.plan.outcome == 'success' && 'true' || 'false' }}
+      verification: ${{ steps.plan.outputs.verification }}
+      deployment: ${{ steps.plan.outputs.deployment }}
+      documentation: ${{ steps.plan.outputs.documentation }}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Plan exact affected verification lanes
+        id: plan
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            planner_root="$RUNNER_TEMP/ci-change-plan-base"
+            if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json" && git show "$BASE_SHA:contracts/ci-change-plan-policy.json" | node -e 'const policy=JSON.parse(require("node:fs").readFileSync(0,"utf8")); process.exit(policy.schemaVersion===1&&["frontend","jvm","verification","deployment","codeqlJava","codeqlJavaScript","dependencyReview","documentation"].every(name=>policy.scopes?.[name])?0:1)'; then
+              git worktree add --detach "$planner_root" "$BASE_SHA"
+              trap 'git worktree remove --force "$planner_root"' EXIT
+              node "$planner_root/scripts/ci-change-plan.mjs" --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
+            else
+              cat >> "$GITHUB_OUTPUT" <<'EOF'
+          frontend=true
+          jvm=true
+          verification=true
+          deployment=true
+          codeql-java=true
+          codeql-javascript=true
+          dependency-review=true
+          documentation=true
+          full=true
+          reason=base-planner-unavailable; running every lane
+          EOF
+            fi
+          elif [ "$GITHUB_EVENT_NAME" = schedule ] || [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] || [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = 0000000000000000000000000000000000000000 ]; then
+            node scripts/ci-change-plan.mjs --all --github-output "$GITHUB_OUTPUT"
+          else
+            node scripts/ci-change-plan.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
+          fi
+      - name: Summarize verification routing
+        env:
+          VERIFICATION: ${{ steps.plan.outputs.verification }}
+          DEPLOYMENT: ${{ steps.plan.outputs.deployment }}
+          DOCUMENTATION: ${{ steps.plan.outputs.documentation }}
+        run: |
+          for selected in "$VERIFICATION" "$DEPLOYMENT" "$DOCUMENTATION"; do case "$selected" in true|false) ;; *) exit 1 ;; esac; done
+          {
+            echo "## Template verification routing"
+            echo
+            echo "| Lane | Selected |"
+            echo "| --- | --- |"
+            echo "| Application qualification | \`$VERIFICATION\` |"
+            echo "| Production deployment fixture | \`$DEPLOYMENT\` |"
+            echo "| Documentation/public contract | \`$DOCUMENTATION\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Validate checked-in documentation and public contract
+        if: steps.plan.outputs.documentation == 'true'
+        run: |
+          git diff --check "$BASE_SHA" "$HEAD_SHA"
+          if [ -f scripts/public-contract-policy.mjs ]; then
+            node scripts/public-contract-policy.mjs
+          fi
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+  # The required application/deployment result always reports. Docs-only pull requests use
+  # trusted-base routing to run the policy above and safely no-op here.
   verify:
+    name: Application and deployment verification
+    needs: changes
+    if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read
-
     steps:
+      - name: Require a successful routing decision
+        env:
+          COORDINATOR_RESULT: ${{ needs.changes.result }}
+          ROUTING_READY: ${{ needs.changes.outputs.routing-ready }}
+          VERIFICATION: ${{ needs.changes.outputs.verification }}
+          DEPLOYMENT: ${{ needs.changes.outputs.deployment }}
+        run: |
+          test "$COORDINATOR_RESULT" = success
+          test "$ROUTING_READY" = true
+          for selected in "$VERIFICATION" "$DEPLOYMENT"; do case "$selected" in true|false) ;; *) exit 1 ;; esac; done
+          printf 'Application qualification selected=%s; production deployment fixture selected=%s\n' "$VERIFICATION" "$DEPLOYMENT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.changes.outputs.verification == 'true' || needs.changes.outputs.deployment == 'true'
         with:
           persist-credentials: false
-
       - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        if: needs.changes.outputs.verification == 'true' || needs.changes.outputs.deployment == 'true'
         with:
           distribution: temurin
           java-version: "21"
       - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
-
+        if: needs.changes.outputs.verification == 'true' || needs.changes.outputs.deployment == 'true'
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: needs.changes.outputs.verification == 'true' || needs.changes.outputs.deployment == 'true'
         with:
           node-version: 24.18.1
           cache: npm
           cache-dependency-path: frontend/package-lock.json
           registry-url: https://registry.npmjs.org
           scope: "@vireocodedev"
-
       - name: Install frontend dependencies
+        if: needs.changes.outputs.verification == 'true' || needs.changes.outputs.deployment == 'true'
         run: corepack npm run setup
-
       - name: Install Chromium
+        if: needs.changes.outputs.verification == 'true' || needs.changes.outputs.deployment == 'true'
         working-directory: frontend
         run: corepack npm exec -- playwright install --with-deps chromium
-
-      - name: Run authoritative verification
+      - name: Run authoritative application verification
+        if: needs.changes.outputs.verification == 'true'
         run: ./scripts/verify-template.sh silent
-
       - name: Verify production PWA lifecycle
+        if: needs.changes.outputs.verification == 'true'
         working-directory: frontend
         run: corepack npm run test:pwa
-
       - name: Enforce Lighthouse production budgets
+        if: needs.changes.outputs.verification == 'true'
         working-directory: frontend
         run: corepack npm run performance:audit
-
       - name: Upload verification timing evidence
-        if: always()
+        if: always() && needs.changes.outputs.verification == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: verification-timing-${{ github.run_id }}-${{ github.run_attempt }}
           path: .verification-evidence/latest.json
           if-no-files-found: ignore
           retention-days: 90
-
       - name: Upload production performance evidence
-        if: always()
+        if: always() && needs.changes.outputs.verification == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: performance-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: .performance-evidence/lighthouse.json
           if-no-files-found: error
           retention-days: 90
-
       - name: Validate deployment descriptor
+        if: needs.changes.outputs.deployment == 'true'
         env:
           POSTGRES_OWNER_PASSWORD: ci-owner-only-password
           POSTGRES_RUNTIME_PASSWORD: ci-runtime-only-password
         run: docker compose config --quiet
-
       - name: Verify production-like deployment
+        if: needs.changes.outputs.deployment == 'true'
         env:
           POSTGRES_OWNER_PASSWORD: ci-owner-only-password
           POSTGRES_RUNTIME_PASSWORD: ci-runtime-only-password
         run: ./scripts/verify-deployment.sh
-
       - name: Upload browser traces
-        if: failure()
+        if: failure() && needs.changes.outputs.deployment == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-report

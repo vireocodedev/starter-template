@@ -13,7 +13,7 @@ The Compose overlay activates `prod,demo`: production-safe error, documentation,
 
 ## Automated immutable deployment
 
-`Template release` dispatches the Flagship workflow only after it has verified an
+`Release · Publish Template` dispatches the flagship deployment workflow only after it has verified an
 exact immutable published `starter-template@X.Y.Z` release. That workflow checks out
 the annotated tag, rebuilds the production artifacts, creates a deterministic
 allowlisted archive and manifest bound to the repository, tag, commit, GitHub
@@ -86,7 +86,7 @@ The repository is configured with:
 1. `VIREO_DEMO_BASE_URL=https://demo.vireocode.com` and
    `VIREO_DEMO_USERNAME=demo` repository variables.
 2. `VIREO_DEMO_PASSWORD` as an Actions secret.
-3. An hourly **Flagship demo** workflow that checks both health boundaries and the
+3. An hourly **Deploy · Flagship demo** workflow that checks both health boundaries and the
    authenticated read-only journey.
 4. A persistent host timer that resets the isolated volume every 24 hours.
 5. The host's atomic `operations/deployment-state.json` release record and the

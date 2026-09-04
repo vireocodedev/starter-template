@@ -153,28 +153,22 @@ function requireText(path, fragments) {
 }
 
 requireText("README.md", [
+  "https://vireocode.com/docs/",
+  "npm create vireo@latest operations",
+  "npm create vireo@latest operations-ui -- --profile frontend",
+  "corepack npm run setup",
+  "corepack npm run doctor",
+  "corepack npm run dev",
+  "corepack npm run verify",
+  "CONTRIBUTING.md",
   "SUPPORT.md",
   "GOVERNANCE.md",
+  "SECURITY.md",
   "docs/starter-compatibility.md",
   "docs/getting-started.md",
   "docs/customizing-the-template.md",
   "docs/deployment.md",
   "docs/flagship-demo.md",
-  "docs/flagship.md",
-  "docs/comparison.md",
-  "docs/security-threat-model.md",
-  "docs/security-hardening.md",
-  "docs/operations.md",
-  "docs/database-recovery.md",
-  "docs/incident-response.md",
-  "docs/offline.md",
-  "docs/accessibility.md",
-  "docs/manual-platform-checklist.md",
-  "docs/EVALUATION.md",
-  "docs/PUBLIC_API.md",
-  "docs/TEMPORAL_VALUES.md",
-  "https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml",
-  "https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml",
   "docs/template-release-preparation.md",
 ]);
 requireText("docs/template-release-preparation.md", [
@@ -190,25 +184,19 @@ requireText("docs/template-release-preparation.md", [
   "--include-attestations",
   "reconcile=true",
   "Hosted preparation PR",
-  "Prepare Template release",
+  "Release · Prepare Template version PR",
   "TEMPLATE_RELEASE_AUTOMATION_APP_ID",
   "TEMPLATE_RELEASE_AUTOMATION_APP_PRIVATE_KEY",
   "TEMPLATE_RELEASE_AUTOMATION_APP_SLUG",
   "repository-scoped App token",
   "It never force-pushes",
-  "Reconcile Template preparation PRs",
+  "Release · Reconcile Template preparation PRs",
   "persistent auto-merge",
   "expected-head SHA REST squash-merge",
 ]);
 requireText("docs/flagship.md", [
   "https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml",
   "https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml",
-]);
-requireText("README.md", [
-  templateReleaseTag,
-  templateReleaseContract,
-  `create-vireo@${templateReleasePolicy.createVireoVersion}`,
-  "Merging a\nrelease-coordinate change to `main` is explicit publication authorization",
 ]);
 requireText("SUPPORT.md", ["SECURITY.md", "CODE_OF_CONDUCT.md"]);
 requireText("SECURITY.md", [templateReleaseTag, templateReleaseContract]);
@@ -535,12 +523,12 @@ const executableDocumentationClaims = [
   },
   {
     documentation: "README.md",
-    documentedCommand: "./scripts/verify.sh",
+    documentedCommand: "corepack npm run verify",
     evidence: ".github/workflows/ci.yml",
     evidenceCommand: "./scripts/verify-template.sh silent",
   },
   {
-    documentation: "README.md",
+    documentation: "docs/deployment.md",
     documentedCommand: "./scripts/verify-deployment.sh",
     evidence: ".github/workflows/ci.yml",
     evidenceCommand: "./scripts/verify-deployment.sh",
@@ -742,7 +730,7 @@ const templatePreparationWorkflow = readFileSync(
   "utf8",
 );
 for (const fragment of [
-  "name: Prepare Template release",
+  "name: Release · Prepare Template version PR",
   "workflow_dispatch:",
   "release_version:",
   "jvm_version:",
@@ -792,7 +780,7 @@ const templatePreparationReconciler = readFileSync(
   "utf8",
 );
 for (const fragment of [
-  "name: Reconcile Template preparation PRs",
+  "name: Release · Reconcile Template preparation PRs",
   "schedule:",
   "workflow_dispatch:",
   "permissions: {}",

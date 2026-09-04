@@ -1,4 +1,4 @@
-name: Recover durable Template release
+name: Recovery · Template release
 
 on:
   workflow_call:

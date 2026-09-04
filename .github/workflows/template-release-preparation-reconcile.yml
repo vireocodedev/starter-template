@@ -1,4 +1,5 @@
-name: Reconcile Template preparation PRs
+name: Release · Reconcile Template preparation PRs
+run-name: Reconcile Template preparation PRs · ${{ github.event_name }}
 
 on:
   schedule:

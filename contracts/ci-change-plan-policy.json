@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "description": "Fail-closed exact-diff routing for Template pull-request verification. Unknown and CI-control paths require every lane.",
+  "safeNoop": {
+    "paths": [".gitignore", ".github/pull_request_template.md"],
+    "pathPrefixes": [".vscode/"],
+    "patterns": ["^\\.github/ISSUE_TEMPLATE/(?:bug_report|feature_request|config)\\.yml$"]
+  },
+  "control": {
+    "paths": [
+      "contracts/ci-change-plan-policy.json",
+      "contracts/github-actions-policy.json",
+      "contracts/verification-budget-policy.json",
+      "contracts/toolchain-policy.json",
+      "scripts/ci-change-plan.mjs",
+      "scripts/ci-change-plan.test.mjs",
+      "scripts/ci-change-plan-coverage.test.mjs",
+      "scripts/ci-required-contexts.test.mjs",
+      "scripts/workflow-security-policy.mjs",
+      "scripts/repository-security-policy.mjs",
+      "scripts/verification-pipeline-policy.mjs",
+      "scripts/verify-template.sh",
+      ".gitleaks.toml"
+    ],
+    "pathPrefixes": [
+      ".github/workflows/",
+      ".github/rulesets/",
+      ".github/settings/",
+      ".github/environments/"
+    ]
+  },
+  "scopes": {
+    "frontend": {
+      "paths": [
+        "frontend/package.json",
+        "frontend/package-lock.json",
+        "frontend/index.html",
+        "frontend/.dockerignore",
+        "frontend/.env.example",
+        "frontend/.prettierignore",
+        "frontend/.prettierrc",
+        "frontend/AGENTS.md"
+      ],
+      "pathPrefixes": ["frontend/src/", "frontend/public/", "frontend/tests/", "frontend/scripts/", "frontend/.storybook/"],
+      "patterns": ["^frontend/(?:[^/]+\\.(?:[cm]?[jt]s|tsx|json|css|html)|Dockerfile|nginx\\.conf)$"]
+    },
+    "jvm": {
+      "paths": [
+        "build.gradle",
+        "settings.gradle",
+        "gradle.properties",
+        "gradlew",
+        "gradlew.bat"
+      ],
+      "pathPrefixes": ["src/", "gradle/"]
+    },
+    "verification": {
+      "paths": [
+        "package.json",
+        "Dockerfile",
+        "compose.yaml",
+        "compose.dev.yaml",
+        "compose.demo.yaml",
+        "compose.smoke.yaml",
+        ".env.example",
+        "build.gradle",
+        "settings.gradle",
+        "gradle.properties",
+        "gradlew",
+        "gradlew.bat",
+        "frontend/package.json",
+        "frontend/package-lock.json",
+        "frontend/.dockerignore",
+        "frontend/.env.example",
+        "frontend/.prettierignore",
+        "frontend/.prettierrc",
+        "frontend/AGENTS.md"
+      ],
+      "pathPrefixes": ["src/", "frontend/src/", "frontend/public/", "frontend/tests/", "frontend/scripts/", "frontend/.storybook/", "deploy/", "contracts/", ".vireo/", ".agents/"],
+      "patterns": [
+        "^frontend/(?:[^/]+\\.(?:[cm]?[jt]s|tsx|json|css|html)|Dockerfile|nginx\\.conf)$",
+        "^scripts/(?!ci-change-plan(?:-coverage)?(?:\\.test)?\\.mjs$).+",
+        "^\\.(?:dockerignore|env\\.example|java-version|nvmrc)$"
+      ]
+    },
+    "deployment": {
+      "paths": [
+        ".dockerignore",
+        "Dockerfile",
+        "compose.yaml",
+        "compose.dev.yaml",
+        "compose.demo.yaml",
+        "compose.smoke.yaml",
+        "build.gradle",
+        "settings.gradle",
+        "gradle.properties",
+        "frontend/package.json",
+        "frontend/package-lock.json",
+        "frontend/.dockerignore"
+      ],
+      "pathPrefixes": ["src/main/", "frontend/src/", "frontend/public/", "deploy/"],
+      "patterns": ["^frontend/(?:[^/]+\\.(?:[cm]?[jt]s|tsx|json|css|html)|Dockerfile|nginx\\.conf)$", "^scripts/(?:verify-deployment|container-context-policy|deployment-contract|compose-database-contract|backend-healthcheck).*"]
+    },
+    "codeqlJava": {
+      "paths": ["build.gradle", "settings.gradle", "gradle.properties", "gradlew", "gradlew.bat"],
+      "pathPrefixes": ["src/main/java/", "src/test/java/", "gradle/"]
+    },
+    "codeqlJavaScript": {
+      "pathPrefixes": ["frontend/src/", "frontend/tests/", "frontend/scripts/", "frontend/.storybook/"],
+      "patterns": ["^frontend/[^/]+\\.(?:[cm]?[jt]s|tsx)$", "^scripts/.*\\.(?:[cm]?[jt]s|tsx)$"]
+    },
+    "dependencyReview": {
+      "paths": ["package.json", "frontend/package.json", "frontend/package-lock.json", "build.gradle", "settings.gradle", "gradle.properties", "Dockerfile", "compose.yaml", "compose.dev.yaml", "compose.demo.yaml", "compose.smoke.yaml"],
+      "pathPrefixes": ["gradle/"],
+      "patterns": ["^deploy/(?:Dockerfile(?:\\.[^/]+)?|.*\\.ya?ml)$", "^frontend/Dockerfile$"]
+    },
+    "documentation": {
+      "paths": ["README.md", "CONTRIBUTING.md", "GOVERNANCE.md", "SECURITY.md", "SUPPORT.md", "CODE_OF_CONDUCT.md", "LICENSE", "AGENTS.md", "frontend/AGENTS.md", "src/AGENTS.md", "scripts/AGENTS.md", ".vireo/application/AGENTS.md"],
+      "pathPrefixes": ["docs/", "frontend/docs/", ".vireo/application/.agents/"]
+    }
+  }
+}
