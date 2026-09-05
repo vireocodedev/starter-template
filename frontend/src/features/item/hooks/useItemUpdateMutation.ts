@@ -12,7 +12,7 @@ import {
 } from "../services/itemQueryCache";
 
 type UpdateItemVariables = {
-  id: number;
+  id: string;
   value: Item;
 };
 

@@ -34,8 +34,11 @@ const itemEn = {
   table: {
     item: "Item",
     noDescription: "No description",
+    pending: "Pending",
+    conflict: "Conflict",
     actions: "Actions",
     history: "Item history",
+    historyOffline: "History is available when the app is online.",
     historyAria: "History",
     edit: "Edit item",
     editAria: "Edit",

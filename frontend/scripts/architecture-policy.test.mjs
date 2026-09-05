@@ -11,6 +11,7 @@ import {
 
 test("only explicit application composition adapters may depend on business features", () => {
   assert.equal(mayAppImportFeature("app/adapters/app.adapters.ts"), true);
+  assert.equal(mayAppImportFeature("app/adapters/app-offline.adapter.ts"), true);
   assert.equal(mayAppImportFeature("app/adapters/mock/app.mock-adapters.ts"), true);
   assert.equal(mayAppImportFeature("app/app.localization.ts"), true);
   assert.equal(mayAppImportFeature("app/shell/providers/AppProvider.tsx"), false);

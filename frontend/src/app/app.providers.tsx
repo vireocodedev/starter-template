@@ -17,6 +17,7 @@ import {
 } from "@/app/data/network/services/appQueryErrorReporting";
 import { AppAuthProvider } from "@/app/shell/providers/AppAuthProvider";
 import { AppPwaProvider } from "@/app/shell/providers/AppPwaProvider";
+import { AppOfflineProvider } from "@/app/offline/providers/AppOfflineProvider";
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({ onError: reportQueryError }),
@@ -31,6 +32,7 @@ const providers = [
   child => <AppThemeProvider>{child}</AppThemeProvider>,
   child => <QueryClientProvider client={queryClient}>{child}</QueryClientProvider>,
   child => <AppAuthProvider>{child}</AppAuthProvider>,
+  child => <AppOfflineProvider>{child}</AppOfflineProvider>,
   child => <PageOverlayControllerProvider>{child}</PageOverlayControllerProvider>,
   child => <VireoConfirmationProvider>{child}</VireoConfirmationProvider>,
   child => <AppUnsavedChangesProvider>{child}</AppUnsavedChangesProvider>,

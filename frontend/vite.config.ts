@@ -235,6 +235,10 @@ export default defineConfig({
     ],
   },
   server: {
+    headers: {
+      "Cross-Origin-Embedder-Policy": "require-corp",
+      "Cross-Origin-Opener-Policy": "same-origin",
+    },
     ...(USE_LOCAL_STARTER
       ? {
           fs: {

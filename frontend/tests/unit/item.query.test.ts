@@ -56,7 +56,8 @@ describe("item query contracts", () => {
 
   it("merges infinite Item pages without losing the server total", () => {
     const item = {
-      id: 1,
+      id: "00000000-0000-4000-8000-000000000301",
+      version: 0,
       name: "First",
       description: "",
       quantity: 1,
@@ -64,7 +65,13 @@ describe("item query contracts", () => {
     };
     const merged = mergeItemSearchPages([
       { content: [item], number: 0, size: 1, totalElements: 2, totalPages: 2 },
-      { content: [{ ...item, id: 2, name: "Second" }], number: 1, size: 1, totalElements: 2, totalPages: 2 },
+      {
+        content: [{ ...item, id: "00000000-0000-4000-8000-000000000302", name: "Second" }],
+        number: 1,
+        size: 1,
+        totalElements: 2,
+        totalPages: 2,
+      },
     ]);
 
     expect(merged).toMatchObject({ number: 1, size: 2, totalElements: 2, totalPages: 2 });
@@ -74,8 +81,15 @@ describe("item query contracts", () => {
   it("updates and rolls back cached item searches without clearing usable rows", async () => {
     const queryClient = new QueryClient();
     const key = ItemQuery.search({ ...pagination, page: 0 }, { searchText: "", queryFilters: null }).queryKey;
-    const first = { id: 1, name: "First", description: "", quantity: 1, status: "DRAFT" as const };
-    const second = { ...first, id: 2, name: "Second" };
+    const first = {
+      id: "00000000-0000-4000-8000-000000000303",
+      version: 0,
+      name: "First",
+      description: "",
+      quantity: 1,
+      status: "DRAFT" as const,
+    };
+    const second = { ...first, id: "00000000-0000-4000-8000-000000000304", name: "Second" };
     queryClient.setQueryData(key, {
       content: [first, second],
       number: 0,
@@ -105,12 +119,19 @@ describe("item query contracts", () => {
     const queryClient = new QueryClient();
     const unfilteredKey = ItemQuery.search(pagination, { searchText: "", queryFilters: null }).queryKey;
     const filteredKey = ItemQuery.search(pagination, filters).queryKey;
-    const second = { id: 2, name: "Second", description: "", quantity: 1, status: "DRAFT" as const };
+    const second = {
+      id: "00000000-0000-4000-8000-000000000305",
+      version: 0,
+      name: "Second",
+      description: "",
+      quantity: 1,
+      status: "DRAFT" as const,
+    };
     const page = { content: [second], number: 0, size: 10, totalElements: 1, totalPages: 1 };
     queryClient.setQueryData(unfilteredKey, page);
     queryClient.setQueryData(filteredKey, page);
 
-    const first = { ...second, id: 1, name: "First" };
+    const first = { ...second, id: "00000000-0000-4000-8000-000000000306", name: "First" };
     insertItemIntoUnfilteredSearchQueries(queryClient, first);
 
     expect(queryClient.getQueryData<{ content: (typeof first)[]; totalElements: number }>(unfilteredKey)).toMatchObject(

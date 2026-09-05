@@ -1,17 +1,11 @@
 const en = {
-  connectivity: {
-    "browser-offline": "Browser offline",
-    checking: "Checking service",
-    reachable: "Service reachable",
-    unavailable: "Service unavailable",
-    mock: "Mock service",
-    message: {
-      "browser-offline": "Your browser reports no network connection. Server-backed data may be unavailable.",
-      checking: "Checking whether the server can be reached.",
-      reachable: "The server is reachable.",
-      unavailable: "The server cannot be reached. Server-backed data may be unavailable.",
-      mock: "This browser is using the local mock service.",
-    },
+  offline: {
+    ONLINE: "Online",
+    OFFLINE: "Offline",
+    SYNCING: "Syncing",
+    PENDING: "{{count}} pending",
+    FAILED: "{{count}} failed",
+    OPEN_SETTINGS: "Open offline settings",
   },
   navigation: {
     PRIMARY: "Primary navigation",
@@ -24,7 +18,13 @@ const en = {
     OPEN: "Open navigation",
     QUICK: "Quick navigation",
   },
-  account: { LABEL: "Account", OPEN_MENU: "Open account menu", SIGN_OUT: "Sign out" },
+  account: {
+    LABEL: "Account",
+    OPEN_MENU: "Open account menu",
+    SIGN_OUT: "Sign out",
+    SIGN_OUT_PENDING_TITLE: "Discard offline changes and sign out?",
+    SIGN_OUT_PENDING_MESSAGE: "Signing out removes {{count}} queued or failed changes from this device.",
+  },
   auth: {
     outcomes: {
       unauthenticated: "Sign in to continue.",

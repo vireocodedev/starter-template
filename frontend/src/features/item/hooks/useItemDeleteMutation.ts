@@ -18,7 +18,7 @@ export function useItemDeleteMutation() {
   return useVireoMutation<Item, Error, Item, ItemSearchQuerySnapshot>({
     mutationKey: ItemMutationKeys.delete,
     mutationFn: async item => {
-      await itemApi.delete(item.id);
+      await itemApi.delete(item.id, item.version);
       return item;
     },
     successMessage: item => t("messages.deleted", { name: item.name }),

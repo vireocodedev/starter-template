@@ -53,6 +53,10 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { ITEMS_TRANSLATION_NAMESPACE } from "@/app/app.localization";
 import { APP_THEME_TOKENS } from "@/app/ui/theme/config/theme.tokens";
+import { sigConnectivityStatus } from "@/app/offline/signals/sigConnectivityStatus";
+import { sigCacheReadiness } from "@/app/offline/signals/sigCacheReadiness";
+import { sigSyncSummary } from "@/app/offline/signals/sigSyncSummary";
+import { CacheStatus, ConnectivityStatus, SyncStatus } from "@/app/offline/models/AppOffline";
 
 type ItemOverlayModes = {
   form: { item?: Item };
@@ -145,6 +149,7 @@ export const AppPageItemsListView = React.memo(function AppPageItemsListView({
     [t],
   );
   const pendingUpdateId = usePendingItemUpdateId();
+  const offline = sigConnectivityStatus.value === ConnectivityStatus.OFFLINE;
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const totalResults = result.data?.totalElements;
   const items = result.data?.content ?? [];
@@ -169,6 +174,7 @@ export const AppPageItemsListView = React.memo(function AppPageItemsListView({
             : "loaded";
   const columns = useItemTableColumns({
     onHistory: onOpenHistory,
+    historyDisabled: offline,
     onEdit: canManage ? onOpenEdit : undefined,
     onDelete: canManage ? onRequestDelete : undefined,
   });
@@ -490,6 +496,10 @@ export function AppPageItems() {
   const { user } = useAppAuth();
   const preferences = sigAppPreferences.value;
   const canManage = user?.role === "SUPERADMIN";
+  const canMutate =
+    canManage &&
+    sigSyncSummary.value.status !== SyncStatus.SYNCING &&
+    sigCacheReadiness.value.status !== CacheStatus.HYDRATING;
   const confirm = useVireoConfirmation();
   const { mutateAsync: deleteItem } = useItemDeleteMutation();
   const initialState = React.useMemo(() => readEntityListState<VireoResponsiveTableFilters>(ITEM_LIST_STATE_KEY), []);
@@ -603,9 +613,9 @@ export function AppPageItems() {
   );
 
   return (
-    <AppPageItemsFrame canManage={canManage} onOpenCreate={openCreate}>
+    <AppPageItemsFrame canManage={canMutate} onOpenCreate={openCreate}>
       <ItemListContent
-        canManage={canManage}
+        canManage={canMutate}
         filters={filters}
         onFiltersChange={setFilters}
         queryFilters={queryFilters}

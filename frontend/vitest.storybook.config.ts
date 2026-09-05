@@ -14,7 +14,7 @@ export default mergeConfig(
     // transform injects its runtime import, which must also be ready before the
     // browser projects start so Vite does not reload them mid-run.
     optimizeDeps: {
-      include: ["@preact/signals-react/runtime", "@testing-library/dom"],
+      include: ["@preact/signals-react/runtime", "@testing-library/dom", "@vireocodedev/sqlite"],
     },
     test: {
       testTimeout: 30_000,

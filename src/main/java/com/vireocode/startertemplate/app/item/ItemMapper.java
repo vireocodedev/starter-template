@@ -13,6 +13,7 @@ public interface ItemMapper extends BaseMapper<Item, ItemDTO> {
 
     @Override
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "version", ignore = true)
     Item toDomain(ItemDTO dto);
 
     @Override
@@ -20,5 +21,6 @@ public interface ItemMapper extends BaseMapper<Item, ItemDTO> {
 
     @Override
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "version", ignore = true)
     void update(ItemDTO update, @MappingTarget Item destination);
 }

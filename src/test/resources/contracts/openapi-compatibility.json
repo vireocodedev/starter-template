@@ -8,10 +8,15 @@
     },
     "DELETE /api/items/{id}": {
       "responses": ["204", "400", "401", "403", "409", "500"],
-      "request": null,
+      "request": "ItemDeleteRequest",
       "security": ["csrfToken", "sessionCookie"]
     },
     "GET /api/auth/me": {
+      "responses": ["200", "400", "401", "403", "409", "500"],
+      "request": null,
+      "security": ["sessionCookie"]
+    },
+    "GET /api/app/current-user": {
       "responses": ["200", "400", "401", "403", "409", "500"],
       "request": null,
       "security": ["sessionCookie"]
@@ -105,12 +110,14 @@
   "schemaNames": [
     "ApiError",
     "AuthMessageResponse",
+    "AppCurrentUserResponse",
     "ChangePasswordRequest",
     "ChangeUsernameRequest",
     "CurrentUserResponse",
     "HistoryActor",
     "HistoryRecord",
     "ItemDTO",
+    "ItemDeleteRequest",
     "JsonNode",
     "LoginRequest",
     "LoginResponse",
@@ -136,13 +143,21 @@
     },
     "ItemDTO": {
       "required": ["name", "quantity", "status"],
-      "properties": ["description", "id", "name", "quantity", "status"],
+      "properties": ["description", "id", "name", "quantity", "status", "version"],
       "constraints": {
         "name.maxLength": 255,
         "description.maxLength": 2000,
         "quantity.minimum": 0,
         "status.enum": ["ACTIVE", "ARCHIVED", "DRAFT"]
       }
+    },
+    "ItemDeleteRequest": {
+      "required": ["version"],
+      "properties": ["version"]
+    },
+    "AppCurrentUserResponse": {
+      "required": [],
+      "properties": ["id", "role", "username"]
     },
     "LoginRequest": {
       "required": ["password", "username"],

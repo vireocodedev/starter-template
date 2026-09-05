@@ -6,7 +6,8 @@ export const ItemStatus = z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]);
 export type ItemStatus = z.infer<typeof ItemStatus>;
 
 export const Item = z.object({
-  id: z.number(),
+  id: z.uuid(),
+  version: z.number().int().nonnegative(),
   name: z.string(),
   description: z
     .string()
@@ -20,7 +21,8 @@ export type Item = z.infer<typeof Item>;
 
 export function getDefaultItem(): Item {
   return {
-    id: 0,
+    id: crypto.randomUUID(),
+    version: 0,
     name: "",
     description: "",
     quantity: 0,

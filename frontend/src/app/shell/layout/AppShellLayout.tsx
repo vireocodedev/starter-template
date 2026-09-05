@@ -12,10 +12,9 @@ import {
 } from "@mui/icons-material";
 import {
   Avatar,
-  Alert,
+  Badge,
   Box,
   Button,
-  Collapse,
   Divider,
   IconButton,
   List,
@@ -29,6 +28,7 @@ import {
   VireoApplicationNavigation,
   VireoApplicationNavigationItem,
   VireoMobileBottomNavigation,
+  useVireoConfirmation,
   type VireoApplicationNavigationMode,
 } from "@vireocodedev/ui";
 import { Outlet, useLocation, useNavigate } from "react-router";
@@ -41,29 +41,15 @@ import { isAppRouteActive } from "@/app/shell/routing/isAppRouteActive";
 import { useAppTranslation } from "@/app/ui/localization/use-app-translation";
 import { APP_THEME_TOKENS } from "@/app/ui/theme/config/theme.tokens";
 import { appConfig } from "@/app/config/app-config";
-import { useAppConnectivity, type AppConnectivityStatus } from "@/app/connectivity/useAppConnectivity";
+import { sigConnectivityStatus } from "@/app/offline/signals/sigConnectivityStatus";
+import { sigSyncSummary } from "@/app/offline/signals/sigSyncSummary";
+import { ConnectivityStatus, SyncStatus } from "@/app/offline/models/AppOffline";
 
 const navigationIcons: Record<AppNavigationIcon, React.ReactNode> = {
   OVERVIEW: <DashboardOutlined />,
   ITEMS: <Inventory2Outlined />,
   SETTINGS: <SettingsOutlined />,
   GENERATED: <ExtensionOutlined />,
-};
-
-const connectivityPalette: Record<AppConnectivityStatus, "error" | "info" | "success" | "warning"> = {
-  "browser-offline": "warning",
-  checking: "info",
-  reachable: "success",
-  unavailable: "error",
-  mock: "info",
-};
-
-const connectivitySeverity: Record<AppConnectivityStatus, "error" | "info" | "warning"> = {
-  "browser-offline": "warning",
-  checking: "info",
-  reachable: "info",
-  unavailable: "error",
-  mock: "info",
 };
 
 export function AppShellLayout() {
@@ -76,7 +62,17 @@ export function AppShellLayout() {
   const preferences = sigAppPreferences.value;
   const location = useLocation();
   const navigate = useNavigate();
-  const connectivity = useAppConnectivity();
+  const confirm = useVireoConfirmation();
+  const connectivity = sigConnectivityStatus.value;
+  const sync = sigSyncSummary.value;
+  const syncLabel =
+    sync.failed > 0
+      ? t("offline.FAILED", { count: sync.failed })
+      : sync.status === SyncStatus.SYNCING
+        ? t("offline.SYNCING")
+        : sync.pending > 0
+          ? t("offline.PENDING", { count: sync.pending })
+          : null;
   const navigation = React.useMemo(
     () =>
       APP_NAVIGATION_PAGES.map(item => ({
@@ -118,10 +114,21 @@ export function AppShellLayout() {
     [desktop],
   );
 
-  const signOut = React.useCallback(() => {
+  const signOut = React.useCallback(async () => {
     setAccountAnchor(null);
-    void logout().then(() => navigate(APP_PAGES.login));
-  }, [logout, navigate]);
+    const performLogout = () => logout().then(() => navigate(APP_PAGES.login));
+    if (sync.pending + sync.failed === 0) {
+      await performLogout();
+      return;
+    }
+    await confirm({
+      title: t("account.SIGN_OUT_PENDING_TITLE"),
+      message: <>{t("account.SIGN_OUT_PENDING_MESSAGE", { count: sync.pending + sync.failed })}</>,
+      confirmLabel: t("account.SIGN_OUT"),
+      confirmColor: "error",
+      onConfirm: performLogout,
+    });
+  }, [confirm, logout, navigate, sync.failed, sync.pending, t]);
 
   return (
     <Box sx={{ display: "flex", height: "100dvh", minHeight: 0, overflow: "hidden" }}>
@@ -195,30 +202,6 @@ export function AppShellLayout() {
                       <Typography noWrap sx={{ fontWeight: 800, lineHeight: 1.2 }}>
                         {appConfig.name}
                       </Typography>
-                      <Box sx={{ alignItems: "center", display: "flex", gap: 0.75, mt: 0.25 }}>
-                        <Box
-                          aria-hidden
-                          sx={{
-                            bgcolor: `${connectivityPalette[connectivity.status]}.main`,
-                            borderRadius: "50%",
-                            boxShadow: theme =>
-                              `0 0 8px color-mix(in srgb, ${theme.palette[connectivityPalette[connectivity.status]].main} 55%, transparent)`,
-                            height: 6,
-                            width: 6,
-                          }}
-                        />
-                        <Typography
-                          color="text.secondary"
-                          sx={{
-                            fontSize: "0.625rem",
-                            fontWeight: 750,
-                            letterSpacing: "0.08em",
-                            textTransform: "uppercase",
-                          }}
-                        >
-                          {t(`connectivity.${connectivity.status}`)}
-                        </Typography>
-                      </Box>
                     </Box>
                   )}
                   {desktop && !preferences.navigationLocked && (
@@ -269,6 +252,42 @@ export function AppShellLayout() {
                   />
                 ))}
               </List>
+              <Box sx={{ bgcolor: "appSurface.chrome", flexShrink: 0, px: compact ? 0.75 : 1.25, py: 1 }}>
+                <Tooltip title={t("offline.OPEN_SETTINGS")}>
+                  <Button
+                    aria-label={t("offline.OPEN_SETTINGS")}
+                    color="inherit"
+                    fullWidth
+                    onClick={() => navigateTo(`${APP_PAGES.settings}#offline`)}
+                    sx={{
+                      justifyContent: compact ? "center" : "flex-start",
+                      minWidth: 0,
+                      px: compact ? 0.75 : 1,
+                      "& .MuiButton-startIcon": { mr: compact ? 0 : 0.75 },
+                    }}
+                    startIcon={
+                      <Badge
+                        badgeContent={compact ? sync.pending + sync.failed : 0}
+                        color={sync.failed > 0 ? "error" : "primary"}
+                        max={99}
+                      >
+                        <Box
+                          aria-hidden
+                          sx={{
+                            bgcolor: connectivity === ConnectivityStatus.ONLINE ? "success.main" : "warning.main",
+                            borderRadius: "50%",
+                            height: 8,
+                            width: 8,
+                          }}
+                        />
+                      </Badge>
+                    }
+                  >
+                    {!compact && `${t(`offline.${connectivity}`)}${syncLabel ? ` · ${syncLabel}` : ""}`}
+                  </Button>
+                </Tooltip>
+              </Box>
+              <Divider sx={{ flexShrink: 0 }} />
               <Box
                 data-app-navigation-footer
                 sx={{
@@ -283,7 +302,6 @@ export function AppShellLayout() {
                   }),
                 }}
               >
-                <Divider sx={{ flexShrink: 0 }} />
                 {compact ? (
                   <Box
                     sx={{
@@ -348,7 +366,7 @@ export function AppShellLayout() {
                       <Button
                         color="inherit"
                         fullWidth
-                        onClick={signOut}
+                        onClick={() => void signOut()}
                         role="menuitem"
                         startIcon={<LogoutOutlined />}
                         sx={{ justifyContent: "flex-start", mt: 0.5 }}
@@ -378,7 +396,7 @@ export function AppShellLayout() {
                       </Typography>
                     </Box>
                     <Tooltip title={t("account.SIGN_OUT")}>
-                      <IconButton aria-label={t("account.SIGN_OUT")} onClick={signOut} size="small">
+                      <IconButton aria-label={t("account.SIGN_OUT")} onClick={() => void signOut()} size="small">
                         <LogoutOutlined />
                       </IconButton>
                     </Tooltip>
@@ -403,16 +421,6 @@ export function AppShellLayout() {
             overflow: "hidden",
           }}
         >
-          <Collapse in={connectivity.status !== "reachable" && connectivity.status !== "mock"}>
-            <Alert
-              role="status"
-              severity={connectivitySeverity[connectivity.status]}
-              square
-              sx={{ borderRadius: 0, py: 0.25 }}
-            >
-              {t(`connectivity.message.${connectivity.status}`)}
-            </Alert>
-          </Collapse>
           <Box
             component="main"
             sx={{

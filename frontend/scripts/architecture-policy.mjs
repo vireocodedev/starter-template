@@ -2,6 +2,8 @@ import ts from "typescript";
 
 const appFeatureCompositionFiles = new Set([
   "app/adapters/app.adapters.ts",
+  "app/adapters/app-offline.adapter.ts",
+  "app/adapters/app-offline.composition.ts",
   "app/adapters/mock/app.mock-adapters.ts",
   "app/adapters/public.ts",
   "app/app.localization.ts",

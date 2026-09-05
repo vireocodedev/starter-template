@@ -37,8 +37,11 @@ const itemHr = {
   table: {
     item: "Stavka",
     noDescription: "Nema opisa",
+    pending: "Na čekanju",
+    conflict: "Sukob",
     actions: "Radnje",
     history: "Povijest stavke",
+    historyOffline: "Povijest je dostupna kada je aplikacija povezana.",
     historyAria: "Povijest",
     edit: "Uredi stavku",
     editAria: "Uredi",

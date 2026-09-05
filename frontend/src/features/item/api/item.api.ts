@@ -15,6 +15,6 @@ export interface ItemApi {
     request?: ItemRequestOptions,
   ): Promise<PageableResponse<Item>>;
   create(value: Item): Promise<Item>;
-  update(id: number, value: Item): Promise<Item>;
-  delete(id: number): Promise<void>;
+  update(id: string, value: Item): Promise<Item>;
+  delete(id: string, version: number): Promise<void>;
 }

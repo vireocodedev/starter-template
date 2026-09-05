@@ -54,10 +54,12 @@ cases and the single-sample accessibility, best-practices, and timing hard-cap
 failures before the browser audit runs.
 
 The existing production build also limits the largest JavaScript chunk to 700 KiB
-and total JavaScript to 2,400 KiB before compression. These are regression budgets
-for the unmodified canonical Template, not field-performance or application-page
-promises. Network proximity, deployment compression/CDN behavior, application data,
-third-party code, and device capability remain application/deployment variables.
+and total JavaScript to 2,500 KiB before compression. The total includes the offline
+showcase's separately loaded application SQLite Worker and WASM bootstrap. These are
+regression budgets for the unmodified canonical Template, not field-performance or
+application-page promises. Network proximity, deployment compression/CDN behavior,
+application data, third-party code, and device capability remain
+application/deployment variables.
 
 Physical low-end and real-user field measurements remain open manual evidence in
 the [platform checklist](manual-platform-checklist.md).

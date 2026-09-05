@@ -7,7 +7,7 @@
     "@vireocodedev/localization": ["^0.2.2"],
     "@vireocodedev/query": ["^0.2.2"],
     "@vireocodedev/shell": ["^0.2.2"],
-    "@vireocodedev/sqlite": ["^0.2.2", "^0.2.3"],
+    "@vireocodedev/sqlite": ["^0.2.3", "^0.2.2"],
     "@vireocodedev/ui": ["^0.3.1"]
   },
   "lockedPackages": {
@@ -16,6 +16,7 @@
     "@vireocodedev/localization": "0.2.2",
     "@vireocodedev/query": "0.2.2",
     "@vireocodedev/shell": "0.2.2",
+    "@vireocodedev/sqlite": "0.2.3",
     "@vireocodedev/ui": "0.3.1"
   }
 }

@@ -1,5 +1,7 @@
 package com.vireocode.startertemplate.app.item;
 
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -52,14 +54,14 @@ public class ItemController {
 
     @PutMapping("/{id}")
     @PreAuthorize(AppSecurityExpressions.CAN_MANAGE_ITEMS)
-    public ItemDTO update(@PathVariable("id") Long id, @Valid @RequestBody ItemDTO item) {
+    public ItemDTO update(@PathVariable("id") UUID id, @Valid @RequestBody ItemDTO item) {
         return service.update(id, item);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize(AppSecurityExpressions.CAN_MANAGE_ITEMS)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("id") Long id) {
-        service.delete(id);
+    public void delete(@PathVariable("id") UUID id, @Valid @RequestBody ItemDeleteRequest request) {
+        service.deleteWithVersion(id, request.version());
     }
 }

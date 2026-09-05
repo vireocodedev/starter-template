@@ -17,11 +17,46 @@ import type { Item } from "@/features/item/public";
 import { AppPageHomeView } from "../AppPageHomeView";
 
 const overviewItems: Item[] = [
-  { id: 1, name: "Portable barcode scanners", description: "Receiving and dispatch", quantity: 18, status: "ACTIVE" },
-  { id: 2, name: "Thermal label rolls", description: "Packing stations", quantity: 4, status: "ACTIVE" },
-  { id: 3, name: "Safety inspection kits", description: "Awaiting approval", quantity: 2, status: "DRAFT" },
-  { id: 4, name: "Rugged field tablets", description: "Warehouse leads", quantity: 11, status: "ACTIVE" },
-  { id: 5, name: "Legacy handheld terminals", description: "Audit history", quantity: 0, status: "ARCHIVED" },
+  {
+    id: "00000000-0000-4000-8000-000000000011",
+    version: 0,
+    name: "Portable barcode scanners",
+    description: "Receiving and dispatch",
+    quantity: 18,
+    status: "ACTIVE",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000012",
+    version: 0,
+    name: "Thermal label rolls",
+    description: "Packing stations",
+    quantity: 4,
+    status: "ACTIVE",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000013",
+    version: 0,
+    name: "Safety inspection kits",
+    description: "Awaiting approval",
+    quantity: 2,
+    status: "DRAFT",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000014",
+    version: 0,
+    name: "Rugged field tablets",
+    description: "Warehouse leads",
+    quantity: 11,
+    status: "ACTIVE",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000015",
+    version: 0,
+    name: "Legacy handheld terminals",
+    description: "Audit history",
+    quantity: 0,
+    status: "ARCHIVED",
+  },
 ];
 
 const meta = {

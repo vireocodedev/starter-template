@@ -7,11 +7,13 @@ import { ItemFormFields } from "@/features/item/components/forms/ItemFormFields/
 import { useItemForm } from "@/features/item/hooks/useItemForm";
 import { DEFAULT_ITEM_FORM_VALIDATION_CONTEXT, type Item } from "@/features/item/models/Item";
 import { AppPageLogin } from "@/pages/login/AppPageLogin";
+import { AppPageSettings } from "@/pages/settings/AppPageSettings";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 const item: Item = {
-  id: 42,
+  id: "00000000-0000-4000-8000-000000000101",
+  version: 0,
   name: "Starter audit",
   description: "Verify pending action behavior.",
   quantity: 2,
@@ -124,5 +126,37 @@ describe("busy action loading-state contract", () => {
     await act(async () => submission.reject(new Error("Invalid credentials")));
     expect(await screen.findByText("The sign-in service is temporarily unavailable. Try again later.")).toBeVisible();
     await waitFor(() => expect(submit).toBeEnabled());
+  });
+
+  it("permits one offline maintenance action and recovers after rejection", async () => {
+    const reset = deferred<void>();
+    const resetOfflineCache = vi.fn(() => reset.promise);
+
+    render(
+      <AppStorybookProvider initialEntries={["/settings"]}>
+        <AppPageSettings
+          offlineOperations={{
+            discard: vi.fn().mockResolvedValue(undefined),
+            reset: resetOfflineCache,
+            retry: vi.fn().mockResolvedValue(undefined),
+          }}
+        />
+      </AppStorybookProvider>,
+    );
+
+    const resetButton = screen.getByRole("button", { name: "Reset cache" });
+    fireEvent.click(resetButton);
+
+    await waitFor(() => expect(resetButton).toBeDisabled());
+    expect(resetButton).toHaveAttribute("aria-busy", "true");
+    fireEvent.click(resetButton);
+    expect(resetOfflineCache).toHaveBeenCalledOnce();
+
+    await act(async () => reset.reject(new Error("Storage unavailable")));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The offline action could not be completed: Storage unavailable",
+    );
+    await waitFor(() => expect(resetButton).toBeEnabled());
+    expect(resetButton).toHaveAttribute("aria-busy", "false");
   });
 });

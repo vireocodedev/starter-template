@@ -11,12 +11,14 @@ export type UseItemTableColumnsOptions = {
   onDelete?: (item: Item) => void | Promise<void>;
   onEdit?: (item: Item) => void;
   onHistory?: (item: Item) => void;
+  historyDisabled?: boolean;
 };
 
 export function useItemTableColumns({
   onDelete,
   onEdit,
   onHistory,
+  historyDisabled = false,
 }: UseItemTableColumnsOptions): readonly VireoResponsiveTableColumn<Item>[] {
   const { t, i18n } = useItemTranslation();
   return React.useMemo(
@@ -28,7 +30,15 @@ export function useItemTableColumns({
         renderHeader: (): React.ReactNode => t("table.item"),
         renderBody: (item: Item) => (
           <Stack spacing={0.25}>
-            <Typography sx={{ fontWeight: 700 }}>{item.name}</Typography>
+            <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+              <Typography sx={{ fontWeight: 700 }}>{item.name}</Typography>
+              {(item as Item & { pending?: boolean; conflict?: boolean }).pending && (
+                <Chip label={t("table.pending")} size="small" />
+              )}
+              {(item as Item & { pending?: boolean; conflict?: boolean }).conflict && (
+                <Chip color="error" label={t("table.conflict")} size="small" />
+              )}
+            </Stack>
             <Typography color="text.secondary" variant="caption" noWrap>
               {item.description || t("table.noDescription")}
             </Typography>
@@ -61,10 +71,17 @@ export function useItemTableColumns({
         renderBody: (item: Item) => (
           <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
             {onHistory && (
-              <Tooltip title={t("table.history")}>
-                <IconButton aria-label={t("table.historyAria")} size="small" onClick={() => onHistory(item)}>
-                  <HistoryOutlined />
-                </IconButton>
+              <Tooltip title={historyDisabled ? t("table.historyOffline") : t("table.history")}>
+                <span>
+                  <IconButton
+                    aria-label={t("table.historyAria")}
+                    disabled={historyDisabled}
+                    size="small"
+                    onClick={() => onHistory(item)}
+                  >
+                    <HistoryOutlined />
+                  </IconButton>
+                </span>
               </Tooltip>
             )}
             {onEdit && (
@@ -90,6 +107,6 @@ export function useItemTableColumns({
         ),
       },
     ],
-    [i18n.resolvedLanguage, onDelete, onEdit, onHistory, t],
+    [historyDisabled, i18n.resolvedLanguage, onDelete, onEdit, onHistory, t],
   );
 }

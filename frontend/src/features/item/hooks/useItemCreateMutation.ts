@@ -17,7 +17,9 @@ export function useItemCreateMutation() {
     errorMessage: t("messages.createFailed"),
     onSuccess: item => {
       insertItemIntoUnfilteredSearchQueries(queryClient, item);
-      void queryClient.invalidateQueries({ queryKey: ItemQueryKeys.all });
+      if (!(item as Item & { pending?: boolean }).pending) {
+        void queryClient.invalidateQueries({ queryKey: ItemQueryKeys.all });
+      }
     },
   });
 }

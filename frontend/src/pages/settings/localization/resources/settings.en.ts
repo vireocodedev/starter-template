@@ -1,7 +1,41 @@
 const en = {
   header: { title: "Settings", description: "Personalize how this workspace behaves and presents data." },
   search: { placeholder: "Search settings", empty: "No preferences match “{{search}}”." },
-  sections: { appearance: "Appearance", layout: "Layout", defaults: "Defaults" },
+  sections: { appearance: "Appearance", layout: "Layout", offline: "Offline", defaults: "Defaults" },
+  offline: {
+    simulation: {
+      title: "Offline simulator",
+      description: "Keep this tab offline and suppress the realtime stream.",
+      unavailable: "Reload the app. If offline storage stays unavailable, use HTTPS or localhost.",
+    },
+    replayFailure: {
+      title: "Fail next replay",
+      description: "Make the next queued replay fail once so retry behavior can be inspected.",
+    },
+    status: {
+      title: "Offline status",
+      description: "{{connection}} · cache {{cache}} · {{pending}} pending · {{failed}} failed",
+      ONLINE: "Online",
+      OFFLINE: "Offline",
+      ready: "ready",
+      unavailable: "unavailable",
+    },
+    retry: "Rebase and retry",
+    action: {
+      failed: "The offline action could not be completed: {{message}}",
+      unknown: "Unknown error",
+    },
+    discard: {
+      title: "Keep server changes",
+      description: "Discard local Item changes and keep the current server version.",
+      action: "Discard",
+    },
+    reset: {
+      title: "Reset local cache",
+      description: "Restart this browser's local Item cache.",
+      action: "Reset cache",
+    },
+  },
   language: {
     title: "Language",
     description: "Choose the language and regional formatting used throughout the application.",
