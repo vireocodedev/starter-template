@@ -34,7 +34,8 @@ import {
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { APP_NAVIGATION_PAGES, APP_PAGES, preloadAppPage, type AppNavigationIcon } from "@/app/app.pages";
 import { AppShellNavigationContext } from "@/app/shell/contexts/AppShellNavigationContext";
-import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences";
+import { updateAppPreference } from "@/app/ui/preferences/actions/app-preferences-actions";
+import { sigAppPreferences } from "@/app/ui/preferences/signals/sigAppPreferences";
 import { useAppAuth } from "@/app/shell/hooks/useAppAuth";
 import { isAppRouteActive } from "@/app/shell/routing/isAppRouteActive";
 import { useAppTranslation } from "@/app/ui/localization/use-app-translation";
@@ -72,7 +73,7 @@ export function AppShellLayout() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [accountAnchor, setAccountAnchor] = React.useState<HTMLElement | null>(null);
   const { user, logout } = useAppAuth();
-  const { preferences, updatePreference } = useAppPreferences();
+  const preferences = sigAppPreferences.value;
   const location = useLocation();
   const navigate = useNavigate();
   const connectivity = useAppConnectivity();
@@ -91,13 +92,10 @@ export function AppShellLayout() {
   );
   const activeNavigationPath = navigation.find(item => isAppRouteActive(location.pathname, item.path))?.path ?? false;
 
-  const commitNavigationWidth = React.useCallback(
-    (width: number) => updatePreference("navigationWidth", width),
-    [updatePreference],
-  );
+  const commitNavigationWidth = React.useCallback((width: number) => updateAppPreference("navigationWidth", width), []);
   const commitNavigationMode = React.useCallback(
-    (mode: VireoApplicationNavigationMode) => updatePreference("navigationMode", mode),
-    [updatePreference],
+    (mode: VireoApplicationNavigationMode) => updateAppPreference("navigationMode", mode),
+    [],
   );
 
   const navigateTo = React.useCallback(

@@ -18,7 +18,7 @@ import {
   queryFilterDocumentToDraft,
   validateQueryFilterDraft,
 } from "../services/entityQueryFilters";
-import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences";
+import { sigAppPreferences } from "@/app/ui/preferences/signals/sigAppPreferences";
 import { EntityQueryFiltersForm } from "./EntityQueryFiltersForm";
 import { useEntityQueryFiltersTranslation } from "../localization/use-entity-query-filters-translation";
 
@@ -46,7 +46,7 @@ export function EntityQueryFiltersOverlay({
   onExited,
 }: EntityQueryFiltersOverlayProps) {
   const { t } = useEntityQueryFiltersTranslation();
-  const { preferences } = useAppPreferences();
+  const preferences = sigAppPreferences.value;
   const definition = useQuery({ ...QueryEngineQuery.describeEntity(entityKey), enabled: open });
   const candidates = React.useMemo(
     () =>

@@ -1,7 +1,8 @@
 import { useAppShellNavigation } from "@/app/shell/hooks/useAppShellNavigation";
 import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
 import { AppPageLayout } from "@/app/shell/layout/AppPageLayout";
-import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences";
+import { resetAppPreferences, updateAppPreference } from "@/app/ui/preferences/actions/app-preferences-actions";
+import { sigAppPreferences } from "@/app/ui/preferences/signals/sigAppPreferences";
 import {
   AspectRatioOutlined,
   DarkModeOutlined,
@@ -21,7 +22,7 @@ import { SETTINGS_TRANSLATION_NAMESPACE } from "@/app/app.localization";
 export function AppPageSettings() {
   const { t } = useTranslation(SETTINGS_TRANSLATION_NAMESPACE);
   const { mobile } = useAppShellNavigation();
-  const { preferences, updatePreference, resetPreferences } = useAppPreferences();
+  const preferences = sigAppPreferences.value;
   const [search, setSearch] = React.useState("");
   const sections: VireoPreferenceSectionDefinition[] = [
     {
@@ -38,7 +39,7 @@ export function AppPageSettings() {
               size="medium"
               fullWidth
               value={preferences.locale}
-              onChange={event => updatePreference("locale", event.target.value as "en" | "hr")}
+              onChange={event => updateAppPreference("locale", event.target.value as "en" | "hr")}
               inputProps={{ "aria-label": t("language.title") }}
             >
               <MenuItem value="en">{t("language.ENGLISH")}</MenuItem>
@@ -54,7 +55,7 @@ export function AppPageSettings() {
           control: (
             <Switch
               checked={preferences.darkMode}
-              onChange={(_, value) => updatePreference("darkMode", value)}
+              onChange={(_, value) => updateAppPreference("darkMode", value)}
               slotProps={{ input: { "aria-label": t("theme.title") } }}
             />
           ),
@@ -69,7 +70,7 @@ export function AppPageSettings() {
               size="medium"
               fullWidth
               value={preferences.tableSize}
-              onChange={event => updatePreference("tableSize", event.target.value as "small" | "medium")}
+              onChange={event => updateAppPreference("tableSize", event.target.value as "small" | "medium")}
               inputProps={{ "aria-label": t("tableDensity.title") }}
             >
               <MenuItem value="small">{t("tableDensity.COMPACT")}</MenuItem>
@@ -93,7 +94,7 @@ export function AppPageSettings() {
               size="medium"
               fullWidth
               value={preferences.pageWidth}
-              onChange={event => updatePreference("pageWidth", event.target.value as "md" | "lg" | "xl" | "full")}
+              onChange={event => updateAppPreference("pageWidth", event.target.value as "md" | "lg" | "xl" | "full")}
               inputProps={{ "aria-label": t("pageWidth.title") }}
             >
               <MenuItem value="md">{t("pageWidth.MEDIUM")}</MenuItem>
@@ -114,7 +115,7 @@ export function AppPageSettings() {
               fullWidth
               value={preferences.desktopSurface}
               onChange={event =>
-                updatePreference(
+                updateAppPreference(
                   "desktopSurface",
                   event.target.value as "dialog" | "overlaySidePanel" | "dockedSidePanel",
                 )
@@ -135,7 +136,7 @@ export function AppPageSettings() {
           control: (
             <Switch
               checked={preferences.allowSidePanelResize}
-              onChange={(_, value) => updatePreference("allowSidePanelResize", value)}
+              onChange={(_, value) => updateAppPreference("allowSidePanelResize", value)}
               slotProps={{ input: { "aria-label": t("resizablePanels.title") } }}
             />
           ),
@@ -148,7 +149,7 @@ export function AppPageSettings() {
           control: (
             <Switch
               checked={preferences.navigationLocked}
-              onChange={(_, value) => updatePreference("navigationLocked", value)}
+              onChange={(_, value) => updateAppPreference("navigationLocked", value)}
               slotProps={{ input: { "aria-label": t("lockNavigation.title") } }}
             />
           ),
@@ -165,7 +166,7 @@ export function AppPageSettings() {
           title: t("reset.title"),
           description: t("reset.description"),
           control: (
-            <Button size="medium" variant="outlined" startIcon={<RestartAltRounded />} onClick={resetPreferences}>
+            <Button size="medium" variant="outlined" startIcon={<RestartAltRounded />} onClick={resetAppPreferences}>
               {t("reset.action")}
             </Button>
           ),

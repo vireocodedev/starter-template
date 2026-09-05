@@ -11,7 +11,7 @@ import {
 } from "@/features/entity-query-filters/public";
 import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
 import { AppPageLayout } from "@/app/shell/layout/AppPageLayout";
-import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences";
+import { sigAppPreferences } from "@/app/ui/preferences/signals/sigAppPreferences";
 import { useAppAuth } from "@/app/shell/hooks/useAppAuth";
 import {
   ItemFormOverlay,
@@ -488,7 +488,7 @@ export function AppPageItemsFrame({
 export function AppPageItems() {
   const { t } = useTranslation(ITEMS_TRANSLATION_NAMESPACE);
   const { user } = useAppAuth();
-  const { preferences } = useAppPreferences();
+  const preferences = sigAppPreferences.value;
   const canManage = user?.role === "SUPERADMIN";
   const confirm = useVireoConfirmation();
   const { mutateAsync: deleteItem } = useItemDeleteMutation();

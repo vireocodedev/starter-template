@@ -10,8 +10,8 @@ import {
   APP_TRANSLATION_NAMESPACES,
 } from "@/app/app.localization";
 import { APP_LOCALES, type AppLocale } from "@/app/ui/localization/app-locales";
-import { AppPreferencesContext } from "@/app/ui/preferences/contexts/AppPreferencesContext";
 import { DEFAULT_APP_PREFERENCES, type AppPreferences } from "@/app/ui/preferences/models/AppPreferences";
+import { sigAppPreferences } from "@/app/ui/preferences/signals/sigAppPreferences";
 import { measureUnexpectedLayoutShift } from "@/app/storybook/loadingGeometry";
 import type { Item } from "@/features/item/public";
 import { AppPageHomeView } from "../AppPageHomeView";
@@ -89,14 +89,13 @@ type OverviewScenarioProps = {
 };
 
 function OverviewScenario({ darkMode, loading, locale, pageWidth }: OverviewScenarioProps) {
-  const preferences = React.useMemo(
-    () => ({
-      preferences: { ...DEFAULT_APP_PREFERENCES, darkMode, locale, pageWidth },
-      resetPreferences: () => undefined,
-      updatePreference: () => undefined,
-    }),
-    [darkMode, locale, pageWidth],
-  );
+  React.useLayoutEffect(() => {
+    const previous = sigAppPreferences.value;
+    sigAppPreferences.value = { ...DEFAULT_APP_PREFERENCES, darkMode, locale, pageWidth };
+    return () => {
+      sigAppPreferences.value = previous;
+    };
+  }, [darkMode, locale, pageWidth]);
 
   return (
     <Box
@@ -106,9 +105,7 @@ function OverviewScenario({ darkMode, loading, locale, pageWidth }: OverviewScen
       sx={{ display: "contents" }}
     >
       <I18nextProvider i18n={storyI18n[locale]}>
-        <AppPreferencesContext.Provider value={preferences}>
-          <AppPageHomeView items={overviewItems} loading={loading} onOpenItems={() => undefined} />
-        </AppPreferencesContext.Provider>
+        <AppPageHomeView items={overviewItems} loading={loading} onOpenItems={() => undefined} />
       </I18nextProvider>
     </Box>
   );

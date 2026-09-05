@@ -5,8 +5,8 @@ import { MemoryRouter, Route, Routes } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppShellLayout } from "@/app/shell/layout/AppShellLayout";
 import { AppPageHeader } from "@/app/shell/layout/AppPageHeader";
-import { AppPreferencesContext } from "@/app/ui/preferences/contexts/AppPreferencesContext";
 import { DEFAULT_APP_PREFERENCES, type AppPreferences } from "@/app/ui/preferences/models/AppPreferences";
+import { sigAppPreferences } from "@/app/ui/preferences/signals/sigAppPreferences";
 import { AppAuthContext } from "@/app/shell/contexts/AppAuthContext";
 import { APP_IDENTITY } from "../../pwa-policy.mjs";
 
@@ -117,27 +117,26 @@ function setDesktop(desktop: boolean) {
 
 function renderShell(preferenceOverrides: Partial<AppPreferences> = {}) {
   const preferences = { ...DEFAULT_APP_PREFERENCES, ...preferenceOverrides };
+  sigAppPreferences.value = preferences;
   return render(
     <ThemeProvider theme={createTheme()}>
-      <AppPreferencesContext.Provider value={{ preferences, updatePreference: vi.fn(), resetPreferences: vi.fn() }}>
-        <AppAuthContext.Provider
-          value={{
-            user: { username: "admin", role: "SUPERADMIN" },
-            loading: false,
-            expireSession: vi.fn(),
-            login: vi.fn(),
-            logout: vi.fn().mockResolvedValue(undefined),
-          }}
-        >
-          <MemoryRouter initialEntries={["/"]}>
-            <Routes>
-              <Route element={<AppShellLayout />}>
-                <Route index element={<AppPageHeader title="Overview" description="Page description" />} />
-              </Route>
-            </Routes>
-          </MemoryRouter>
-        </AppAuthContext.Provider>
-      </AppPreferencesContext.Provider>
+      <AppAuthContext.Provider
+        value={{
+          user: { username: "admin", role: "SUPERADMIN" },
+          loading: false,
+          expireSession: vi.fn(),
+          login: vi.fn(),
+          logout: vi.fn().mockResolvedValue(undefined),
+        }}
+      >
+        <MemoryRouter initialEntries={["/"]}>
+          <Routes>
+            <Route element={<AppShellLayout />}>
+              <Route index element={<AppPageHeader title="Overview" description="Page description" />} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </AppAuthContext.Provider>
     </ThemeProvider>,
   );
 }

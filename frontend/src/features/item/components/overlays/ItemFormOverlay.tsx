@@ -6,7 +6,7 @@ import { useItemCreateMutation } from "../../hooks/useItemCreateMutation";
 import { useItemUpdateMutation } from "../../hooks/useItemUpdateMutation";
 import { useItemForm } from "../../hooks/useItemForm";
 import { DEFAULT_ITEM_FORM_VALIDATION_CONTEXT, type Item } from "../../models/Item";
-import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences";
+import { sigAppPreferences } from "@/app/ui/preferences/signals/sigAppPreferences";
 import { useItemTranslation } from "../../localization/use-item-translation";
 
 export type ItemFormOverlayProps = {
@@ -24,7 +24,7 @@ export function ItemFormOverlay({ item, open, onClose, onExited }: ItemFormOverl
   const { t } = useItemTranslation();
   const createItem = useItemCreateMutation();
   const updateItem = useItemUpdateMutation();
-  const { preferences } = useAppPreferences();
+  const preferences = sigAppPreferences.value;
   const mode = getItemFormMode(item);
   const submit = async (value: Item) => {
     if (item) {

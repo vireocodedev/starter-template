@@ -7,7 +7,6 @@ import {
   type VireoProviderWrapper,
 } from "@vireocodedev/ui";
 import { VireoToaster } from "@vireocodedev/ui/sonner";
-import { AppPreferencesProvider } from "@/app/ui/preferences/providers/AppPreferencesProvider";
 import { AppLocalizationProvider } from "@/app/ui/localization/app-localization-provider";
 import { AppThemeProvider } from "@/app/ui/theme/AppThemeProvider";
 import { AppUnsavedChangesProvider } from "@/app/shell/providers/AppUnsavedChangesProvider";
@@ -28,7 +27,6 @@ const queryClient = new QueryClient({
 });
 
 const providers = [
-  child => <AppPreferencesProvider>{child}</AppPreferencesProvider>,
   child => <AppLocalizationProvider>{child}</AppLocalizationProvider>,
   child => <AppThemeProvider>{child}</AppThemeProvider>,
   child => <QueryClientProvider client={queryClient}>{child}</QueryClientProvider>,
