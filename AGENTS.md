@@ -18,3 +18,17 @@ This repository is the source Template consumed by `create-vireo`. Work here has
 - Use focused checks while editing. Full verification, deployment, release, and external operations need coordination and explicit authorization.
 
 Read `docs/generated-capabilities.md`, `docs/project-upgrades.md`, and `docs/local-starter-development.md` for the maintained contracts.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs use GitHub Issues. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Triage uses the default Matt Pocock label vocabulary. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Domain documentation uses the single-context layout. See `docs/agents/domain.md`.
